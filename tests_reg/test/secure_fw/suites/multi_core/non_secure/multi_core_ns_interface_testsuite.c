@@ -59,7 +59,7 @@ struct test_params {
     void *mutex_handle;             /* Mutex to protect is_complete flag */
     enum test_status_t ret;         /* The test result */
     uint32_t total_ticks;           /* The total ticks cost to complete tests */
-    bool is_complete;               /* Whether current test thread completes */
+    volatile bool is_complete;               /* Whether current test thread completes */
     bool is_parent;                 /* Whether executed in parent thread */
 };
 
