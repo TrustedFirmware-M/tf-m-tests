@@ -53,9 +53,10 @@ ExternalProject_Add(TF-M
     BINARY_DIR        build-spe
     INSTALL_DIR       api_ns
     CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    CMAKE_ARGS        -DPSA_ARCH_TESTS_PATH=${PSA_ARCH_TESTS_PATH}
-    CMAKE_ARGS        -DCONFIG_TFM_TEST_DIR=${CMAKE_SOURCE_DIR}/partitions
-    CMAKE_ARGS        -DCONFIG_PSA_ARCH_TESTS_CONFIG_FILE=${CMAKE_CURRENT_LIST_DIR}/config/config_test_psa_api.cmake
+                      -DPSA_ARCH_TESTS_PATH=${PSA_ARCH_TESTS_PATH}
+                      -DCONFIG_TFM_TEST_DIR=${CMAKE_SOURCE_DIR}/partitions
+                      -DCONFIG_PSA_ARCH_TESTS_CONFIG_FILE=${CMAKE_CURRENT_LIST_DIR}/config/config_test_psa_api.cmake
+                      ${BUILD_SPE_ARGS}
     CMAKE_CACHE_DEFAULT_ARGS ${TFM_CMDLINE_CONFIGS}
     PREFIX             "temp"
     BUILD_ALWAYS       ON
