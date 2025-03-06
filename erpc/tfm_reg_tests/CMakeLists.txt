@@ -155,7 +155,8 @@ include(${TFM_REG_TEST_ROOT}/config/check_config.cmake)
 add_library(tfm_ns_log INTERFACE)
 
 set(USE_STDIO ON)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../lib/ext/qcbor ${CMAKE_BINARY_DIR}/lib/ext/qcbor)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../lib/ext/qcbor  ${CMAKE_BINARY_DIR}/lib/ext/qcbor)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../lib/ext/t_cose ${CMAKE_BINARY_DIR}/lib/ext/t_cose)
 add_subdirectory(${TFM_REG_TEST_ROOT}/ns_regression      ${CMAKE_BINARY_DIR}/ns_regression)
 
 target_link_libraries(erpc_main
