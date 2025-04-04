@@ -11,6 +11,45 @@
 #include <string.h>
 #include "crypto_tests_common.h"
 
+/* Helper function to convert from string representation to binary */
+static uint8_t char_to_uint8_t(char c)
+{
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+        return c - 'a' + 10;
+    } else if (c >= 'A' && c <= 'F') {
+        return c - 'A' + 10;
+    } else {
+        assert(0);
+    }
+}
+
+static void StringToBuffer(const char *str, size_t len, uint8_t *buf) {
+  for (int i = 0; i < len; i++) {
+    buf[i] = char_to_uint8_t(*str) * 16 + char_to_uint8_t(*(str + 1));
+    str += 2;
+  }
+}
+
+/* Helper function to convert from binary to string representation */
+static char uint8_to_char(uint8_t u)
+{
+    assert( u < (1UL << 4));
+    const uint8_t arr[] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                           '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    return arr[u];
+}
+
+static void BufferToString(const uint8_t *buf, size_t len, char *str) {
+  for (int i = 0; i < len; i++) {
+    *str = uint8_to_char((buf[i] >> 4) & 0xf);
+    *(str + 1) = uint8_to_char(buf[i] & 0xf);
+    str += 2;
+  }
+  str[0] = '\0';
+}
+
 void psa_key_interface_test(const psa_key_type_t key_type,
                             struct test_result_t *ret)
 {
@@ -1577,14 +1616,18 @@ void psa_mac_test(const psa_algorithm_t alg,
     const uint32_t msg_num = sizeof(msg_size)/sizeof(msg_size[0]);
     uint32_t idx, start_idx = 0;
     uint8_t *hmac_res;
-
+#ifdef TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
+    uint8_t hmac[PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg))];
+    size_t hmac_length = 0;
+    uint32_t comp_result;
+#endif /* TFM_CRYPTO_TEST_SINGLE_PART_FUNCS */
     psa_key_id_t key_id_local = PSA_KEY_ID_NULL;
     psa_key_type_t key_type = PSA_KEY_TYPE_HMAC;
     psa_status_t status;
     psa_mac_operation_t handle = psa_mac_operation_init();
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
     psa_key_attributes_t retrieved_attributes = psa_key_attributes_init();
-    psa_key_usage_t usage = PSA_KEY_USAGE_VERIFY_HASH;
+    psa_key_usage_t usage = PSA_KEY_USAGE_VERIFY_HASH | PSA_KEY_USAGE_SIGN_HASH;
 
     ret->val = TEST_PASSED;
 
@@ -1620,6 +1663,43 @@ void psa_mac_test(const psa_algorithm_t alg,
 
     psa_reset_key_attributes(&retrieved_attributes);
 
+    /* Cycle until idx points to the correct index in the algorithm table */
+    for (idx=0; hash_alg[idx] != PSA_ALG_HMAC_GET_HASH(alg); idx++);
+
+    if (key_bits == BIT_SIZE_TEST_LONG_KEY) {
+        hmac_res = (uint8_t *)long_key_hmac_val;
+    } else {
+        hmac_res = (uint8_t *)hmac_val[idx];
+    }
+
+#ifdef TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
+    /* Compute the HMAC */
+    status = psa_mac_compute(key_id_local, alg,
+                             (const uint8_t *)msg, strlen(msg),
+                             hmac, sizeof(hmac), &hmac_length);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error using the single shot API for computing mac");
+        goto destroy_key_mac;
+    }
+
+    /* Check that the computed MAC matches with the reference */
+    comp_result = memcmp(hmac, hmac_res, hmac_length);
+    if (comp_result != 0) {
+        TEST_FAIL("Single shot API mac does not match reference");
+        goto destroy_key_mac;
+    }
+
+    /* Test the verification function against the reference values */
+    status = psa_mac_verify(key_id_local, alg,
+                            (const uint8_t *)msg, strlen(msg),
+                            hmac_res,
+                            PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg)));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error using the single shot API for verifying mac");
+        goto destroy_key_mac;
+    }
+#endif /* TFM_CRYPTO_TEST_SINGLE_PART_FUNCS */
+
     /* Setup the mac object for hmac */
     status = psa_mac_verify_setup(&handle, key_id_local, alg);
     if (status != PSA_SUCCESS) {
@@ -1633,7 +1713,7 @@ void psa_mac_test(const psa_algorithm_t alg,
     }
 
     /* Update object with all the chunks of message */
-    for (idx=0; idx<msg_num; idx++) {
+    for (idx = 0; idx < msg_num; idx++) {
         status = psa_mac_update(&handle,
                                 (const uint8_t *)&msg[start_idx],
                                 msg_size[idx]);
@@ -1644,33 +1724,12 @@ void psa_mac_test(const psa_algorithm_t alg,
         start_idx += msg_size[idx];
     }
 
-    /* Cycle until idx points to the correct index in the algorithm table */
-    for (idx=0; hash_alg[idx] != PSA_ALG_HMAC_GET_HASH(alg); idx++);
-
-    if (key_bits == BIT_SIZE_TEST_LONG_KEY) {
-        hmac_res = (uint8_t *)long_key_hmac_val;
-    } else {
-        hmac_res = (uint8_t *)hmac_val[idx];
-    }
-
     /* Finalise and verify the mac value */
     status = psa_mac_verify_finish(&handle, hmac_res,
                                    PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg)));
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error during finalising the mac operation");
-        goto destroy_key_mac;
     }
-
-#ifdef TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
-    /* Do the same as above with the single shot APIs */
-    status = psa_mac_verify(key_id_local, alg,
-                            (const uint8_t *)msg, strlen(msg),
-                            hmac_res,
-                            PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg)));
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Error using the single shot API");
-    }
-#endif
 
 destroy_key_mac:
     /* Destroy the key */
@@ -3163,45 +3222,6 @@ static const struct {
         .pub = "048c98e1238fd6cec70df45cad0e6e3c3653da25202cbeed63d972a5030bef5bbf091e28fae781c1d73271d87bf7520c5f891dc89a016cefb7818d3662ea421bc402c55dcc7b5a8dff3020f2d554b5bf70e11baa975a7d66c4c4f1c0ef58604e8d"
     }
 };
-
-/* Helper function to convert from string representation to binary */
-static uint8_t char_to_uint8_t(char c)
-{
-    if (c >= '0' && c <= '9') {
-        return c - '0';
-    } else if (c >= 'a' && c <= 'f') {
-        return c - 'a' + 10;
-    } else if (c >= 'A' && c <= 'F') {
-        return c - 'A' + 10;
-    } else {
-        assert(0);
-    }
-}
-
-static void StringToBuffer(const char *str, size_t len, uint8_t *buf) {
-  for (int i = 0; i < len; i++) {
-    buf[i] = char_to_uint8_t(*str) * 16 + char_to_uint8_t(*(str + 1));
-    str += 2;
-  }
-}
-
-/* Helper function to convert from binary to string representation */
-static char uint8_to_char(uint8_t u)
-{
-    assert( u < (1UL << 4));
-    const uint8_t arr[] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                           '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-    return arr[u];
-}
-
-static void BufferToString(const uint8_t *buf, size_t len, char *str) {
-  for (int i = 0; i < len; i++) {
-    *str = uint8_to_char((buf[i] >> 4) & 0xf);
-    *(str + 1) = uint8_to_char(buf[i] & 0xf);
-    str += 2;
-  }
-  str[0] = '\0';
-}
 
 void psa_sign_verify_hash_test(psa_algorithm_t alg, uint8_t curve_selector,
                                struct test_result_t *ret)
