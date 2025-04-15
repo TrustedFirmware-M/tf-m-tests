@@ -11,6 +11,10 @@
 #include <string.h>
 #include "crypto_tests_common.h"
 
+/* Maximum array sizes to remove VLAs */
+#define PSA_HASH_LENGTH_MAX     64
+#define ECDSA_KEYS_PRIV_SZ_MAX  48
+
 /* Helper function to convert from string representation to binary */
 static uint8_t char_to_uint8_t(char c)
 {
@@ -2858,7 +2862,7 @@ void psa_asymmetric_encryption_test(psa_algorithm_t alg,
         return;
     }
 
-    uint8_t encrypted_data[PSA_ASYMMETRIC_ENCRYPT_OUTPUT_SIZE(PSA_KEY_TYPE_RSA_KEY_PAIR, 2048, alg)];
+    uint8_t encrypted_data[PSA_BITS_TO_BYTES(2048)];
 
     status = psa_import_key(&key_attributes, key_pair, key_size, &key_id_local);
     if (status != PSA_SUCCESS) {
@@ -3239,15 +3243,21 @@ void psa_sign_verify_hash_test(psa_algorithm_t alg, uint8_t curve_selector,
     }
 
     const size_t ecdsa_private_key_sz = ecdsa_keys[curve_selector].priv_sz;
-    uint8_t signature[PSA_ECDSA_SIGNATURE_SIZE(PSA_BYTES_TO_BITS(ecdsa_private_key_sz))];
+
+    assert(ECDSA_KEYS_PRIV_SZ_MAX >= ecdsa_private_key_sz);
+
+    uint8_t signature[PSA_ECDSA_SIGNATURE_SIZE(PSA_BYTES_TO_BITS(ECDSA_KEYS_PRIV_SZ_MAX))];
     char tmp_str[sizeof(signature) * 2 + 1]; /* enough to hold the hash string as well */
     size_t signature_length = 0;
     /* The expected format of the public key is uncompressed, i.e. 0x04 X Y */
     uint8_t ecdsa_pub_key[
-        PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(PSA_BYTES_TO_BITS(ecdsa_private_key_sz))];
+        PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(PSA_BYTES_TO_BITS(ECDSA_KEYS_PRIV_SZ_MAX))];
     size_t pub_key_length = 0;
     const psa_algorithm_t hash_alg = PSA_ALG_GET_HASH(alg);
-    uint8_t hash[PSA_HASH_LENGTH(hash_alg)];
+
+    assert(PSA_HASH_LENGTH_MAX >= PSA_HASH_LENGTH(hash_alg));
+
+    uint8_t hash[PSA_HASH_LENGTH_MAX];
     size_t hash_length = 0;
     uint8_t scratch_buffer[48 * 2 + 1]; /* Up to the P-384 pub key in uncompressed format */
 
