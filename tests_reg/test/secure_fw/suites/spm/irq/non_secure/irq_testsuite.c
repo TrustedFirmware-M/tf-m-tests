@@ -10,6 +10,12 @@
 #include "test_framework.h"
 #include "irq_test.h"
 
+#if defined(TEST_NS_SLIH_IRQ)
+#define IRQ_TEST_NAME "TFM IRQ Test - SLIH (TFM_IRQ_TEST_1xxx)"
+#elif defined(TEST_NS_FLIH_IRQ)
+#define IRQ_TEST_NAME "TFM IRQ Test - FLIH (TFM_IRQ_TEST_1xxx)"
+#endif
+
 #ifdef TEST_NS_SLIH_IRQ
 static void tfm_irq_test_slih_case_1(struct test_result_t *ret)
 {
@@ -48,6 +54,5 @@ void register_testsuite_irq_test(struct test_suite_t *p_test_suite)
 
     list_size = (sizeof(irq_test_cases) / sizeof(irq_test_cases[0]));
 
-    set_testsuite("TFM IRQ Test (TFM_IRQ_TEST_1xxx)",
-                  irq_test_cases, list_size, p_test_suite);
+    set_testsuite(IRQ_TEST_NAME, irq_test_cases, list_size, p_test_suite);
 }
