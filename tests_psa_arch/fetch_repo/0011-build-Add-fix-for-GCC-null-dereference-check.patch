@@ -1,0 +1,50 @@
+From 980025011cb99dbbfc5812d7ca01fa6efaf2d368 Mon Sep 17 00:00:00 2001
+From: Gabor Toth <gabor.toth@arm.com>
+Date: Thu, 17 Apr 2025 16:22:19 +0200
+Subject: [PATCH] build: Add fix for GCC null-dereference check
+
+Turn off GCC null-dereference check on specific test code, which
+should not be executed anyway.
+
+Signed-off-by: Gabor Toth <gabor.toth@arm.com>
+Change-Id: Icf4d90ad92a63ffe170c43e8ff065e7ffb940008
+---
+ api-tests/ff/ipc/test_i047/test_supp_i047.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/api-tests/ff/ipc/test_i047/test_supp_i047.c b/api-tests/ff/ipc/test_i047/test_supp_i047.c
+index efa3a3f..899442c 100644
+--- a/api-tests/ff/ipc/test_i047/test_supp_i047.c
++++ b/api-tests/ff/ipc/test_i047/test_supp_i047.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2019-2024, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2019-2025, Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -206,9 +206,21 @@ int32_t server_test_psa_get_with_invalid_msg_pointer(void)
+         val->print(PRINT_ERROR, "\tFailed to set boot flag after check\n", 0);
+     }
+ 
++    /* GCC null-dereference check fails because of invalid_msg, however this
++     * part should not be reached according the comment above.
++     */
++    #if defined(__GNUC__)
++    #pragma GCC diagnostic push
++    #pragma GCC diagnostic ignored "-Wnull-dereference"
++    #endif
++
+     /* Reject the connection */
+     psa->reply(invalid_msg->handle, PSA_ERROR_CONNECTION_REFUSED);
+ 
++    #if defined(__GNUC__)
++    #pragma GCC diagnostic pop
++    #endif
++
+     return VAL_STATUS_SPM_FAILED;
+ }
+ 
+-- 
+2.34.1
+
