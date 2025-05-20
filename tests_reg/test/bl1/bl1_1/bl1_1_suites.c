@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include "test_framework.h"
 
 #include "bl1_1_crypto_tests.h"
-#include "bl1_1_trng_tests.h"
+#include "bl1_1_random_generation_tests.h"
 #include "bl1_1_integration_tests.h"
 #include "extra_bl1_1_tests.h"
 
@@ -19,7 +19,7 @@
 static struct test_suite_t test_suites[] = {
 
     {&register_testsuite_bl1_crypto_interface, 0, 0, 0},
-    {&register_testsuite_bl1_trng_interface, 0, 0, 0},
+    {&register_testsuite_bl1_random_generation_interface, 0, 0, 0},
     {&register_testsuite_bl1_1_integration, 0, 0, 0},
 
 #ifdef EXTRA_BL1_1_TEST_SUITE
