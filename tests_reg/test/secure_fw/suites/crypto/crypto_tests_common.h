@@ -201,17 +201,19 @@ void psa_mac_test(const psa_algorithm_t alg,
 /**
  * \brief Run AEAD tests with different algorithms and key types
  *
- * \param[in]  key_type PSA key type
- * \param[in]  alg      PSA algorithm
- * \param[in]  key      Encryption key
- * \param[in]  key_bits Encryption key size in bits
- * \param[out] ret      Test result
+ * \param[in]  key_type   PSA key type
+ * \param[in]  alg        PSA algorithm
+ * \param[in]  key        Encryption key
+ * \param[in]  key_bits   Encryption key size in bits
+ * \param[in]  chunk_size Chunk size in bytes
+ * \param[out] ret        Test result
  *
  */
 void psa_aead_test(const psa_key_type_t key_type,
                    const psa_algorithm_t alg,
                    const uint8_t *key,
                    size_t key_bits,
+                   size_t chunk_size,
                    struct test_result_t *ret);
 /**
  * \brief Tests invalid key length

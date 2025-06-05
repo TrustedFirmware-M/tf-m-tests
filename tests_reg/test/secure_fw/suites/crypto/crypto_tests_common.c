@@ -15,6 +15,10 @@
 #define PSA_HASH_LENGTH_MAX     64
 #define ECDSA_KEYS_PRIV_SZ_MAX  48
 
+#ifndef ROUND_UP
+#define ROUND_UP(x, bound) ((((x) + bound - 1) / bound) * bound)
+#endif
+
 /* Helper function to convert from string representation to binary */
 static uint8_t char_to_uint8_t(char c)
 {
@@ -1747,6 +1751,7 @@ void psa_aead_test(const psa_key_type_t key_type,
                    const psa_algorithm_t alg,
                    const uint8_t *key,
                    size_t key_bits,
+                   size_t chunk_size,
                    struct test_result_t *ret)
 {
     psa_aead_operation_t encop = psa_aead_operation_init();
@@ -1963,14 +1968,15 @@ void psa_aead_test(const psa_key_type_t key_type,
     }
 
     /* Encrypt one chunk of information at a time */
-    for (size_t i = 0; i <= sizeof(plain_text)/BYTE_SIZE_CHUNK; i++) {
-
+    for (size_t i = 0;
+         i < ROUND_UP(sizeof(plain_text), chunk_size) / chunk_size;
+         i++) {
         size_t size_to_encrypt =
-            (sizeof(plain_text) - i*BYTE_SIZE_CHUNK) > BYTE_SIZE_CHUNK ?
-            BYTE_SIZE_CHUNK : (sizeof(plain_text) - i*BYTE_SIZE_CHUNK);
+            (sizeof(plain_text) - i*chunk_size) > chunk_size ?
+            chunk_size : (sizeof(plain_text) - i*chunk_size);
 
         status = psa_aead_update(&encop,
-                                 plain_text + i*BYTE_SIZE_CHUNK,
+                                 plain_text + i*chunk_size,
                                  size_to_encrypt,
                                  encrypted_data + total_encrypted_length,
                                  sizeof(encrypted_data) -
@@ -2007,7 +2013,6 @@ void psa_aead_test(const psa_key_type_t key_type,
     total_encrypted_length += encrypted_data_length;
 
 #ifdef TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
-    /* Compare tag between single part and multipart case */
     comp_result = memcmp(
                       &encrypted_data_single_shot[total_encrypted_length],
                       tag, tag_length);
@@ -2071,14 +2076,15 @@ void psa_aead_test(const psa_key_type_t key_type,
     }
 
     /* Decrypt */
-    for (size_t i = 0; i <= total_encrypted_length/BYTE_SIZE_CHUNK; i++) {
-
+    for (size_t i = 0;
+        i < ROUND_UP(total_encrypted_length, chunk_size) / chunk_size;
+        i++) {
         size_t size_to_decrypt =
-            (total_encrypted_length - i*BYTE_SIZE_CHUNK) > BYTE_SIZE_CHUNK ?
-            BYTE_SIZE_CHUNK : (total_encrypted_length - i*BYTE_SIZE_CHUNK);
+            (total_encrypted_length - i*chunk_size) > chunk_size ?
+            chunk_size : (total_encrypted_length - i*chunk_size);
 
         status = psa_aead_update(&decop,
-                                 encrypted_data + i*BYTE_SIZE_CHUNK,
+                                 encrypted_data + i*chunk_size,
                                  size_to_decrypt,
                                  decrypted_data + total_output_length,
                                  sizeof(decrypted_data)

@@ -423,7 +423,16 @@ static void tfm_crypto_test_1024(struct test_result_t *ret)
 static void tfm_crypto_test_1030(struct test_result_t *ret)
 {
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM,
-                  test_key_128, BIT_SIZE_TEST_KEY, ret);
+                  test_key_128, BIT_SIZE_TEST_KEY,
+                  BYTE_SIZE_CHUNK, ret);
+
+    psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM,
+                test_key_128, BIT_SIZE_TEST_KEY,
+                BYTE_SIZE_CHUNK / 3, ret);
+
+    psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM,
+                test_key_128, BIT_SIZE_TEST_KEY,
+                BYTE_SIZE_CHUNK / 4, ret);
 }
 #endif /* TFM_CRYPTO_TEST_ALG_CCM */
 
@@ -431,7 +440,8 @@ static void tfm_crypto_test_1030(struct test_result_t *ret)
 static void tfm_crypto_test_1031(struct test_result_t *ret)
 {
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_GCM,
-                  test_key_128, BIT_SIZE_TEST_KEY, ret);
+                  test_key_128, BIT_SIZE_TEST_KEY,
+                  BYTE_SIZE_CHUNK, ret);
 }
 #endif /* TFM_CRYPTO_TEST_ALG_GCM */
 
@@ -459,7 +469,16 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
             PSA_ALG_CCM, TRUNCATED_AUTH_TAG_LEN);
 
     psa_aead_test(PSA_KEY_TYPE_AES, alg,
-                  test_key_128, BIT_SIZE_TEST_KEY, ret);
+                  test_key_128, BIT_SIZE_TEST_KEY,
+                  BYTE_SIZE_CHUNK, ret);
+
+    psa_aead_test(PSA_KEY_TYPE_AES, alg,
+                  test_key_128, BIT_SIZE_TEST_KEY,
+                  BYTE_SIZE_CHUNK / 3, ret);
+
+    psa_aead_test(PSA_KEY_TYPE_AES, alg,
+                  test_key_128, BIT_SIZE_TEST_KEY,
+                  BYTE_SIZE_CHUNK / 4, ret);
 }
 #endif /* TFM_CRYPTO_TEST_ALG_CCM */
 
@@ -577,7 +596,8 @@ static void tfm_crypto_test_1051(struct test_result_t *ret)
 static void tfm_crypto_test_1049(struct test_result_t *ret)
 {
     psa_aead_test(PSA_KEY_TYPE_CHACHA20, PSA_ALG_CHACHA20_POLY1305,
-                  test_key_256, BIT_SIZE_TEST_LONG_KEY, ret);
+                  test_key_256, BIT_SIZE_TEST_LONG_KEY,
+                  BYTE_SIZE_CHUNK, ret);
 }
 
 static void tfm_crypto_test_1052(struct test_result_t *ret)
