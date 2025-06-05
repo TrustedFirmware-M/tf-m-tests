@@ -235,19 +235,27 @@ static void ipc_service_stateless_rot(void)
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 
-static void ipc_service_mmiovec_test_handle(void)
+static void ipc_service_mmiovec_test_handle(uint32_t signals)
 {
-    psa_status_t status;
+    psa_status_t status = TFM_MMIOVEC_TEST_ERROR;
     psa_msg_t msg;
 
     /* Retrieve the message corresponding to the MMIO test service signal */
-    status = psa_get(IPC_SERVICE_TEST_MMIOVEC_SIGNAL, &msg);
+    status = psa_get(signals, &msg);
     if (status != PSA_SUCCESS) {
         psa_panic();
     }
 
     /* Decode the message */
     switch (msg.type) {
+    case PSA_IPC_CONNECT:
+    case PSA_IPC_DISCONNECT:
+
+        /* Only entertain cases when the call is from a connection-based test context */
+        if (signal & IPC_SERVICE_TEST_MMIOVEC_STATEFUL_SIGNAL) {
+            status = PSA_SUCCESS;
+        }
+        break;
     case INVEC_MAP_AND_UNMAP:
         status = test_service_mmiovec_invec(&msg);
         break;
@@ -417,8 +425,9 @@ void ipc_service_test_main(void *param)
         } else if (signals & IPC_SERVICE_TEST_STATELESS_ROT_SIGNAL) {
             ipc_service_stateless_rot();
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
-        } else if (signals & IPC_SERVICE_TEST_MMIOVEC_SIGNAL) {
-            ipc_service_mmiovec_test_handle();
+        } else if ((signals & IPC_SERVICE_TEST_MMIOVEC_SIGNAL) ||
+                   (signals & IPC_SERVICE_TEST_MMIOVEC_STATEFUL_SIGNAL)) {
+            ipc_service_mmiovec_test_handle(signals);
 #endif
         } else if (signals & IPC_SERVICE_TEST_CLIENT_ID_TRANSLATE_SIGNAL) {
             ipc_service_client_id_translate();

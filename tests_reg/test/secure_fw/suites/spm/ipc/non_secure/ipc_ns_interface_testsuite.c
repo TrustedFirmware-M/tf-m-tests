@@ -32,6 +32,12 @@ static void tfm_ipc_test_1013(struct test_result_t *ret);
 static void tfm_ipc_test_1014(struct test_result_t *ret);
 
 static void tfm_ipc_test_1015(struct test_result_t *ret);
+
+static void tfm_ipc_test_1019(struct test_result_t *ret);
+
+static void tfm_ipc_test_1020(struct test_result_t *ret);
+
+static void tfm_ipc_test_1021(struct test_result_t *ret);
 #endif
 
 static void tfm_ipc_test_1016(struct test_result_t *ret);
@@ -60,6 +66,12 @@ static struct test_t ipc_veneers_tests[] = {
      "Mapping output vectors and unmapping them"},
     {&tfm_ipc_test_1015, "TFM_NS_IPC_TEST_1015",
      "Mapping output vectors and not unmapping them"},
+    {&tfm_ipc_test_1019, "TFM_NS_IPC_TEST_1019",
+     "Testing connection based mapping and unmapping of input vectors"},
+    {&tfm_ipc_test_1020, "TFM_NS_IPC_TEST_1020",
+     "Testing connection based mapping and unmapping of output vectors"},
+    {&tfm_ipc_test_1021, "TFM_NS_IPC_TEST_1021",
+     "Testing connection based mapping of output vectors without unmapping them"},
 #endif
 
     {&tfm_ipc_test_1016, "TFM_NS_IPC_TEST_1016",
@@ -357,4 +369,70 @@ static void tfm_ipc_test_1015(struct test_result_t *ret)
     outvec_map_only_test(ret, IPC_SERVICE_TEST_MMIOVEC_HANDLE);
 }
 
+/**
+ * \brief Connection-based test for mapping input vectors and unmapping them.
+ *
+ * \note Test psa_map_invec() and psa_unmap_invec() functionality.
+ */
+static void tfm_ipc_test_1019(struct test_result_t *ret)
+{
+    psa_handle_t handle;
+    ret->val = TEST_FAILED;
+
+    handle = psa_connect(IPC_SERVICE_TEST_MMIOVEC_STATEFUL_SID,
+                         IPC_SERVICE_TEST_MMIOVEC_STATEFUL_VERSION);
+
+    if (handle > 0) {
+        invec_map_unmap_test(ret, handle);
+        psa_close(handle);
+        ret->val = TEST_PASSED;
+    } else {
+        TEST_FAIL("Connection to the service failed!\r\n");
+    }
+}
+
+/**
+ * \brief Connection-based test for mapping output vectors and unmapping them.
+ *
+ * \note Test psa_map_outvec() and psa_unmap_outvec() functionality.
+ */
+static void tfm_ipc_test_1020(struct test_result_t *ret)
+{
+    psa_handle_t handle;
+    ret->val = TEST_FAILED;
+
+    handle = psa_connect(IPC_SERVICE_TEST_MMIOVEC_STATEFUL_SID,
+                         IPC_SERVICE_TEST_MMIOVEC_STATEFUL_VERSION);
+
+    if (handle > 0) {
+        outvec_map_unmap_test(ret, handle);
+        psa_close(handle);
+        ret->val = TEST_PASSED;
+    } else {
+        TEST_FAIL("Connection to the service failed!\r\n");
+    }
+}
+
+/**
+ * \brief Connection-based test for mapping of output vectors without unmapping them.
+ *
+ * \note RoT services map outvecs and does not unmap outvecs, the service caller
+ *       should get a zero out length.
+ */
+static void tfm_ipc_test_1021(struct test_result_t *ret)
+{
+    psa_handle_t handle;
+    ret->val = TEST_FAILED;
+
+    handle = psa_connect(IPC_SERVICE_TEST_MMIOVEC_STATEFUL_SID,
+                         IPC_SERVICE_TEST_MMIOVEC_STATEFUL_VERSION);
+
+    if (handle > 0) {
+        outvec_map_only_test(ret, handle);
+        psa_close(handle);
+        ret->val = TEST_PASSED;
+    } else {
+        TEST_FAIL("Connection to the service failed!\r\n");
+    }
+}
 #endif
