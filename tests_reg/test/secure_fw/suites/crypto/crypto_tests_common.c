@@ -1752,6 +1752,7 @@ void psa_aead_test(const psa_key_type_t key_type,
                    const uint8_t *key,
                    size_t key_bits,
                    size_t chunk_size,
+                   enum psa_test_iovec_inline inline_conf,
                    struct test_result_t *ret)
 {
     psa_aead_operation_t encop = psa_aead_operation_init();
@@ -1764,10 +1765,13 @@ void psa_aead_test(const psa_key_type_t key_type,
         "This is my plaintext message and it's made of 68 characters...!1234";
     const uint8_t associated_data[] =
         "This is my associated data to authenticate";
+    const uint8_t inline_buf[ENC_DEC_BUFFER_SIZE_AEAD] = {0};
     uint8_t decrypted_data[MAX_PLAIN_DATA_SIZE_AEAD] = {0};
     uint8_t encrypted_data[ENC_DEC_BUFFER_SIZE_AEAD] = {0};
+    uint8_t *input_buffer, *output_buffer;
     size_t encrypted_data_length = 0, decrypted_data_length = 0;
     size_t total_output_length = 0, total_encrypted_length = 0;
+    uint8_t *tag;
     uint32_t comp_result;
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
     psa_key_attributes_t retrieved_attributes = psa_key_attributes_init();
@@ -1775,13 +1779,22 @@ void psa_aead_test(const psa_key_type_t key_type,
 #ifdef TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
     uint8_t encrypted_data_single_shot[ENC_DEC_BUFFER_SIZE_AEAD] = {0};
 #endif
+    bool is_inline = (inline_conf == PSA_TEST_IOVEC_INLINED) ? true : false;
 
     /* Variables required for multipart operations */
-    uint8_t *tag = &encrypted_data[MAX_PLAIN_DATA_SIZE_AEAD];
     size_t tag_size = PSA_AEAD_TAG_LENGTH(key_type,
                                           psa_get_key_bits(&key_attributes),
                                           alg);
     size_t tag_length = 0;
+
+    if (is_inline) {
+        /* Initialise inline buffer with plaintext data */
+        memcpy(inline_buf, plain_text, sizeof(plain_text));
+
+        tag = &inline_buf[MAX_PLAIN_DATA_SIZE_AEAD];
+    } else {
+        tag = &encrypted_data[MAX_PLAIN_DATA_SIZE_AEAD];
+    }
 
     ret->val = TEST_PASSED;
 
@@ -1824,12 +1837,20 @@ void psa_aead_test(const psa_key_type_t key_type,
 
 #ifdef TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
     /* Perform AEAD encryption */
+    if (is_inline) {
+        input_buffer = inline_buf;
+        output_buffer = inline_buf;
+    } else {
+        input_buffer = plain_text;
+        output_buffer = encrypted_data;
+    }
+
     status = psa_aead_encrypt(key_id_local, alg, nonce, nonce_length,
                               associated_data,
                               sizeof(associated_data),
-                              plain_text,
+                              input_buffer,
                               sizeof(plain_text),
-                              encrypted_data,
+                              output_buffer,
                               sizeof(encrypted_data),
                               &encrypted_data_length);
 
@@ -1856,15 +1877,20 @@ void psa_aead_test(const psa_key_type_t key_type,
         TEST_FAIL("Encrypted data length is above the maximum expected value");
         goto destroy_key_aead;
     }
-    memcpy(encrypted_data_single_shot, encrypted_data, encrypted_data_length);
+    memcpy(encrypted_data_single_shot, output_buffer, encrypted_data_length);
+
+    if (!is_inline) {
+        input_buffer = encrypted_data;
+        output_buffer = decrypted_data;
+    }
 
     /* Perform AEAD decryption */
     status = psa_aead_decrypt(key_id_local, alg, nonce, nonce_length,
                               associated_data,
                               sizeof(associated_data),
-                              encrypted_data,
+                              input_buffer,
                               encrypted_data_length,
-                              decrypted_data,
+                              output_buffer,
                               sizeof(decrypted_data),
                               &decrypted_data_length);
 
@@ -1884,7 +1910,7 @@ void psa_aead_test(const psa_key_type_t key_type,
     }
 
     /* Check that the decrypted data is the same as the original data */
-    comp_result = memcmp(plain_text, decrypted_data, sizeof(plain_text));
+    comp_result = memcmp(plain_text, output_buffer, sizeof(plain_text));
     if (comp_result != 0) {
         TEST_FAIL("Decrypted data doesn't match with plain text");
         goto destroy_key_aead;
@@ -1967,6 +1993,17 @@ void psa_aead_test(const psa_key_type_t key_type,
         goto destroy_key_aead;
     }
 
+    if (is_inline) {
+        memcpy(inline_buf, plain_text, sizeof(plain_text));
+        //memset(inline_buf + sizeof(plain_text), 0, PSA_AEAD_TAG_MAX_SIZE);
+
+        input_buffer = inline_buf;
+        output_buffer = inline_buf;
+    } else {
+        input_buffer = plain_text;
+        output_buffer = encrypted_data;
+    }
+
     /* Encrypt one chunk of information at a time */
     for (size_t i = 0;
          i < ROUND_UP(sizeof(plain_text), chunk_size) / chunk_size;
@@ -1976,9 +2013,9 @@ void psa_aead_test(const psa_key_type_t key_type,
             chunk_size : (sizeof(plain_text) - i*chunk_size);
 
         status = psa_aead_update(&encop,
-                                 plain_text + i*chunk_size,
+                                 input_buffer + i*chunk_size,
                                  size_to_encrypt,
-                                 encrypted_data + total_encrypted_length,
+                                 output_buffer + total_encrypted_length,
                                  sizeof(encrypted_data) -
                                                       total_encrypted_length,
                                  &encrypted_data_length);
@@ -1996,7 +2033,7 @@ void psa_aead_test(const psa_key_type_t key_type,
 
     /* Finish the aead operation */
     status = psa_aead_finish(&encop,
-                             encrypted_data + total_encrypted_length,
+                             output_buffer + total_encrypted_length,
                              sizeof(encrypted_data) - total_encrypted_length,
                              &encrypted_data_length,
                              tag,
@@ -2024,7 +2061,7 @@ void psa_aead_test(const psa_key_type_t key_type,
     /* Compare encrypted data between single part and multipart case */
     comp_result = memcmp(
                       encrypted_data_single_shot,
-                      encrypted_data, total_encrypted_length);
+                      output_buffer, total_encrypted_length);
     if (comp_result != 0) {
         TEST_FAIL("Single shot encrypted data does not match with multipart");
         goto destroy_key_aead;
@@ -2075,6 +2112,14 @@ void psa_aead_test(const psa_key_type_t key_type,
         goto destroy_key_aead;
     }
 
+    if (is_inline) {
+        input_buffer = inline_buf;
+        output_buffer = inline_buf;
+    } else {
+        input_buffer = encrypted_data;
+        output_buffer = decrypted_data;
+    }
+
     /* Decrypt */
     for (size_t i = 0;
         i < ROUND_UP(total_encrypted_length, chunk_size) / chunk_size;
@@ -2084,9 +2129,9 @@ void psa_aead_test(const psa_key_type_t key_type,
             chunk_size : (total_encrypted_length - i*chunk_size);
 
         status = psa_aead_update(&decop,
-                                 encrypted_data + i*chunk_size,
+                                 input_buffer + i*chunk_size,
                                  size_to_decrypt,
-                                 decrypted_data + total_output_length,
+                                 output_buffer + total_output_length,
                                  sizeof(decrypted_data)
                                                        - total_output_length,
                                  &decrypted_data_length);
@@ -2104,7 +2149,7 @@ void psa_aead_test(const psa_key_type_t key_type,
 
     /* Verify the AEAD operation */
     status = psa_aead_verify(&decop,
-                             decrypted_data + total_output_length,
+                             output_buffer + total_output_length,
                              sizeof(decrypted_data) - total_output_length,
                              &decrypted_data_length,
                              tag,
@@ -2129,7 +2174,7 @@ void psa_aead_test(const psa_key_type_t key_type,
     }
 
     /* Check that the decrypted data is the same as the original data */
-    comp_result = memcmp(plain_text, decrypted_data, sizeof(plain_text));
+    comp_result = memcmp(plain_text, output_buffer, sizeof(plain_text));
     if (comp_result != 0) {
         TEST_FAIL("Decrypted data doesn't match with plain text");
     }

@@ -16,6 +16,11 @@ extern "C" {
 #include "test_framework_helpers.h"
 #include "crypto_tests_check_config.h"
 
+enum psa_test_iovec_inline {
+    PSA_TEST_IOVEC_INLINED,
+    PSA_TEST_IOVEC_NOT_INLINED,
+};
+
 /**
  * \brief Size of the key to use in tests in bits
  *
@@ -201,12 +206,13 @@ void psa_mac_test(const psa_algorithm_t alg,
 /**
  * \brief Run AEAD tests with different algorithms and key types
  *
- * \param[in]  key_type   PSA key type
- * \param[in]  alg        PSA algorithm
- * \param[in]  key        Encryption key
- * \param[in]  key_bits   Encryption key size in bits
- * \param[in]  chunk_size Chunk size in bytes
- * \param[out] ret        Test result
+ * \param[in]  key_type    PSA key type
+ * \param[in]  alg         PSA algorithm
+ * \param[in]  key         Encryption key
+ * \param[in]  key_bits    Encryption key size in bits
+ * \param[in]  inline_conf inline config of IOVEC buffers
+ * \param[in]  chunk_size  Chunk size in bytes
+ * \param[out] ret         Test result
  *
  */
 void psa_aead_test(const psa_key_type_t key_type,
@@ -214,6 +220,7 @@ void psa_aead_test(const psa_key_type_t key_type,
                    const uint8_t *key,
                    size_t key_bits,
                    size_t chunk_size,
+                   enum psa_test_iovec_inline inline_conf,
                    struct test_result_t *ret);
 /**
  * \brief Tests invalid key length
