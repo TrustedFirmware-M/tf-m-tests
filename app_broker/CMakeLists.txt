@@ -107,6 +107,7 @@ if(TFM_NS_MAILBOX_API)
             # NS RTOS specific implementation of NS mailbox
             ${APP_LIB_DIR}/multi_core/tfm_ns_mailbox_rtos_api.c
             $<$<BOOL:${TEST_NS_MULTI_CORE}>:${APP_LIB_DIR}/multi_core/tfm_ns_mailbox_test.c>
+            ${SPE_INSTALL_INTERFACE_SRC}/multi_core/tfm_ns_mailbox_common.c
     )
 
     target_compile_definitions(ns_multi_core
