@@ -1765,10 +1765,11 @@ void psa_aead_test(const psa_key_type_t key_type,
         "This is my plaintext message and it's made of 68 characters...!1234";
     const uint8_t associated_data[] =
         "This is my associated data to authenticate";
-    const uint8_t inline_buf[ENC_DEC_BUFFER_SIZE_AEAD] = {0};
+    uint8_t inline_buf[ENC_DEC_BUFFER_SIZE_AEAD] = {0};
     uint8_t decrypted_data[MAX_PLAIN_DATA_SIZE_AEAD] = {0};
     uint8_t encrypted_data[ENC_DEC_BUFFER_SIZE_AEAD] = {0};
-    uint8_t *input_buffer, *output_buffer;
+    const uint8_t *input_buffer;
+    uint8_t *output_buffer;
     size_t encrypted_data_length = 0, decrypted_data_length = 0;
     size_t total_output_length = 0, total_encrypted_length = 0;
     uint8_t *tag;
