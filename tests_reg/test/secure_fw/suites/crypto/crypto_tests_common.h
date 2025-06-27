@@ -80,7 +80,7 @@ enum psa_test_iovec_inline {
  * \brief Max size in bytes of the data to be encrypted in AEAD
  *        tests.
  */
-#define MAX_PLAIN_DATA_SIZE_AEAD (68)
+#define MAX_PLAIN_DATA_SIZE_AEAD (BYTE_SIZE_CHUNK * 5)
 
 /**
  * \brief Size in bytes of the encryption/decryption buffers used

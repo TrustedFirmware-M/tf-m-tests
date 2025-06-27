@@ -428,6 +428,7 @@ static void tfm_crypto_test_1030(struct test_result_t *ret)
                   PSA_TEST_IOVEC_NOT_INLINED,
                   ret);
 
+#ifdef CC3XX_RUNTIME_ENABLED
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM,
                   test_key_128, BIT_SIZE_TEST_KEY,
                   BYTE_SIZE_CHUNK / 3,
@@ -439,15 +440,15 @@ static void tfm_crypto_test_1030(struct test_result_t *ret)
                   BYTE_SIZE_CHUNK / 4,
                   PSA_TEST_IOVEC_NOT_INLINED,
                   ret);
+#endif /* CC3XX_RUNTIME_ENABLED */
 
-    /* Inline Tests */
-    TEST_LOG("Inlined iovec\n");
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM,
                   test_key_128, BIT_SIZE_TEST_KEY,
                   BYTE_SIZE_CHUNK,
                   PSA_TEST_IOVEC_INLINED,
                   ret);
 
+#ifdef CC3XX_RUNTIME_ENABLED
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM,
                   test_key_128, BIT_SIZE_TEST_KEY,
                   BYTE_SIZE_CHUNK / 3,
@@ -459,6 +460,7 @@ static void tfm_crypto_test_1030(struct test_result_t *ret)
                   BYTE_SIZE_CHUNK / 4,
                   PSA_TEST_IOVEC_INLINED,
                   ret);
+#endif /* CC3XX_RUNTIME_ENABLED */
 }
 #endif /* TFM_CRYPTO_TEST_ALG_CCM */
 
@@ -502,6 +504,7 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
                   PSA_TEST_IOVEC_NOT_INLINED,
                   ret);
 
+#ifdef CC3XX_RUNTIME_ENABLED
     psa_aead_test(PSA_KEY_TYPE_AES, alg,
                   test_key_128, BIT_SIZE_TEST_KEY,
                   BYTE_SIZE_CHUNK / 3,
@@ -513,14 +516,15 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
                   BYTE_SIZE_CHUNK / 4,
                   PSA_TEST_IOVEC_NOT_INLINED,
                   ret);
+#endif /* CC3XX_RUNTIME_ENABLED */
 
-    /* Inline Tests */
     psa_aead_test(PSA_KEY_TYPE_AES, alg,
                   test_key_128, BIT_SIZE_TEST_KEY,
                   BYTE_SIZE_CHUNK,
                   PSA_TEST_IOVEC_INLINED,
                   ret);
 
+#ifdef CC3XX_RUNTIME_ENABLED
     psa_aead_test(PSA_KEY_TYPE_AES, alg,
                   test_key_128, BIT_SIZE_TEST_KEY,
                   BYTE_SIZE_CHUNK / 3,
@@ -532,6 +536,7 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
                   BYTE_SIZE_CHUNK / 4,
                   PSA_TEST_IOVEC_INLINED,
                   ret);
+#endif /* CC3XX_RUNTIME_ENABLED */
 }
 #endif /* TFM_CRYPTO_TEST_ALG_CCM */
 
