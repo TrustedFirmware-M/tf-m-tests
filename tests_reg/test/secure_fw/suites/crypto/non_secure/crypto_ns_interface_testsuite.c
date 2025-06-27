@@ -29,7 +29,7 @@ static void tfm_crypto_test_1009(struct test_result_t *ret);
 #ifdef TFM_CRYPTO_TEST_UNSUPPORTED_ALG
 static void tfm_crypto_test_1010(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_UNSUPPORTED_ALG */
-#ifdef TFM_CRYPTO_TEST_ALG_SHA_224
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1011(struct test_result_t *ret);
 #endif
 static void tfm_crypto_test_1012(struct test_result_t *ret);
@@ -49,7 +49,7 @@ static void tfm_crypto_test_1021(struct test_result_t *ret);
 #ifdef TFM_CRYPTO_TEST_ALG_SHA_512
 static void tfm_crypto_test_1022(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_SHA_512 */
-#ifdef TFM_CRYPTO_TEST_ALG_SHA_224
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1024(struct test_result_t *ret);
 #endif
 #ifdef TFM_CRYPTO_TEST_ALG_CCM
@@ -106,7 +106,7 @@ static void tfm_crypto_test_1051(struct test_result_t *ret);
 static void tfm_crypto_test_1049(struct test_result_t *ret);
 static void tfm_crypto_test_1052(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305 */
-#ifdef TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION
+#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1050(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION */
 #if defined(TFM_CRYPTO_TEST_SINGLE_PART_FUNCS)
@@ -147,7 +147,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1010, "TFM_NS_CRYPTO_TEST_1010",
      "Non Secure Unsupported Hash (SHA-1) interface"},
 #endif /* TFM_CRYPTO_TEST_UNSUPPORTED_ALG */
-#ifdef TFM_CRYPTO_TEST_ALG_SHA_224
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
     {&tfm_crypto_test_1011, "TFM_NS_CRYPTO_TEST_1011",
      "Non Secure Hash (SHA-224) interface"},
 #endif
@@ -175,7 +175,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1022, "TFM_NS_CRYPTO_TEST_1022",
      "Non Secure HMAC (SHA-512) interface"},
 #endif /* TFM_CRYPTO_TEST_ALG_SHA_512 */
-#ifdef TFM_CRYPTO_TEST_ALG_SHA_224
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
     {&tfm_crypto_test_1024, "TFM_NS_CRYPTO_TEST_1024",
      "Non Secure HMAC with long key (SHA-224) interface"},
 #endif
@@ -253,7 +253,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1049, "TFM_NS_CRYPTO_TEST_1049",
      "Non Secure AEAD (CHACHA20-POLY1305) interface"},
 #endif /* TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305 */
-#ifdef TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION
+#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION) && !defined(CC3XX_RUNTIME_ENABLED)
     {&tfm_crypto_test_1050, "TFM_NS_CRYPTO_TEST_1050",
      "Non Secure RSASSA-PSS signature verification (RSASSA-PSS-SHA256)"},
 #endif /* TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION */
@@ -355,7 +355,7 @@ static void tfm_crypto_test_1010(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_UNSUPPORTED_ALG */
 
-#ifdef TFM_CRYPTO_TEST_ALG_SHA_224
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1011(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_SHA_224, ret);
@@ -411,7 +411,7 @@ static void tfm_crypto_test_1022(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_ALG_SHA_512 */
 
-#ifdef TFM_CRYPTO_TEST_ALG_SHA_224
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1024(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_224),
@@ -664,7 +664,7 @@ static void tfm_crypto_test_1052(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305 */
 
-#ifdef TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION
+#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1050(struct test_result_t *ret)
 {
     psa_verify_rsassa_pss_test(ret);
