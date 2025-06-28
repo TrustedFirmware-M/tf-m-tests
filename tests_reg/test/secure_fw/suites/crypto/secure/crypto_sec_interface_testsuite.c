@@ -76,9 +76,9 @@ static void tfm_crypto_test_1039(struct test_result_t *ret);
 #ifdef TFM_CRYPTO_TEST_ECDH
 static void tfm_crypto_test_1040(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ECDH */
-#ifdef TFM_CRYPTO_TEST_ALG_OFB
+#if defined(TFM_CRYPTO_TEST_ALG_OFB) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1041(struct test_result_t *ret);
-#endif /* TFM_CRYPTO_TEST_ALG_OFB */
+#endif /* TFM_CRYPTO_TEST_ALG_OFB && !CC3XX_RUNTIME_ENABLED */
 #ifdef TFM_CRYPTO_TEST_ALG_ECB
 static void tfm_crypto_test_1042(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_ECB */
@@ -212,10 +212,10 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1040, "TFM_S_CRYPTO_TEST_1040",
      "Secure ECDH key agreement"},
 #endif /* TFM_CRYPTO_TEST_ECDH */
-#ifdef TFM_CRYPTO_TEST_ALG_OFB
+#if defined(TFM_CRYPTO_TEST_ALG_OFB) && !defined(CC3XX_RUNTIME_ENABLED)
     {&tfm_crypto_test_1041, "TFM_S_CRYPTO_TEST_1041",
      "Secure Symmetric encryption (AES-128-OFB) interface"},
-#endif /* TFM_CRYPTO_TEST_ALG_OFB */
+#endif /* TFM_CRYPTO_TEST_ALG_OFB && !CC3XX_RUNTIME_ENABLED */
 #ifdef TFM_CRYPTO_TEST_ALG_ECB
     {&tfm_crypto_test_1042, "TFM_S_CRYPTO_TEST_1042",
      "Secure Symmetric encryption (AES-128-ECB) interface"},
@@ -601,13 +601,13 @@ static void tfm_crypto_test_1040(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_ECDH */
 
-#ifdef TFM_CRYPTO_TEST_ALG_OFB
+#if defined(TFM_CRYPTO_TEST_ALG_OFB) && !defined(CC3XX_RUNTIME_ENABLED)
 static void tfm_crypto_test_1041(struct test_result_t *ret)
 {
     psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_OFB,
                     test_key_128, BIT_SIZE_TEST_KEY, ret);
 }
-#endif /* TFM_CRYPTO_TEST_ALG_OFB */
+#endif /* TFM_CRYPTO_TEST_ALG_OFB && !CC3XX_RUNTIME_ENABLED */
 
 #ifdef TFM_CRYPTO_TEST_ALG_ECB
 static void tfm_crypto_test_1042(struct test_result_t *ret)
