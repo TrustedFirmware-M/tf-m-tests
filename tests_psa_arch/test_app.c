@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "test_app.h"
-#include "tfm_log.h"
+#include "tfm_tests_log_msg.h"
 #include "os_wrapper/thread.h"
 
 /**
