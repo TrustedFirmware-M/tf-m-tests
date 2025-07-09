@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -124,29 +124,6 @@ if(TFM_NS_MAILBOX_API)
     )
 endif()
 
-# TF-M NS logging
-add_library(tfm_ns_log STATIC EXCLUDE_FROM_ALL)
-
-target_sources(tfm_ns_log
-    PRIVATE
-        ${APP_LIB_DIR}/log/tfm_log_raw.c
-)
-
-target_include_directories(tfm_ns_log
-    PUBLIC
-        ${APP_LIB_DIR}/log/
-)
-
-target_compile_definitions(tfm_ns_log
-    INTERFACE
-        $<$<NOT:$<BOOL:${TFM_NS_LOG_DISABLE}>>:TFM_NS_LOG>
-)
-
-target_link_libraries(tfm_ns_log
-    PRIVATE
-        platform_ns
-)
-
 ################## Update plaform_ns with NS settings #################
 
 target_include_directories(platform_ns
@@ -192,6 +169,7 @@ target_sources(tfm_test_broker
 target_include_directories(tfm_test_broker
     PUBLIC
         .
+        ${APP_LIB_DIR}/log/
 )
 
 target_link_libraries(tfm_test_broker
@@ -201,7 +179,6 @@ target_link_libraries(tfm_test_broker
     PUBLIC
         RTX_OS
         tfm_api_ns
-        tfm_ns_log
         $<$<BOOL:${TFM_NS_MAILBOX_API}>:ns_multi_core>
 )
 
