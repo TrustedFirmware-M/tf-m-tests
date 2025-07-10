@@ -163,6 +163,7 @@ add_library(tfm_test_broker STATIC)
 
 target_sources(tfm_test_broker
     PRIVATE
+        assert.c
         main_ns.c
 )
 
