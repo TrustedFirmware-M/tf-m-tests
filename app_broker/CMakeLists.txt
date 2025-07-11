@@ -40,6 +40,20 @@ set(SPE_INSTALL_INTERFACE_INC    ${CONFIG_SPE_PATH}/interface/include)
 # lib path
 set(APP_LIB_DIR                  ${CMAKE_CURRENT_LIST_DIR}/../lib)
 
+# TFM NS logging interface
+add_library(tfm_ns_log_msg_interface INTERFACE)
+
+target_include_directories(tfm_ns_log_msg_interface
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../lib/log>
+        $<INSTALL_INTERFACE:${SPE_INSTALL_INTERFACE_INC}
+)
+
+target_compile_definitions(tfm_ns_log_msg_interface
+    INTERFACE
+        $<$<NOT:$<BOOL:${TFM_NS_LOG_DISABLE}>>:TFM_NS_LOG>
+)
+
 # OS wrapper library consists of the wrapper layer of RTOSes, such as RTX
 add_library(os_wrapper STATIC)
 
@@ -151,6 +165,8 @@ target_compile_definitions(tfm_api_ns
 )
 
 target_link_libraries(tfm_api_ns
+    INTERFACE
+        tfm_ns_log_msg_interface
     PRIVATE
         $<$<BOOL:${TFM_NS_MAILBOX_API}>:tfm_api_ns_mailbox>
         $<$<NOT:$<BOOL:${TFM_NS_MAILBOX_API}>>:tfm_api_ns_tz>
