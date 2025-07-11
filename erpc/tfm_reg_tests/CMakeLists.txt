@@ -151,6 +151,10 @@ include(${TFM_REG_TEST_ROOT}/config/default_test_config.cmake)
 # Config check in case additional test configs passed in via command line.
 include(${TFM_REG_TEST_ROOT}/config/check_config.cmake)
 
+# Dummy tfm_ns_log for the tfm_test_framework_ns library
+add_library(tfm_ns_log INTERFACE)
+
+set(USE_STDIO ON)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../lib/ext/qcbor ${CMAKE_BINARY_DIR}/lib/ext/qcbor)
 add_subdirectory(${TFM_REG_TEST_ROOT}/ns_regression      ${CMAKE_BINARY_DIR}/ns_regression)
 

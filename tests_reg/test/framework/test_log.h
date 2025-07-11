@@ -13,17 +13,7 @@
 #elif defined USE_STDIO
 #include <stdio.h>
 #else
-/*
- * Depending on how the tests are compiled, they may
- * pick up the LOG_LEVEL definition from other components. These other values
- * will have no effect on logging in the tests as we always call the tfm_log
- * function. In the case that we do not have a definition, just set
- * it to VERBOSE
- */
-#ifndef LOG_LEVEL
-#define LOG_LEVEL LOG_LEVEL_VERBOSE
-#endif
-#include "tfm_log.h"
+#include "tfm_log_raw.h"
 #endif /* USE_SP_LOG */
 
 #ifdef __cplusplus
@@ -35,7 +25,7 @@ extern "C" {
 #elif defined USE_STDIO
 #define TEST_LOG(...) printf(__VA_ARGS__)
 #else
-#define TEST_LOG(...) tfm_log(LOG_MARKER_RAW __VA_ARGS__)
+#define TEST_LOG(...) tfm_log_printf(__VA_ARGS__)
 #endif /* USE_SP_LOG */
 
 #ifdef __cplusplus

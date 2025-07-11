@@ -11,9 +11,28 @@ endif()
 
 add_library(bl1_1_tests STATIC)
 
-target_link_libraries(tfm_test_framework_common
+set(LOG_SOURCE_ROOT ${TFM_TESTS_ROOT_DIR}/lib/log)
+
+add_library(bl1_1_log INTERFACE)
+
+target_sources(bl1_1_log
+    INTERFACE
+        ${LOG_SOURCE_ROOT}/tfm_log_raw.c
+)
+
+target_include_directories(bl1_1_log
+    INTERFACE
+        ${LOG_SOURCE_ROOT}
+)
+
+target_link_libraries(bl1_1_log
     INTERFACE
         platform_bl1_1_interface
+)
+
+target_link_libraries(tfm_test_framework_common
+    INTERFACE
+        bl1_1_log
 )
 
 add_subdirectory(suites/crypto)

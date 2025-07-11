@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -39,20 +39,6 @@ set(SPE_INSTALL_INTERFACE_SRC    ${CONFIG_SPE_PATH}/interface/src)
 set(SPE_INSTALL_INTERFACE_INC    ${CONFIG_SPE_PATH}/interface/include)
 # lib path
 set(APP_LIB_DIR                  ${CMAKE_CURRENT_LIST_DIR}/../lib)
-
-# TFM NS logging interface
-add_library(tfm_ns_log_msg_interface INTERFACE)
-
-target_include_directories(tfm_ns_log_msg_interface
-    INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../lib/log>
-        $<INSTALL_INTERFACE:${SPE_INSTALL_INTERFACE_INC}
-)
-
-target_compile_definitions(tfm_ns_log_msg_interface
-    INTERFACE
-        $<$<NOT:$<BOOL:${TFM_NS_LOG_DISABLE}>>:TFM_NS_LOG>
-)
 
 # OS wrapper library consists of the wrapper layer of RTOSes, such as RTX
 add_library(os_wrapper STATIC)
@@ -138,6 +124,29 @@ if(TFM_NS_MAILBOX_API)
     )
 endif()
 
+# TF-M NS logging
+add_library(tfm_ns_log STATIC EXCLUDE_FROM_ALL)
+
+target_sources(tfm_ns_log
+    PRIVATE
+        ${APP_LIB_DIR}/log/tfm_log_raw.c
+)
+
+target_include_directories(tfm_ns_log
+    PUBLIC
+        ${APP_LIB_DIR}/log/
+)
+
+target_compile_definitions(tfm_ns_log
+    INTERFACE
+        $<$<NOT:$<BOOL:${TFM_NS_LOG_DISABLE}>>:TFM_NS_LOG>
+)
+
+target_link_libraries(tfm_ns_log
+    PRIVATE
+        platform_ns
+)
+
 ################## Update plaform_ns with NS settings #################
 
 target_include_directories(platform_ns
@@ -165,8 +174,6 @@ target_compile_definitions(tfm_api_ns
 )
 
 target_link_libraries(tfm_api_ns
-    INTERFACE
-        tfm_ns_log_msg_interface
     PRIVATE
         $<$<BOOL:${TFM_NS_MAILBOX_API}>:tfm_api_ns_mailbox>
         $<$<NOT:$<BOOL:${TFM_NS_MAILBOX_API}>>:tfm_api_ns_tz>
@@ -179,14 +186,12 @@ add_library(tfm_test_broker STATIC)
 
 target_sources(tfm_test_broker
     PRIVATE
-        assert.c
         main_ns.c
 )
 
 target_include_directories(tfm_test_broker
     PUBLIC
         .
-        ${APP_LIB_DIR}/log/
 )
 
 target_link_libraries(tfm_test_broker
@@ -196,6 +201,7 @@ target_link_libraries(tfm_test_broker
     PUBLIC
         RTX_OS
         tfm_api_ns
+        tfm_ns_log
         $<$<BOOL:${TFM_NS_MAILBOX_API}>:ns_multi_core>
 )
 

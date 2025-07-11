@@ -1,11 +1,11 @@
 /*
- * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "tfm_tests_log_msg.h"
+#include "tfm_log.h"
 #include "erpc_server_start.h"
 #include "config_erpc_target.h"
 
