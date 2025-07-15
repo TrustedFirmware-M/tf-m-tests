@@ -1,7 +1,7 @@
-From 1ed4fd6856aa6cd67b7dfbea82c1b775f0a450e1 Mon Sep 17 00:00:00 2001
+From dd2b65274de6f62258fc60137f5be11dff8e8caf Mon Sep 17 00:00:00 2001
 From: Stephan Koch <koch@oberon.ch>
 Date: Fri, 28 Jun 2024 18:18:55 +0200
-Subject: [PATCH] Use rsa_128_key_data which has expected format.
+Subject: [PATCH 09/17] Use rsa_128_key_data which has expected format.
 
 Signed-off-by: Stephan Koch <koch@oberon.ch>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Stephan Koch <koch@oberon.ch>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/api-tests/dev_apis/crypto/test_c042/test_data.h b/api-tests/dev_apis/crypto/test_c042/test_data.h
-index ff038337..1972b945 100644
+index ff03833..1972b94 100644
 --- a/api-tests/dev_apis/crypto/test_c042/test_data.h
 +++ b/api-tests/dev_apis/crypto/test_c042/test_data.h
 @@ -236,8 +236,8 @@ static const test_data check1[] = {
@@ -23,3 +23,6 @@ index ff038337..1972b945 100644
      .usage_flags      = PSA_KEY_USAGE_VERIFY_HASH,
      .alg              = PSA_ALG_RSA_PSS_ANY_SALT(PSA_ALG_SHA_256),
      .hash             = hash,
+-- 
+2.43.0
+

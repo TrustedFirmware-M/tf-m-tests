@@ -1,0 +1,68 @@
+From dc2a61dd864b269b77be556c45ff21ae5ec64a31 Mon Sep 17 00:00:00 2001
+From: Antonio de Angelis <Antonio.deAngelis@arm.com>
+Date: Fri, 18 Jul 2025 10:03:55 +0100
+Subject: [PATCH 17/17] Verify_hash and verify_message can be gated on just
+ ECDSA
+
+Even if the algorithm is strictly DETERMINISTIC_ECDSA, when doing
+the verification flows it's enough for the platform to implement
+ECDSA as the verification is the same.
+
+Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
+---
+ api-tests/dev_apis/crypto/test_c042/test_data.h | 2 +-
+ api-tests/dev_apis/crypto/test_c053/test_c053.c | 4 ++--
+ api-tests/dev_apis/crypto/test_c053/test_data.h | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/api-tests/dev_apis/crypto/test_c042/test_data.h b/api-tests/dev_apis/crypto/test_c042/test_data.h
+index 1972b94..6cb8db3 100644
+--- a/api-tests/dev_apis/crypto/test_c042/test_data.h
++++ b/api-tests/dev_apis/crypto/test_c042/test_data.h
+@@ -71,7 +71,7 @@ static const test_data check1[] = {
+ #endif
+ 
+ #ifdef ARCH_TEST_SHA256
+-#ifdef ARCH_TEST_DETERMINISTIC_ECDSA
++#if defined(ARCH_TEST_DETERMINISTIC_ECDSA) || defined(ARCH_TEST_ECDSA)
+ #ifdef ARCH_TEST_ECC_CURVE_SECP256R1
+ {
+     .test_desc        = "Test psa_verify_hash - ECDSA KEY_PAIR SECP256R1 SHA-256\n",
+diff --git a/api-tests/dev_apis/crypto/test_c053/test_c053.c b/api-tests/dev_apis/crypto/test_c053/test_c053.c
+index 8769c1d..90da931 100644
+--- a/api-tests/dev_apis/crypto/test_c053/test_c053.c
++++ b/api-tests/dev_apis/crypto/test_c053/test_c053.c
+@@ -35,7 +35,7 @@ int32_t psa_verify_message_test(caller_security_t caller __UNUSED)
+ #if ((defined(ARCH_TEST_RSA_1024) && (defined(ARCH_TEST_RSA_PKCS1V15_SIGN) || \
+       defined(ARCH_TEST_RSA_PKCS1V15_SIGN_RAW) || defined(ARCH_TEST_SHA256))) || \
+      (defined(ARCH_TEST_SHA256) && (defined(ARCH_TEST_DETERMINISTIC_ECDSA) || \
+-      defined(ARCH_TEST_ECC_CURVE_SECP256R1))))
++      defined(ARCH_TEST_ECC_CURVE_SECP256R1) || defined(ARCH_TEST_ECDSA))))
+     int32_t                 num_checks = sizeof(check1)/sizeof(check1[0]);
+     int32_t                 i, status;
+     psa_key_attributes_t    attributes = PSA_KEY_ATTRIBUTES_INIT;
+@@ -111,7 +111,7 @@ int32_t psa_verify_message_negative_test(caller_security_t caller __UNUSED)
+ #if ((defined(ARCH_TEST_RSA_1024) && (defined(ARCH_TEST_RSA_PKCS1V15_SIGN) || \
+       defined(ARCH_TEST_RSA_PKCS1V15_SIGN_RAW) || defined(ARCH_TEST_SHA256))) || \
+      (defined(ARCH_TEST_SHA256) && (defined(ARCH_TEST_DETERMINISTIC_ECDSA) || \
+-      defined(ARCH_TEST_ECC_CURVE_SECP256R1))))
++      defined(ARCH_TEST_ECC_CURVE_SECP256R1) || defined(ARCH_TEST_ECDSA))))
+     int32_t                 status;
+     psa_key_id_t            key = 13;
+ 
+diff --git a/api-tests/dev_apis/crypto/test_c053/test_data.h b/api-tests/dev_apis/crypto/test_c053/test_data.h
+index 49477c7..c1612ed 100644
+--- a/api-tests/dev_apis/crypto/test_c053/test_data.h
++++ b/api-tests/dev_apis/crypto/test_c053/test_data.h
+@@ -89,7 +89,7 @@ static const test_data check1[] = {
+ #endif
+ 
+ #ifdef ARCH_TEST_SHA256
+-#ifdef ARCH_TEST_DETERMINISTIC_ECDSA
++#if defined(ARCH_TEST_DETERMINISTIC_ECDSA) || defined(ARCH_TEST_ECDSA)
+ #ifdef ARCH_TEST_ECC_CURVE_SECP256R1
+ {
+     .test_desc        = "Test psa_verify_message - ECDSA KEY_PAIR SECP256R1 SHA-256\n",
+-- 
+2.43.0
+

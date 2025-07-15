@@ -1,7 +1,7 @@
-From e8150b5c013d01a3ee268e50cd4f83ea86ff7c5b Mon Sep 17 00:00:00 2001
+From 7f27ad5b37e82bdc75f3733acbb3a479eda97029 Mon Sep 17 00:00:00 2001
 From: Kevin Peng <kevin.peng@arm.com>
 Date: Thu, 9 Nov 2023 14:40:48 +0800
-Subject: [PATCH 3/5] Build: Add manifest tool dependencies
+Subject: [PATCH 03/17] Build: Add manifest tool dependencies
 
 Signed-off-by: Kevin Peng <kevin.peng@arm.com>
 ---
@@ -10,10 +10,10 @@ Signed-off-by: Kevin Peng <kevin.peng@arm.com>
  2 files changed, 9 insertions(+)
 
 diff --git a/api-tests/CMakeLists.txt b/api-tests/CMakeLists.txt
-index f5e45c1..176978e 100644
+index 4058862..d4bf988 100644
 --- a/api-tests/CMakeLists.txt
 +++ b/api-tests/CMakeLists.txt
-@@ -673,6 +673,9 @@ add_dependencies(${PSA_TARGET_GENERATE_DATABASE_POST}	${PSA_TARGET_GENERATE_DATA
+@@ -686,6 +686,9 @@ add_dependencies(${PSA_TARGET_GENERATE_DATABASE_POST}	${PSA_TARGET_GENERATE_DATA
  add_dependencies(${PSA_TARGET_PAL_NSPE_LIB} 		${PSA_TARGET_GENERATE_DATABASE_POST})
  add_dependencies(${PSA_TARGET_VAL_NSPE_LIB}		${PSA_TARGET_PAL_NSPE_LIB})
  add_dependencies(${PSA_TARGET_TEST_COMBINE_LIB}		${PSA_TARGET_VAL_NSPE_LIB})
@@ -41,5 +41,5 @@ index 37b8888..81f8d6a 100644
  	${CMAKE_CURRENT_BINARY_DIR}
  	${PSA_ROOT_DIR}/val/common
 -- 
-2.47.0
+2.43.0
 

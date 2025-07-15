@@ -1,8 +1,8 @@
-From e0210ad8109519e77785a2d1170d6b37e0e8ba3a Mon Sep 17 00:00:00 2001
+From f55f3b2bf33805cb7d4ef3dcf6408d081017d8d8 Mon Sep 17 00:00:00 2001
 From: Waleed Elmelegy <waleed.elmelegy@arm.com>
 Date: Wed, 26 Mar 2025 15:53:13 +0000
-Subject: [PATCH] Add multiple expected return statuses in case of invalid
- algorithm
+Subject: [PATCH 11/17] Add multiple expected return statuses in case of
+ invalid algorithm
 
 Signed-off-by: Waleed Elmelegy <waleed.elmelegy@arm.com>
 ---
@@ -124,5 +124,5 @@ index a7ae40f..ab63deb 100644
  #endif
  #endif
 -- 
-2.25.1
+2.43.0
 

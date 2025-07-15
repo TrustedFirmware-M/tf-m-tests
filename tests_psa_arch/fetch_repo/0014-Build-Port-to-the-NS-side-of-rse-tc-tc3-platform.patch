@@ -1,0 +1,1626 @@
+From 08c674ca4a6b40c93eaedaf6b86fc711d6c8aa92 Mon Sep 17 00:00:00 2001
+From: Antonio de Angelis <Antonio.deAngelis@arm.com>
+Date: Mon, 14 Jul 2025 15:54:09 +0100
+Subject: [PATCH 14/17] Build: Port to the NS side of rse/tc/tc3 platform
+
+Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
+---
+ .../nspe/pal_attestation_config.h             | 107 +++++
+ .../tgt_dev_apis_tfm_tc3/nspe/pal_config.h    |  95 ++++
+ .../nspe/pal_crypto_config.h                  | 414 ++++++++++++++++++
+ .../nspe/pal_driver_intf.c                    | 163 +++++++
+ .../nspe/pal_storage_config.h                 |  24 +
+ .../reference_logs/attestation.txt            |  36 ++
+ .../reference_logs/crypto.txt                 | 403 +++++++++++++++++
+ .../reference_logs/protected_storage.txt      | 154 +++++++
+ .../targets/tgt_dev_apis_tfm_tc3/target.cfg   |  41 ++
+ .../targets/tgt_dev_apis_tfm_tc3/target.cmake |  97 ++++
+ 10 files changed, 1534 insertions(+)
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_attestation_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_crypto_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_driver_intf.c
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_storage_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/attestation.txt
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/crypto.txt
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/protected_storage.txt
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cfg
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cmake
+
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_attestation_config.h
+new file mode 100644
+index 0000000..16987c0
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_attestation_config.h
+@@ -0,0 +1,107 @@
++/** @file
++ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++
++#ifndef _PAL_ATTESTATION_CONFIG_H_
++#define _PAL_ATTESTATION_CONFIG_H_
++
++#define COSE_ALGORITHM_ES256             -7
++#define COSE_ALG_SHA256_PROPRIETARY      -72000
++
++#define USEFUL_BUF_MAKE_STACK_UB UsefulBuf_MAKE_STACK_UB
++
++#define COSE_SIG_CONTEXT_STRING_SIGNATURE1 "Signature1"
++
++/* Private value. Intentionally not documented for Doxygen.
++ * This is the size allocated for the encoded protected headers.  It
++ * needs to be big enough for make_protected_header() to succeed. It
++ * currently sized for one header with an algorithm ID up to 32 bits
++ * long -- one byte for the wrapping map, one byte for the label, 5
++ * bytes for the ID. If this is made accidentially too small, QCBOR will
++ * only return an error, and not overrun any buffers.
++ *
++ * 9 extra bytes are added, rounding it up to 16 total, in case some
++ * other protected header is to be added.
++ */
++#define T_COSE_SIGN1_MAX_PROT_HEADER (1+1+5+9)
++
++/**
++ * This is the size of the first part of the CBOR encoded TBS
++ * bytes. It is around 20 bytes. See create_tbs_hash().
++ */
++#define T_COSE_SIZE_OF_TBS \
++    1 + /* For opening the array */ \
++    sizeof(COSE_SIG_CONTEXT_STRING_SIGNATURE1) + /* "Signature1" */ \
++    2 + /* Overhead for encoding string */ \
++    T_COSE_SIGN1_MAX_PROT_HEADER + /* entire protected headers */ \
++    3 * (/* 3 NULL bstrs for fields not used */ \
++        1 /* size of a NULL bstr */  \
++    )
++#define NULL_USEFUL_BUF_C  NULLUsefulBufC
++
++#define ATTEST_PUBLIC_KEY_SLOT                  4
++#define ECC_CURVE_SECP256R1_PULBIC_KEY_LENGTH   (1 + 2 * PSA_BITS_TO_BYTES(256))
++
++typedef struct {
++    uint8_t  *pubx_key;
++    size_t    pubx_key_size;
++    uint8_t  *puby_key;
++    size_t    puby_key_size;
++} ecc_key_t;
++
++struct ecc_public_key_t {
++    const uint8_t a;
++    uint8_t public_key[]; /* X-coordinate || Y-coordinate */
++};
++
++static const struct ecc_public_key_t attest_public_key = {
++     /* Constant byte */
++     0x04,
++     /* X-coordinate */
++     {0x79, 0xEB, 0xA9, 0x0E, 0x8B, 0xF4, 0x50, 0xA6,
++      0x75, 0x15, 0x76, 0xAD, 0x45, 0x99, 0xB0, 0x7A,
++      0xDF, 0x93, 0x8D, 0xA3, 0xBB, 0x0B, 0xD1, 0x7D,
++      0x00, 0x36, 0xED, 0x49, 0xA2, 0xD0, 0xFC, 0x3F,
++     /* Y-coordinate */
++      0xBF, 0xCD, 0xFA, 0x89, 0x56, 0xB5, 0x68, 0xBF,
++      0xDB, 0x86, 0x73, 0xE6, 0x48, 0xD8, 0xB5, 0x8D,
++      0x92, 0x99, 0x55, 0xB1, 0x4A, 0x26, 0xC3, 0x08,
++      0x0F, 0x34, 0x11, 0x7D, 0x97, 0x1D, 0x68, 0x64},
++};
++
++static const uint8_t initial_attestation_public_x_key[] = {
++    0x79, 0xEB, 0xA9, 0x0E, 0x8B, 0xF4, 0x50, 0xA6,
++    0x75, 0x15, 0x76, 0xAD, 0x45, 0x99, 0xB0, 0x7A,
++    0xDF, 0x93, 0x8D, 0xA3, 0xBB, 0x0B, 0xD1, 0x7D,
++    0x00, 0x36, 0xED, 0x49, 0xA2, 0xD0, 0xFC, 0x3F
++};
++
++static const uint8_t initial_attestation_public_y_key[] = {
++    0xBF, 0xCD, 0xFA, 0x89, 0x56, 0xB5, 0x68, 0xBF,
++    0xDB, 0x86, 0x73, 0xE6, 0x48, 0xD8, 0xB5, 0x8D,
++    0x92, 0x99, 0x55, 0xB1, 0x4A, 0x26, 0xC3, 0x08,
++    0x0F, 0x34, 0x11, 0x7D, 0x97, 0x1D, 0x68, 0x64
++};
++
++/* Initialize the structure with given public key */
++static const ecc_key_t attest_key = {
++        (uint8_t *)initial_attestation_public_x_key,
++        sizeof(initial_attestation_public_x_key),
++        (uint8_t *)initial_attestation_public_y_key,
++        sizeof(initial_attestation_public_y_key)
++};
++
++#endif /* _PAL_ATTESTATION_CONFIG_H_ */
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_config.h
+new file mode 100644
+index 0000000..9c66edc
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_config.h
+@@ -0,0 +1,95 @@
++/** @file
++ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++
++#ifndef _PAL_CONFIG_H_
++#define _PAL_CONFIG_H_
++
++#include "pal_crypto_config.h"
++#include "pal_attestation_config.h"
++#include "pal_storage_config.h"
++
++/* Define PSA test suite dependent macros for non-cmake build */
++#if !defined(PSA_CMAKE_BUILD)
++
++/* Print verbosity = TEST */
++#define VERBOSE 3
++
++/* NSPE or SPE VAL build? */
++#define VAL_NSPE_BUILD
++
++/* NSPE or SPE TEST build? */
++#define NONSECURE_TEST_BUILD
++
++/* If not defined, skip watchdog programming */
++#define WATCHDOG_AVAILABLE
++
++/* Are Dynamic memory APIs available to secure partition? */
++#define SP_HEAP_MEM_SUPP
++
++/* PSA Isolation level supported by platform */
++#define PLATFORM_PSA_ISOLATION_LEVEL 3
++#endif /* PSA_CMAKE_BUILD */
++
++/* Version of crypto spec used in attestation */
++#define CRYPTO_VERSION_BETA3
++
++/* Use hardcoded public key */
++#define PLATFORM_OVERRIDE_ATTEST_PK
++
++/*
++ * Include of PSA defined Header files
++ */
++#ifdef IPC
++/* psa/client.h: Contains the PSA Client API elements */
++#include "psa/client.h"
++
++/*
++ * psa_manifest/sid.h:  Macro definitions derived from manifest files that map from RoT Service
++ * names to Service IDs (SIDs). Partition manifest parse build tool must provide the implementation
++ * of this file.
++*/
++#include "psa_manifest/sid.h"
++
++/*
++ * psa_manifest/pid.h: Secure Partition IDs
++ * Macro definitions that map from Secure Partition names to Secure Partition IDs.
++ * Partition manifest parse build tool must provide the implementation of this file.
++*/
++#include "psa_manifest/pid.h"
++#endif
++
++#ifdef CRYPTO
++/* psa/crypto.h: Contains the PSA Crypto API elements */
++#include "psa/crypto.h"
++#endif
++
++#if defined(INTERNAL_TRUSTED_STORAGE) || defined(STORAGE)
++/* psa/internal_trusted_storage.h: Contains the PSA ITS API elements */
++#include "psa/internal_trusted_storage.h"
++#endif
++
++#if defined(PROTECTED_STORAGE) || defined(STORAGE)
++/* psa/protected_storage.h: Contains the PSA PS API elements */
++#include "psa/protected_storage.h"
++#endif
++
++#ifdef INITIAL_ATTESTATION
++/* psa/initial_attestation.h: Contains the PSA Initial Attestation API elements */
++#include "psa/initial_attestation.h"
++#endif
++
++#endif /* _PAL_CONFIG_H_ */
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_crypto_config.h
+new file mode 100644
+index 0000000..85427b6
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_crypto_config.h
+@@ -0,0 +1,414 @@
++/** @file
++ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++
++/*
++ * \file pal_crypto_config.h
++ *
++ * \brief Configuration options for crypto tests (set of defines)
++ *
++ *  This set of compile-time options may be used to enable
++ *  or disable features selectively for crypto test suite
++ */
++
++#ifndef _PAL_CRYPTO_CONFIG_H_
++#define _PAL_CRYPTO_CONFIG_H_
++/**
++ * \def ARCH_TEST_RSA
++ *
++ * Enable the RSA public-key cryptosystem.
++ * By default all supported keys are enabled.
++ *
++ * Comment macros to disable the types
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++//#define ARCH_TEST_RSA
++//#define ARCH_TEST_RSA_1024
++//#define ARCH_TEST_RSA_2048
++//#define ARCH_TEST_RSA_3072
++#endif
++#endif
++
++/**
++ * \def  ARCH_TEST_ECC
++ * \def  ARCH_TEST_ECC_CURVE_SECPXXXR1
++ *
++ * Enable the elliptic curve
++ * Enable specific curves within the Elliptic Curve
++ * module.  By default all supported curves are enabled.
++ *
++ * Requires: ARCH_TEST_ECC
++ * Comment macros to disable the curve
++ */
++#ifndef TF_M_PROFILE_SMALL
++#define ARCH_TEST_ECC
++#define ARCH_TEST_ECC_CURVE_SECP192R1
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_ECC_CURVE_SECP224R1
++#endif
++#define ARCH_TEST_ECC_CURVE_SECP256R1
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_ECC_CURVE_SECP384R1
++#endif
++#endif
++/* curves of size <255 are obsolete algorithms, should be disabled. */
++#undef ARCH_TEST_ECC_CURVE_SECP192R1
++#undef ARCH_TEST_ECC_CURVE_SECP224R1
++
++/**
++ * \def ARCH_TEST_AES
++ *
++ * Enable the AES block cipher.
++ * By default all supported keys are enabled.
++ *
++ * Comment macros to disable the types
++ */
++#define ARCH_TEST_AES
++#define ARCH_TEST_AES_128
++#define ARCH_TEST_AES_192
++#define ARCH_TEST_AES_256
++#define ARCH_TEST_AES_512
++
++/**
++ * \def  ARCH_TEST_DES
++ *
++ * Enable the DES block cipher.
++ * By default all supported keys are enabled.
++ *
++ * Comment macros to disable the types
++ */
++//#define ARCH_TEST_DES
++//#define ARCH_TEST_DES_1KEY
++//#define ARCH_TEST_DES_2KEY
++//#define ARCH_TEST_DES_3KEY
++
++/**
++ * \def  ARCH_TEST_RAW
++ *
++ * A "key" of this type cannot be used for any cryptographic operation.
++ * Applications may use this type to store arbitrary data in the keystore.
++ */
++#define ARCH_TEST_RAW
++
++/**
++ * \def ARCH_TEST_CIPHER
++ *
++ * Enable the generic cipher layer.
++ */
++
++#define ARCH_TEST_CIPHER
++
++/**
++ * \def ARCH_TEST_ARC4
++ *
++ * Enable the ARC4 key type.
++ */
++//#define ARCH_TEST_ARC4
++
++/**
++ * \def ARCH_TEST_CIPHER_MODE_CTR
++ *
++ * Enable Counter Block Cipher mode (CTR) for symmetric ciphers.
++ *
++ * Requires: ARCH_TEST_CIPHER
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_CIPHER_MODE_CTR
++#endif
++#endif
++
++/**
++ * \def ARCH_TEST_CIPHER_MODE_CFB
++ *
++ * Enable Cipher Feedback mode (CFB) for symmetric ciphers.
++ *
++ * Requires: ARCH_TEST_CIPHER
++ */
++#define ARCH_TEST_CIPHER_MODE_CFB
++
++/**
++ * \def ARCH_TEST_CIPHER_MODE_CBC
++ *
++ * Enable Cipher Block Chaining mode (CBC) for symmetric ciphers.
++ *
++ * Requires: ARCH_TEST_CIPHER
++ */
++#define ARCH_TEST_CIPHER_MODE_CBC
++
++/**
++ * \def ARCH_TEST_CTR_AES
++ *
++ * Requires: ARCH_TEST_CIPHER, ARCH_TEST_AES, ARCH_TEST_CIPHER_MODE_CTR
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_CTR_AES
++#endif
++#endif
++
++/**
++ * \def ARCH_TEST_CBC_AES
++ *
++ * Requires: ARCH_TEST_CIPHER, ARCH_TEST_AES, ARCH_TEST_CIPHER_MODE_CBC
++ *
++ * Comment macros to disable the types
++ */
++#define ARCH_TEST_CBC_AES
++#define ARCH_TEST_CBC_AES_NO_PADDING
++
++/**
++ * \def ARCH_TEST_CBC_NO_PADDING
++ *
++ * Requires: ARCH_TEST_CIPHER, ARCH_TEST_CIPHER_MODE_CBC
++ *
++ * Comment macros to disable the types
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_CBC_NO_PADDING
++#endif
++#endif
++
++/**
++ * \def ARCH_TEST_CFB_AES
++ *
++ * Requires: ARCH_TEST_CIPHER, ARCH_TEST_AES, ARCH_TEST_CIPHER_MODE_CFB
++ */
++#define ARCH_TEST_CFB_AES
++
++/**
++ * \def ARCH_TEST_PKCS1V15_*
++ *
++ * Enable support for PKCS#1 v1.5 encoding.
++ * Enable support for PKCS#1 v1.5 operations.
++ * Enable support for RSA-OAEP
++ *
++ * Requires: ARCH_TEST_RSA, ARCH_TEST_PKCS1V15
++ *
++ * Comment macros to disable the types
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++//#define ARCH_TEST_PKCS1V15
++//#define ARCH_TEST_RSA_PKCS1V15_SIGN
++//#define ARCH_TEST_RSA_PKCS1V15_SIGN_RAW
++//#define ARCH_TEST_RSA_PKCS1V15_CRYPT
++//#define ARCH_TEST_RSA_OAEP
++#endif
++#endif
++
++/**
++ * \def ARCH_TEST_CBC_PKCS7
++ *
++ * Requires: ARCH_TEST_CIPHER_MODE_CBC
++ *
++ * Comment macros to disable the types
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_CBC_PKCS7
++#endif
++#endif
++
++/**
++ * \def ARCH_TEST_ASYMMETRIC_ENCRYPTION
++ *
++ * Enable support for Asymmetric encryption algorithms
++ */
++#define ARCH_TEST_ASYMMETRIC_ENCRYPTION
++
++/**
++ * \def ARCH_TEST_HASH
++ *
++ * Enable the hash algorithm.
++ */
++#define ARCH_TEST_HASH
++
++/**
++ * \def  ARCH_TEST_HMAC
++ *
++ * The key policy determines which underlying hash algorithm the key can be
++ * used for.
++ *
++ * Requires: ARCH_TEST_HASH
++ */
++#define ARCH_TEST_HMAC
++
++/**
++ * \def ARCH_TEST_MDX
++ * \def ARCH_TEST_SHAXXX
++ *
++ * Enable the MDX algorithm.
++ * Enable the SHAXXX algorithm.
++ *
++ * Requires: ARCH_TEST_HASH
++ *
++ * Comment macros to disable the types
++ */
++//#define ARCH_TEST_MD2
++//#define ARCH_TEST_MD4
++//#define ARCH_TEST_MD5
++//#define ARCH_TEST_RIPEMD160
++//#define ARCH_TEST_SHA1
++#ifndef TF_M_PROFILE_SMALL
++#define ARCH_TEST_SHA224
++#endif
++#define ARCH_TEST_SHA256
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++/* disable the 384,512 as CC312 driver do not support it*/
++#ifdef CC312_LEGACY_DRIVER_API_ENABLED
++#define ARCH_TEST_SHA384
++#define ARCH_TEST_SHA512
++#endif
++#endif
++#endif
++//#define ARCH_TEST_SHA512_224
++//#define ARCH_TEST_SHA512_256
++//#define ARCH_TEST_SHA3_224
++//#define ARCH_TEST_SHA3_256
++//#define ARCH_TEST_SHA3_384
++//#define ARCH_TEST_SHA3_512
++
++/**
++ * \def ARCH_TEST_HKDF
++ *
++ * Enable the HKDF algorithm (RFC 5869).
++ *
++ * Requires: ARCH_TEST_HASH
++*/
++#define ARCH_TEST_HKDF
++
++/**
++ * \def ARCH_TEST_TLS12_PRF
++ *
++ * Enable the TLS-1.2 PRF algorithm (RFC 5246).
++ *
++ * Requires: ARCH_TEST_HASH
++*/
++#define ARCH_TEST_TLS12_PRF
++
++/**
++ * \def ARCH_TEST_xMAC
++ *
++ * Enable the xMAC (Cipher/Hash/G-based Message Authentication Code) mode for block
++ * ciphers.
++ * Requires: ARCH_TEST_AES or ARCH_TEST_DES
++ *
++ * Comment macros to disable the types
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_CMAC
++#endif
++#endif
++//#define ARCH_TEST_GMAC
++#define ARCH_TEST_HMAC
++
++/**
++ * \def ARCH_TEST_CCM
++ *
++ * Enable the Counter with CBC-MAC (CCM) mode for 128-bit block cipher.
++ *
++ * Requires: ARCH_TEST_AES
++ */
++#define ARCH_TEST_CCM
++
++/**
++ * \def ARCH_TEST_GCM
++ *
++ * Enable the Galois/Counter Mode (GCM) for AES.
++ *
++ * Requires: ARCH_TEST_AES
++ *
++ */
++#ifndef TF_M_PROFILE_SMALL
++#ifndef TF_M_PROFILE_MEDIUM
++#define ARCH_TEST_GCM
++#endif
++#endif
++
++/**
++ * \def ARCH_TEST_TRUNCATED_MAC
++ *
++ * Enable support for RFC 6066 truncated HMAC in SSL.
++ *
++ * Comment this macro to disable support for truncated HMAC in SSL
++ */
++#define ARCH_TEST_TRUNCATED_MAC
++
++
++/**
++ * \def ARCH_TEST_ECDH
++ *
++ * Enable the elliptic curve Diffie-Hellman library.
++ *
++ * Requires: ARCH_TEST_ECC
++ */
++#ifndef TF_M_PROFILE_SMALL
++#define ARCH_TEST_ECDH
++#endif
++
++/**
++ * \def ARCH_TEST_ECDSA
++ *
++ * Enable the elliptic curve DSA library.
++ * Requires: ARCH_TEST_ECC
++ */
++#ifndef TF_M_PROFILE_SMALL
++#define ARCH_TEST_ECDSA
++#endif
++
++/**
++ * \def ARCH_TEST_DETERMINISTIC_ECDSA
++ *
++ * Enable deterministic ECDSA (RFC 6979).
++*/
++//#define ARCH_TEST_DETERMINISTIC_ECDSA
++
++/**
++ * \def ARCH_TEST_ECC_ASYMMETRIC_API_SUPPORT
++ *
++ * Enable ECC support for asymmetric API.
++*/
++//#define ARCH_TEST_ECC_ASYMMETRIC_API_SUPPORT
++
++/**
++ * \def ARCH_TEST_HASH_SUSPEND
++ *
++ * Enable has suspend.
++*/
++//#define ARCH_TEST_HASH_SUSPEND
++
++/**
++ * \def ARCH_TEST_HASH_RESUME
++ *
++ * Enable has resume.
++*/
++//#define ARCH_TEST_HASH_RESUME
++
++/**
++ * \def ARCH_TEST_PBKDF2
++ *
++ * Enable the Password-based Key derivation functions - 2.
++*/
++#define ARCH_TEST_PBKDF2
++
++#include "pal_crypto_config_check.h"
++
++#endif /* _PAL_CRYPTO_CONFIG_H_ */
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_driver_intf.c b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_driver_intf.c
+new file mode 100644
+index 0000000..111f4ea
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_driver_intf.c
+@@ -0,0 +1,163 @@
++/** @file
++ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++
++#include "pal_common.h"
++#include "pal_uart.h"
++#include "pal_nvmem.h"
++#include "pal_wd_syswdog.h"
++
++#define UNUSED_VAR(x) (void)x
++
++/* Define DUMMY_NVMEM for emulation on volatile memory */
++#define DUMMY_NVMEM
++
++#ifdef DUMMY_NVMEM
++/* Emulate 1 KiB of NV storage to make the framework happy, but we do
++ * not rely on the features based on this emulation anyway
++ */
++static uint32_t dummy_nvmem[0x100] = {0xFF};
++#endif /* DUMMY_NVMEM */
++
++int32_t tfm_platform_system_reset(void);
++
++/**
++    @brief    - This function initializes the UART
++    @param    - uart base addr
++    @return   - SUCCESS/FAILURE
++**/
++int pal_uart_init_ns(uint32_t uart_base_addr)
++{
++    pal_uart_pl011_init(uart_base_addr);
++    return PAL_STATUS_SUCCESS;
++}
++
++/**
++    @brief    - This function parses the input string and writes bytes into UART TX FIFO
++    @param    - str      : Input String
++              - data     : Value for format specifier
++    @return   - SUCCESS/FAILURE
++**/
++
++int pal_print_ns(const char *str, int32_t data)
++{
++    pal_uart_pl011_print(str, data);
++    return PAL_STATUS_SUCCESS;
++}
++
++/**
++    @brief           - Initializes an hardware watchdog timer
++    @param           - base_addr       : Base address of the watchdog module
++                     - time_us         : Time in micro seconds
++                     - timer_tick_us   : Number of ticks per micro second
++    @return          - SUCCESS/FAILURE
++**/
++int pal_wd_timer_init_ns(addr_t base_addr, uint32_t time_us, uint32_t timer_tick_us)
++{
++    return pal_wd_syswdog_init(base_addr, time_us, timer_tick_us);
++}
++
++/**
++    @brief           - Enables a hardware watchdog timer
++    @param           - base_addr       : Base address of the watchdog module
++    @return          - SUCCESS/FAILURE
++**/
++int pal_wd_timer_enable_ns(addr_t base_addr)
++{
++    return pal_wd_syswdog_enable(base_addr);
++}
++
++/**
++    @brief           - Disables a hardware watchdog timer
++    @param           - base_addr  : Base address of the watchdog module
++    @return          - SUCCESS/FAILURE
++**/
++int pal_wd_timer_disable_ns(addr_t base_addr)
++{
++    return pal_wd_syswdog_disable(base_addr);
++}
++
++/**
++    @brief    - Reads from given non-volatile address.
++    @param    - base    : Base address of nvmem
++                offset  : Offset
++                buffer  : Pointer to source address
++                size    : Number of bytes
++    @return   - SUCCESS/FAILURE
++**/
++int pal_nvmem_read_ns(addr_t base, uint32_t offset, void *buffer, int size)
++{
++#ifdef DUMMY_NVMEM
++    base = (addr_t)&dummy_nvmem[0];
++#endif /* DUMMY_NVMEM */
++    if (nvmem_read(base, offset, buffer, size))
++    {
++        return PAL_STATUS_SUCCESS;
++    }
++    else
++    {
++        return PAL_STATUS_ERROR;
++    }
++}
++
++/**
++    @brief    - Writes into given non-volatile address.
++    @param    - base    : Base address of nvmem
++                offset  : Offset
++                buffer  : Pointer to source address
++                size    : Number of bytes
++    @return   - SUCCESS/FAILURE
++**/
++int pal_nvmem_write_ns(addr_t base, uint32_t offset, void *buffer, int size)
++{
++#ifdef DUMMY_NVMEM
++    base = (addr_t)&dummy_nvmem[0];
++#endif /* DUMMY_NVMEM */
++    if (nvmem_write(base, offset, buffer, size))
++    {
++        return PAL_STATUS_SUCCESS;
++    }
++    else
++    {
++        return PAL_STATUS_ERROR;
++    }
++}
++
++/**
++ *   @brief    - Terminates the simulation at the end of all tests completion.
++ *               By default, it put cpus into power down mode.
++ *   @param    - void
++ *   @return   - void
++**/
++void pal_terminate_simulation(void)
++{
++    /* Add logic to terminate the simluation */
++    while (1)
++    {
++        __asm volatile("WFI");
++    }
++}
++
++/**
++ *   @brief    - Resets the system.
++ *   @param    - void
++ *   @return   - SUCCESS/FAILURE
++**/
++int pal_system_reset(void)
++{
++    /* On RSE this would cause a cold reset */
++    return tfm_platform_system_reset();
++}
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_storage_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_storage_config.h
+new file mode 100644
+index 0000000..9d04a13
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_storage_config.h
+@@ -0,0 +1,24 @@
++/** @file
++ * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++
++#ifndef _PAL_STORAGE_CONFIG_H_
++#define _PAL_STORAGE_CONFIG_H_
++
++/* Platform specific max UID's size */
++#define ARCH_TEST_STORAGE_UID_MAX_SIZE 512
++
++#endif /* _PAL_STORAGE_CONFIG_H_ */
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/attestation.txt b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/attestation.txt
+new file mode 100644
+index 0000000..78c2294
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/attestation.txt
+@@ -0,0 +1,36 @@
++***** PSA Architecture Test Suite - Version 0.8 *****
++
++Running.. Attestation Suite
++******************************************
++
++TEST: 801 | DESCRIPTION: Testing initial attestation APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_initial_attestation_get_token with Challenge 32
++[Check 2] Test psa_initial_attestation_get_token with Challenge 48
++[Check 3] Test psa_initial_attestation_get_token with Challenge 64
++[Check 4] Test psa_initial_attestation_get_token with zero challenge size
++[Check 5] Test psa_initial_attestation_get_token with small challenge size
++[Check 6] Test psa_initial_attestation_get_token with invalid challenge size
++[Check 7] Test psa_initial_attestation_get_token with large challenge size
++[Check 8] Test psa_initial_attestation_get_token with zero as token size
++[Check 9] Test psa_initial_attestation_get_token with small token size
++[Check 10] Test psa_initial_attestation_get_token_size with Challenge 32
++[Check 11] Test psa_initial_attestation_get_token_size with Challenge 48
++[Check 12] Test psa_initial_attestation_get_token_size with Challenge 64
++[Check 13] Test psa_initial_attestation_get_token_size with zero challenge size
++[Check 14] Test psa_initial_attestation_get_token_size with small challenge size
++[Check 15] Test psa_initial_attestation_get_token_size with invalid challenge size
++[Check 16] Test psa_initial_attestation_get_token_size with large challenge size
++TEST RESULT: PASSED
++
++******************************************
++
++************ Attestation Suite Report **********
++TOTAL TESTS     : 1
++TOTAL PASSED    : 1
++TOTAL SIM ERROR : 0
++TOTAL FAILED    : 0
++TOTAL SKIPPED   : 0
++******************************************
++
++Entering standby..
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/crypto.txt b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/crypto.txt
+new file mode 100644
+index 0000000..c014880
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/crypto.txt
+@@ -0,0 +1,403 @@
++***** PSA Architecture Test Suite - Version 0.8 *****
++
++Running.. Crypto Suite
++******************************************
++
++TEST: 201 | DESCRIPTION: Testing psa_crypto_init API: Basic
++[Info] Executing tests from non-secure
++[Check 1] Test calling crypto functions before psa_crypto_init
++[Check 2] Test psa_crypto_init
++[Check 3] Test multiple psa_crypto_init
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 202 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_import_key 16 Byte AES
++[Check 2] Test psa_import_key 24 Byte AES
++[Check 3] Test psa_import_key 32 Byte AES
++[Check 4] Test psa_import_key with DES 64 bit key
++[Check 5] Test psa_import_key with Triple DES 2-Key
++[Check 6] Test psa_import_key with Triple DES 3-Key
++[Check 7] Test psa_import_key with key data greater than the algorithm size
++[Check 8] Test psa_import_key with incorrect key data size
++[Check 9] Test psa_import_key with incorrect key type
++[Check 10] Test psa_import_key with already occupied key slot
++[Check 11] Test psa_import_key with invalid key slot
++[Check 12] Test psa_import_key with zero key slot
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 203 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_export_key 16 Byte AES
++[Check 2] Test psa_export_key 24 Byte AES
++[Check 3] Test psa_export_key 32 Byte AES
++[Check 4] Test psa_export_key with DES 64 bit key
++[Check 5] Test psa_export_key with Triple DES 2-Key
++[Check 6] Test psa_export_key with Triple DES 3-Key
++[Check 7] Test psa_export_key with key policy verify
++[Check 8] Test psa_export_key with invalid key slot
++[Check 9] Test psa_export_key with zero key slot
++[Check 10] Test psa_export_key with less buffer size
++[Check 11] Test psa_export_key with empty key slot
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 204 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_export_public_key 16 Byte AES
++[Check 2] Test psa_export_public_key 24 Byte AES
++[Check 3] Test psa_export_public_key 32 Byte AES
++[Check 4] Test psa_export_public_key with DES 64 bit key
++[Check 5] Test psa_export_public_key with Triple DES 2-Key
++[Check 6] Test psa_export_public_key with Triple DES 3-Key
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 205 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_destroy_key 16 Byte AES
++[Check 2] Test psa_destroy_key 24 Byte AES
++[Check 3] Test psa_destroy_key 32 Byte AES
++[Check 4] Test psa_destroy_key with DES 64 bit key
++[Check 5] Test psa_destroy_key with Triple DES 2-Key
++[Check 6] Test psa_destroy_key with Triple DES 3-Key
++[Check 7] Test psa_destroy_key with invalid key slot
++[Check 8] Test psa_destroy_key with zero key slot
++[Check 9] Test psa_destroy_key with empty key slot
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 206 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_get_key_information 16 Byte AES
++[Check 2] Test psa_get_key_information 24 Byte AES
++[Check 3] Test psa_get_key_information 32 Byte AES
++[Check 4] Test psa_get_key_information wit DE¦[Check 5] Test psa_get_key_information with Triple DES 2-Key
++[Check 6] Test psa_get_key_information with Triple DES 3-Key
++[Check 7] Test psa_get_key_information with invalid key slot
++[Check 8] Test psa_get_key_information with zero key slot
++[Check 9] Test psa_get_key_information with empty key slot
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 207 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_set_key_policy 16 Byte AES
++[Check 2] Test psa_set_key_policy 24 Byte AES
++[Check 3] Test psa_set_key_policy 32 Byte AES
++[Check 4] Test psa_set_key_policy with DES 64 bit key
++[Check 5] Test psa_set_key_policy with Triple DES 2-Key
++[Check 6] Test psa_set_key_policy with Triple DES 3-Key
++[Check 7] Test psa_set_key_policy with already occupied key slot
++[Check 8] Test psa_set_key_policy with invalid key slot
++[Check 9] Test psa_set_key_policy with zero key slot
++[Check 10] Test psa_set_key_policy with invalid usage
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 208 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_get_key_policy 16 Byte AES
++[Check 2] Test psa_get_key_policy 24 Byte AES
++[Check 3] Test psa_get_key_policy 32 Byte AES
++[Check 4] Test psa_get_key_policy with DES 64 bit key
++[Check 5] Test psa_get_key_policy with Triple DES 2-Key
++[Check 6] Test psa_get_key_policy with Triple DES 3-Key
++[Check 7] Test psa_get_key_policy with invalid key slot
++[Check 8] Test psa_get_key_policy with zero key slot
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 209 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_set_key_lifetime 16 Byte AES
++[Check 2] Test psa_set_key_lifetime with Triple DES 2-Key
++[Check 3] Test psa_set_key_lifetime with invalid key slot
++[Check 4] Test psa_set_key_lifetime with zero key slot
++[Check 5] Test psa_set_key_lifetime with invalid lifetime
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 210 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_get_key_lifetime 16 Byte AES
++[Check 2] Test psa_get_key_lifetime with Triple DES 2-Key
++[Check 3] Test psa_get_key_lifetime with invalid key slot
++[Check 4] Test psa_get_key_lifetime with zero key slot
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 211 | DESCRIPTION: Testing crypto hash functions APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_hash_setup with MD2 algorithm
++[Check 2] Test psa_hash_setup with MD4 algorithm
++[Check 3] Test psa_hash_setup with MD5 algorithm
++[Check 4] Test psa_hash_setup with RIPEMD160 algorithm
++[Check 5] Test psa_hash_setup with SHA1 algorithm
++[Check 6] Test psa_hash_setup with SHA224 algorithm
++[Check 7] Test psa_hash_setup with SHA256 algorithm
++[Check 8] Test psa_hash_setup with SHA384 algorithm
++[Check 9] Test psa_hash_setup with SHA512 algorithm
++[Check 10] Test psa_hash_setup with Invalid algorithm
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 212 | DESCRIPTION: Testing crypto hash functions APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_hash_update with MD2 algorithm
++[Check 2] Test psa_hash_update with MD4 algorithm
++[Check 3] Test psa_hash_update with MD5 algorithm
++[Check 4] Test psa_hash_update with RIPEMD160 algorithm
++[Check 5] Test psa_hash_update with SHA1 algorithm
++[Check 6] Test psa_hash_update with SHA224 algorithm
++[Check 7] Test psa_hash_update with SHA256 algorithm
++[Check 8] Test psa_hash_update with SHA384 algorithm
++[Check 9] Test psa_hash_update with SHA512 algorithm
++[Check 10] Test psa_hash_update without hash setup
++[Check 11] Test psa_hash_update with completed operation handle
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 213 | DESCRIPTION: Testing crypto hash functions APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_hash_verify with MD2 algorithm
++[Check 2] Test psa_hash_verify with MD4 algorithm
++[Check 3] Test psa_hash_verify with MD5 algorithm
++[Check 4] Test psa_hash_verify with RIPEMD160 algorithm
++[Check 5] Test psa_hash_verify with SHA1 algorithm
++[Check 6] Test psa_hash_verify with SHA224 algorithm
++[Check 7] Test psa_hash_verify with SHA256 algorithm
++[Check 8] Test psa_hash_verify with SHA384 algorithm
++[Check 9] Test psa_hash_verify with SHA512 algorithm
++[Check 10] Test psa_hash_verify with incorrect expected hash
++[Check 11] Test psa_hash_verify with incorrect hash length
++[Check 12] test psa_hash_verify with inactive & invalid operation handle
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 214 | DESCRIPTION: Testing crypto hash functions APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_hash_finish with MD2 algorithm
++[Check 2] Test psa_hash_finish with MD4 algorithm
++[Check 3] Test psa_hash_finish with MD5 algorithm
++[Check 4] Test psa_hash_finish with RIPEMD160 algorithm
++[Check 5] Test psa_hash_finish with SHA1 algorithm
++[Check 6] Test psa_hash_finish with SHA224 algorithm
++[Check 7] Test psa_hash_finish with SHA256 algorithm
++[Check 8] Test psa_hash_finish with SHA384 algorithm
++[Check 9] Test psa_hash_finish with SHA512 algorithm
++[Check 10] test psa_hash_finish with inactive operation handle
++[Check 11] test psa_hash_finish with invalid hash buffer size
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 215 | DESCRIPTION: Testing crypto hash functions APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_hash_abort with MD2 algorithm
++[Check 2] Test psa_hash_abort with MD4 algorithm
++[Check 3] Test psa_hash_abort with MD5 algorithm
++[Check 4] Test psa_hash_abort with RIPEMD160 algorithm
++[Check 5] Test psa_hash_abort with SHA1 algorithm
++[Check 6] Test psa_hash_abort with SHA224 algorithm
++[Check 7] Test psa_hash_abort with SHA256 algorithm
++[Check 8] Test psa_hash_abort with SHA384 algorithm
++[Check 9] Test psa_hash_abort with SHA512 algorithm
++[Check 10] Test psa_hash_finish after calling psa_hash_abort
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 223 | DESCRIPTION: Testing crypto key management APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_key_policy_get_usage with usage as encrypt
++[Check 2] Test psa_key_policy_get_usage with usage as decrypt
++[Check 3] Test psa_key_policy_get_usage with usage as derive
++[Check 4] Test psa_key_policy_get_usage with usage as export
++[Check 5] Test psa_key_policy_get_usage with usage as sign
++[Check 6] Test psa_key_policy_get_usage with usage as verify
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 224 | DESCRIPTION: Testing crypto AEAD APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_aead_encrypt - CCM - 16B AES - 13B nounce & 8B addi data
++[Check 2] Test psa_aead_encrypt - AES-CCM
++[Check 3] Test psa_aead_encrypt - GCM - 16B AES - 12B Nounce & 12B addi data
++[Check 4] Test psa_aead_encrypt - DES Key
++[Check 5] Test psa_aead_encrypt - Empty key slot
++[Check 6] Test psa_aead_encrypt - Zero key slot
++[Check 7] Test psa_aead_encrypt - Invalid key slot
++[Check 8] Test psa_aead_encrypt - Unsupported Algorithm
++[Check 9] Test psa_aead_encrypt - Invalid key usage
++[Check 10] Test psa_aead_encrypt - Small output buffer size
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 225 | DESCRIPTION: Testing crypto AEAD APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_aead_decrypt - CCM - 16B AES - 13B nounce & 8B addi data
++[Check 2] Test psa_aead_decrypt - AES-CCM
++[Check 3] Test psa_aead_decrypt - GCM - 16B AES - 12B Nounce & 12B addi data
++[Check 4] Test psa_aead_decrypt - DES Key
++[Check 5] Test psa_aead_decrypt - Empty key slot
++[Check 6] Test psa_aead_decrypt - Zero key slot
++[Check 7] Test psa_aead_decrypt - Invalid key slot
++[Check 8] Test psa_aead_decrypt - Unsupported Algorithm
++[Check 9] Test psa_aead_decrypt - Invalid key usage
++[Check 10] Test psa_aead_decrypt - Small output buffer size
++[Check 11] Test psa_aead_decrypt - Invalid cipher text
++[Check 12] Test psa_aead_decrypt - Invalid cipher text size
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 232 | DESCRIPTION: Testing crypto symmetric cipher APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_cipher_encrypt_setup 16 Byte AES
++[Check 2] Test psa_cipher_encrypt_setup 24 Byte AES
++[Check 3] Test psa_cipher_encrypt_setup 32 Byte AES
++[Check 4] Test psa_cipher_encrypt_setup DES 64 bit key
++[Check 5] Test psa_cipher_encrypt_setup Triple DES 2-Key
++[Check 6] Test psa_cipher_encrypt_setup Triple DES 3-Key
++[Check 7] Test psa_cipher_encrypt_setup 16 Byte raw data
++[Check 8] Test psa_cipher_encrypt_setup - not a cipher algorithm
++[Check 9] Test psa_cipher_encrypt_setup - unknown cipher algorithm
++[Check 10] Test psa_cipher_encrypt_setup - incompatible key ARC4
++[Check 11] Test psa_cipher_encrypt_setup - invalid key slot
++[Check 12] Test psa_cipher_encrypt_setup - empty key slot
++[Check 13] Test psa_cipher_encrypt_setup - zero as key slot
++[Check 14] Test psa_cipher_encrypt_setup - incorrect usage
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 233 | DESCRIPTION: Testing crypto symmetric cipher APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_cipher_decrypt_setup 16 Byte AES
++[Check 2] Test psa_cipher_decrypt_setup 24 Byte AES
++[Check 3] Test psa_cipher_decrypt_setup 32 Byte AES
++[Check 4] Test psa_cipher_decrypt_setup DES 64 bit key
++[Check 5] Test psa_cipher_decrypt_setup Triple DES 2-Key
++[Check 6] Test psa_cipher_decrypt_setup Triple DES 3-Key
++[Check 7] Test psa_cipher_decrypt_setup 16 Byte raw data
++[Check 8] Test psa_cipher_decrypt_setup - not a cipher algorithm
++[Check 9] Test psa_cipher_decrypt_setup - unknown cipher algorithm
++[Check 10] Test psa_cipher_decrypt_setup - incompatible key ARC4
++[Check 11] Test psa_cipher_decrypt_setup - invalid key slot
++[Check 12] Test psa_cipher_decrypt_setup - empty key slot
++[Check 13] Test psa_cipher_decrypt_setup - zero as key slot
++[Check 14] Test psa_cipher_decrypt_setup - incorrect usage
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 235 | DESCRIPTION: Testing crypto symmetric cipher APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_cipher_set_iv 16 Byte AES
++[Check 2] Test psa_cipher_set_iv 24 Byte AES
++[Check 3] Test psa_cipher_set_iv 32 Byte AES
++[Check 4] Test psa_cipher_set_iv DES 64 bit key
++[Check 5] Test psa_cipher_set_iv Triple DES 2-Key
++[Check 6] Test psa_cipher_set_iv Triple DES 3-Key
++[Check 7] Test psa_cipher_set_iv AES - small iv buffer
++[Check 8] Test psa_cipher_set_iv DES - small iv buffer
++[Check 9] Test psa_cipher_set_iv AES - large iv buffer
++[Check 10] Test psa_cipher_set_iv DES - large iv buffer
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 236 | DESCRIPTION: Testing crypto symmetric cipher APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_cipher_update - Encrypt - AES CBC_NO_PADDING
++[Check 2] Test psa_cipher_update - Encrypt - AES CBC_NO_PADDING (Short input)
++[Check 3] Test psa_cipher_update - Encrypt - AES CBC_PKCS7
++[Check 4] Test psa_cipher_update - Encrypt - AES CBC_PKCS7 (Short input)
++[Check 5] Test psa_cipher_update - Encrypt - AES CTR
++[Check 6] Test psa_cipher_update - Encrypt - DES CBC (nopad)
++[Check 7] Test psa_cipher_update - Encrypt - 2-key 3DE -CBC (nopad)
++[Check 8] Test psa_cipher_update - Encrypt - 3-key 3DE -CBC (nopad)
++[Check 9] Test psa_cipher_update - small output buffer size
++[Check 10] Test psa_cipher_update - Decrypt - AES CBC_NO_PADDING
++[Check 11] Test psa_cipher_update - Decrypt - AES CBC_NO_PADDING (Short input)
++[Check 12] Test psa_cipher_update - Decrypt - AES CBC_PKCS7
++[Check 13] Test psa_cipher_update - Decrypt - AES CBC_PKCS7 (Short input)
++[Check 14] Test psa_cipher_update - Decrypt - AES CTR
++[Check 15] Test psa_cipher_update - Decrypt - DES CBC (nopad)
++[Check 16] Test psa_cipher_update - Decrypt - 2-key 3DE -CBC (nopad)
++[Check 17] Test psa_cipher_update - Decrypt - 3-key 3DE -CBC (nopad)
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 237 | DESCRIPTION: Testing crypto symmetric cipher APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_cipher_finish - Encrypt - AES CBC_NO_PADDING
++[Check 2] Test psa_cipher_finish - Encrypt - AES CBC_NO_PADDING (Short input)
++[Check 3] Test psa_cipher_finish - Encrypt - AES CBC_PKCS7
++[Check 4] Test psa_cipher_finish - Encrypt - AES CBC_PKCS7 (Short input)
++[Check 5] Test psa_cipher_finish - Encrypt - AES CTR
++[Check 6] Test psa_cipher_finish - Encrypt - AES CTR (short input)
++[Check 7] Test psa_cipher_finish - Encrypt - DES CBC (nopad)
++[Check 8] Test psa_cipher_finish - Encrypt - 2-key 3DE -CBC (nopad)
++[Check 9] Test psa_cipher_finish - Encrypt - 3-key 3DE -CBC (nopad)
++[Check 10] Test psa_cipher_finish - small output buffer size
++[Check 11] Test psa_cipher_finish - Decrypt - AES CBC_NO_PADDING
++[Check 12] Test psa_cipher_finish - Decrypt - AES CBC_NO_PADDING (Short input)
++[Check 13] Test psa_cipher_finish - Decrypt - AES CBC_PKCS7
++[Check 14] Test psa_cipher_finish - Decrypt - AES CBC_PKCS7 (Short input)
++[Check 15] Test psa_cipher_finish - Decrypt - AES CTR
++[Check 16] Test psa_cipher_finish - Decrypt - AES CTR (short input)
++[Check 17] Test psa_cipher_finish - Decrypt - DES CBC (nopad)
++[Check 18] Test psa_cipher_finish - Decrypt - 2-key 3DE -CBC (nopad)
++[Check 19] Test psa_cipher_finish - 3-key 3DE -CBC (nopad)
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 238 | DESCRIPTION: Testing crypto symmetric cipher APIs
++[Info] Executing tests from non-secure
++[Check 1] Test psa_cipher_abort - Encrypt - AES CBC_NO_PADDING
++[Check 2] Test psa_cipher_abort - Encrypt - AES CBC_PKCS7
++[Check 3] Test psa_cipher_abort - Encrypt - AES CTR
++[Check 4] Test psa_cipher_abort - Encrypt - DES CBC (nopad)
++[Check 5] Test psa_cipher_abort - Encrypt - 2-key 3DE -CBC (nopad)
++[Check 6] Test psa_cipher_abort - Encrypt - 3-key 3DE -CBC (nopad)
++[Check 7] Test psa_cipher_abort - Decrypt - AES CBC_NO_PADDING
++[Check 8] Test psa_cipher_abort - Decrypt - AES CBC_PKCS7
++[Check 9] Test psa_cipher_abort - Decrypt - AES CTR
++[Check 10] Test psa_cipher_abort - Decrypt - DES CBC (nopad)
++[Check 11] Test psa_cipher_abort - Decrypt - 2-key 3DE -CBC (nopad)
++[Check 12] Test psa_cipher_abort - Decrypt - 3-key 3DE -CBC (nopad)
++[Check 1] Test psa_cipher_update after psa_cipher_abort should fail
++TEST RESULT: PASSED
++
++******************************************
++
++************ Crypto Suite Report **********
++TOTAL TESTS     : 24
++TOTAL PASSED    : 24
++TOTAL SIM ERROR : 0
++TOTAL FAILED    : 0
++TOTAL SKIPPED   : 0
++******************************************
++
++Entering standby..
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/protected_storage.txt b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/protected_storage.txt
+new file mode 100644
+index 0000000..6716837
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/reference_logs/protected_storage.txt
+@@ -0,0 +1,154 @@
++***** PSA Architecture Test Suite - Version 0.8 *****
++
++Running.. Protected Storage Suite
++******************************************
++
++TEST: 401 | DESCRIPTION: UID not found check
++[Info] Executing tests from non-secure
++[Check 1] Call get API for UID 6 which is not set
++[Check 2] Call get_info API for UID 6 which is not set
++[Check 3] Call remove API for UID 6 which is not set
++[Check 4] Call get API for UID 6 which is removed
++[Check 5] Call get_info API for UID 6 which is removed
++[Check 6] Call remove API for UID 6 which is removed
++Set storage for UID 6
++[Check 7] Call get API for different UID 6
++[Check 8] Call get_info API for different UID 6
++[Check 9] Call remove API for different UID 6
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 402 | DESCRIPTION: Write once error check
++[Info] Executing tests from non-secure
++[Check 1] Update the flag of UID 1 with WRITE_ONCE flag
++[Check 2] Try to remove the UID 1 having WRITE_ONCE flag
++[Check 3] Create a new UID 2 with WRITE_ONCE flag
++[Check 4] Try to remove the UID 2 having WRITE_ONCE flag
++[Check 5] Try to change the length of write_once UID 2
++[Check 6] Check UID removal still fails
++[Check 7] Try to change the WRITE_ONCE flag to None for UID 2
++[Check 8] Check UID removal still fails
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 403 | DESCRIPTION: Insufficient space check
++[Info] Executing tests from non-secure
++[Check 1] Overload storage space
++Remove all registered UIDs
++[Check 2] Overload storage again to verify all previous UID removed
++Remove all registered UIDs
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 404 | DESCRIPTION: Data Consistency check
++[Info] Executing tests from non-secure
++[Check 1] Call get API with incorrect length
++[Check 2] Old buffer invalid after length change
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 405 | DESCRIPTION: Success scenarios check
++[Info] Executing tests from non-secure
++[Check 1] Set UID with data length zero and call storage APIs
++[Check 2] Resetting the length check
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 406 | DESCRIPTION: Flags not supported check
++[Info] Executing tests from non-secure
++[Check 1] Call set API with valid flag values
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 407 | DESCRIPTION: Incorrect Size check
++[Info] Executing tests from non-secure
++Create a valid Storage
++Increase the length of storage
++[Check 1] Call get API with old length
++Decrease the length of storage
++[Check 2] Call get API with old length
++[Check 3] Call get API with valid length
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 408 | DESCRIPTION: Invalid offset check
++[Info] Executing tests from non-secure
++[Check 1] Try to access data with varying valid offset
++[Check 2] Try to access data with varying invalid offset
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 409 | DESCRIPTION: Invalid Arguments check
++[Info] Executing tests from non-secure
++[Check 1] Call set API with NULL pointer and data length 0
++[Check 2] Create UID with zero data length
++[Check 3] Try to set NULL buffer for existing UID
++[Check 4] Call get API with NULL read buffer and data length 0
++[Check 5] Increase the length
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 410 | DESCRIPTION: UID value zero check
++[Info] Executing tests from non-secure
++[Check 1] Creating storage with UID 0 should fail
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 411 | DESCRIPTION: Optional APIs: UID not found check
++[Info] Executing tests from non-secure
++Test Case skipped as Optional PS APIs are not supported.
++TEST RESULT: SKIPPED (Skip Code=0x2B)
++
++******************************************
++
++TEST: 412 | DESCRIPTION: Optional APIs: Invalid arguments and offset invalid
++[Info] Executing tests from non-secure
++Test Case skipped as Optional PS APIs are not supported.
++TEST RESULT: SKIPPED (Skip Code=0x2B)
++
++******************************************
++
++TEST: 413 | DESCRIPTION: Set_Extended and Create api : Success
++[Info] Executing tests from non-secure
++Test Case skipped as Optional PS APIs are not supported.
++TEST RESULT: SKIPPED (Skip Code=0x2B)
++
++******************************************
++
++TEST: 414 | DESCRIPTION: Optional APIs not supported check
++[Info] Executing tests from non-secure
++Optional PS APIs are not supported.
++[Check 1] Call to create API should fail as API not supported
++[Check 2] Create valid storage with set API
++[Check 3] Call to set_extended API call should fail
++[Check 4] Verify data is unchanged
++TEST RESULT: PASSED
++
++******************************************
++
++TEST: 415 | DESCRIPTION: Create API write_once flag value check
++[Info] Executing tests from non-secure
++Test Case skipped as Optional PS APIs are not supported.
++TEST RESULT: SKIPPED (Skip Code=0x2B)
++
++******************************************
++
++************ Protected Storage Suite Report **********
++TOTAL TESTS     : 15
++TOTAL PASSED    : 11
++TOTAL SIM ERROR : 0
++TOTAL FAILED    : 0
++TOTAL SKIPPED   : 4
++******************************************
++
++Entering standby..
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cfg b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cfg
+new file mode 100644
+index 0000000..9824d13
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cfg
+@@ -0,0 +1,41 @@
++///** @file
++// * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
++// * SPDX-License-Identifier : Apache-2.0
++// *
++// * Licensed under the Apache License, Version 2.0 (the "License");
++// * you may not use this file except in compliance with the License.
++// * You may obtain a copy of the License at
++// *
++// *  http://www.apache.org/licenses/LICENSE-2.0
++// *
++// * Unless required by applicable law or agreed to in writing, software
++// * distributed under the License is distributed on an "AS IS" BASIS,
++// * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// * See the License for the specific language governing permissions and
++// * limitations under the License.
++//**/
++
++// UART device info
++uart.num=1;
++uart.0.base = 0x6FF00000; // HOST_UART0_BASE_NS
++uart.0.size = 0xFFF;
++uart.0.intr_id = 0xFF;
++uart.0.permission = TYPE_READ_WRITE;
++
++// Watchdog device info
++watchdog.num = 1;
++watchdog.0.base = 0x48040000; // SYSWDOG_ARMV8_M_CNTRL_BASE_NS
++watchdog.0.size = 0xFFF;
++watchdog.0.intr_id = 0xFF;
++watchdog.0.permission = TYPE_READ_WRITE;
++watchdog.0.num_of_tick_per_micro_sec = 0x3;         //(sys_feq/1000000)
++watchdog.0.timeout_in_micro_sec_low = 0xF4240;      //1.0  sec :  1 * 1000 * 1000
++watchdog.0.timeout_in_micro_sec_medium = 0x1E8480;  //2.0  sec :  2 * 1000 * 1000
++watchdog.0.timeout_in_micro_sec_high = 0x4C4B40;    //5.0  sec :  5 * 1000 * 1000
++watchdog.0.timeout_in_micro_sec_crypto = 0x1312D00; //18.0 sec : 18 * 1000 * 1000
++
++// Range of 1KB Non-volatile memory to preserve data over reset. Ex, NVRAM and FLASH
++nvmem.num = 1;
++nvmem.0.start = 0x20060000;
++nvmem.0.end = 0x200603FF;
++nvmem.0.permission = TYPE_READ_WRITE;
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cmake b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cmake
+new file mode 100644
+index 0000000..5fb5540
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/target.cmake
+@@ -0,0 +1,97 @@
++#/** @file
++# * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
++# * SPDX-License-Identifier : Apache-2.0
++# *
++# * Licensed under the Apache License, Version 2.0 (the "License");
++# * you may not use this file except in compliance with the License.
++# * You may obtain a copy of the License at
++# *
++# *  http://www.apache.org/licenses/LICENSE-2.0
++# *
++# * Unless required by applicable law or agreed to in writing, software
++# * distributed under the License is distributed on an "AS IS" BASIS,
++# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# * See the License for the specific language governing permissions and
++# * limitations under the License.
++#**/
++
++# PAL C source files part of NSPE library
++list(APPEND PAL_SRC_C_NSPE )
++
++# PAL ASM source files part of NSPE library
++list(APPEND PAL_SRC_ASM_NSPE )
++
++# PAL C source files part of SPE library - driver partition
++list(APPEND PAL_SRC_C_DRIVER_SP )
++
++# PAL ASM source files part of SPE library - driver partition
++list(APPEND PAL_SRC_ASM_DRIVER_SP )
++
++# Listing all the sources required for given target
++if(${SUITE} STREQUAL "IPC")
++	message(FATAL_ERROR "IPC not supported for ${TARGET}, and tgt_ff_tfm_rse_tc3 is not implemented")
++else()
++	list(APPEND PAL_SRC_C_NSPE
++		# driver files will be compiled as part of NSPE
++		${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe/pal_driver_intf.c
++		${PSA_ROOT_DIR}/platform/drivers/nvmem/pal_nvmem.c
++		${PSA_ROOT_DIR}/platform/drivers/uart/pl011/pal_uart.c
++		${PSA_ROOT_DIR}/platform/drivers/watchdog/syswatchdog/pal_wd_syswdog.c
++	)
++endif()
++
++if(${SUITE} STREQUAL "CRYPTO")
++	list(APPEND PAL_SRC_C_NSPE
++		${PSA_ROOT_DIR}/platform/targets/common/nspe/crypto/pal_crypto_intf.c
++	)
++endif()
++if((${SUITE} STREQUAL "PROTECTED_STORAGE") OR (${SUITE} STREQUAL "STORAGE"))
++	list(APPEND PAL_SRC_C_NSPE
++		${PSA_ROOT_DIR}/platform/targets/common/nspe/protected_storage/pal_protected_storage_intf.c
++	)
++endif()
++if((${SUITE} STREQUAL "INTERNAL_TRUSTED_STORAGE") OR (${SUITE} STREQUAL "STORAGE"))
++	list(APPEND PAL_SRC_C_NSPE
++		${PSA_ROOT_DIR}/platform/targets/common/nspe/internal_trusted_storage/pal_internal_trusted_storage_intf.c
++	)
++endif()
++if(${SUITE} STREQUAL "INITIAL_ATTESTATION")
++	list(APPEND PAL_SRC_C_NSPE
++		${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation/pal_attestation_intf.c
++		${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
++                ${PSA_TARGET_QCBOR}/src/UsefulBuf.c
++                ${PSA_TARGET_QCBOR}/src/ieee754.c
++                ${PSA_TARGET_QCBOR}/src/qcbor_decode.c
++                ${PSA_TARGET_QCBOR}/src/qcbor_encode.c
++	)
++endif()
++
++# Create NSPE library
++add_library(${PSA_TARGET_PAL_NSPE_LIB} STATIC ${PAL_SRC_C_NSPE} ${PAL_SRC_ASM_NSPE})
++
++# PSA Include directories
++foreach(psa_inc_path ${PSA_INCLUDE_PATHS})
++	target_include_directories(${PSA_TARGET_PAL_NSPE_LIB} PRIVATE ${psa_inc_path})
++endforeach()
++
++list(APPEND PAL_DRIVER_INCLUDE_PATHS
++	${PSA_ROOT_DIR}/platform/drivers/nvmem
++	${PSA_ROOT_DIR}/platform/drivers/uart/pl011
++	${PSA_ROOT_DIR}/platform/drivers/watchdog/syswatchdog
++)
++
++target_include_directories(${PSA_TARGET_PAL_NSPE_LIB} PRIVATE
++	${PAL_DRIVER_INCLUDE_PATHS}
++	${PSA_ROOT_DIR}/platform/targets/common/nspe
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/crypto
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/protected_storage
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/internal_trusted_storage
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation
++	${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe
++)
++
++if(${SUITE} STREQUAL "INITIAL_ATTESTATION")
++target_include_directories(${PSA_TARGET_PAL_NSPE_LIB} PRIVATE
++	${PSA_QCBOR_INCLUDE_PATH}
++)
++endif()
+-- 
+2.43.0
+

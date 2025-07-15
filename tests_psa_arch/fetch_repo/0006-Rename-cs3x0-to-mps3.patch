@@ -1,7 +1,7 @@
-From 4b6fb0da08e7413a227aeda0b8002b0acede45cc Mon Sep 17 00:00:00 2001
+From 1c0e191e5005959b8f0a268c3836e4260126ae48 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Gergely=20Korcs=C3=A1k?= <gergely.korcsak@arm.com>
 Date: Thu, 7 Nov 2024 15:23:43 +0100
-Subject: [PATCH 2/2] Rename cs3x0 to mps3
+Subject: [PATCH 06/17] Rename cs3x0 to mps3
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -71,7 +71,7 @@ diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_cs3x0/target.cmake b/ap
 similarity index 97%
 rename from api-tests/platform/targets/tgt_dev_apis_tfm_cs3x0/target.cmake
 rename to api-tests/platform/targets/tgt_dev_apis_tfm_mps3/target.cmake
-index afd2591..d858e92 100644
+index cbcef21..1527aa7 100644
 --- a/api-tests/platform/targets/tgt_dev_apis_tfm_cs3x0/target.cmake
 +++ b/api-tests/platform/targets/tgt_dev_apis_tfm_mps3/target.cmake
 @@ -29,7 +29,7 @@ list(APPEND PAL_SRC_ASM_DRIVER_SP )

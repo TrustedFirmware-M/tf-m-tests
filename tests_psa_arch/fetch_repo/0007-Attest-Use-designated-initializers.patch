@@ -1,7 +1,7 @@
-From a7e440e35d42f488adc94fa053dd54bac8c50397 Mon Sep 17 00:00:00 2001
+From 6d8b02ccff98413acec11c0d1b4542b3c0fdbb06 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Thu, 9 Nov 2023 14:28:04 +0800
-Subject: [PATCH 4/5] Attest: Use designated initializers.
+Subject: [PATCH 07/17] Attest: Use designated initializers.
 
 Armclang 6.21 reports missing-field-initializers warning for missing
 designated initializers. This will be fixed in armclang 6.22.
@@ -12,7 +12,8 @@ Signed-off-by: Summer Qin <summer.qin@arm.com>
  .../tgt_dev_apis_tfm_an521/nspe/pal_attestation_config.h     | 5 +++--
  .../tgt_dev_apis_tfm_an524/nspe/pal_attestation_config.h     | 5 +++--
  .../tgt_dev_apis_tfm_an539/nspe/pal_attestation_config.h     | 5 +++--
- .../tgt_dev_apis_tfm_cs3x0/nspe/pal_attestation_config.h     | 5 +++--
+ .../tgt_dev_apis_tfm_mps3/nspe/pal_attestation_config.h      | 5 +++--
+ .../tgt_dev_apis_tfm_mps4/nspe/pal_attestation_config.h      | 5 +++--
  .../tgt_dev_apis_tfm_musca_a/nspe/pal_attestation_config.h   | 5 +++--
  .../tgt_dev_apis_tfm_musca_b1/nspe/pal_attestation_config.h  | 5 +++--
  .../tgt_dev_apis_tfm_musca_s1/nspe/pal_attestation_config.h  | 5 +++--
@@ -20,7 +21,7 @@ Signed-off-by: Summer Qin <summer.qin@arm.com>
  .../tgt_dev_apis_tfm_nrf9160/nspe/pal_attestation_config.h   | 5 +++--
  .../tgt_dev_apis_tfm_psoc64/nspe/pal_attestation_config.h    | 5 +++--
  .../nspe/pal_attestation_config.h                            | 5 +++--
- 11 files changed, 33 insertions(+), 22 deletions(-)
+ 12 files changed, 36 insertions(+), 24 deletions(-)
 
 diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_an521/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_an521/nspe/pal_attestation_config.h
 index 6817b5f..15d6ce4 100644
@@ -91,7 +92,7 @@ index 35a951b..84d8c6f 100644
        0xDF, 0x93, 0x8D, 0xA3, 0xBB, 0x0B, 0xD1, 0x7D,
        0x00, 0x36, 0xED, 0x49, 0xA2, 0xD0, 0xFC, 0x3F,
 diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_mps4/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_mps4/nspe/pal_attestation_config.h
-index 35a951b..84d8c6f 100644
+index 3ab11e4..3fbf00b 100644
 --- a/api-tests/platform/targets/tgt_dev_apis_tfm_mps4/nspe/pal_attestation_config.h
 +++ b/api-tests/platform/targets/tgt_dev_apis_tfm_mps4/nspe/pal_attestation_config.h
 @@ -69,9 +69,10 @@ struct ecc_public_key_t {
@@ -227,5 +228,5 @@ index 6817b5f..15d6ce4 100644
        0xDF, 0x93, 0x8D, 0xA3, 0xBB, 0x0B, 0xD1, 0x7D,
        0x00, 0x36, 0xED, 0x49, 0xA2, 0xD0, 0xFC, 0x3F,
 -- 
-2.47.0
+2.43.0
 

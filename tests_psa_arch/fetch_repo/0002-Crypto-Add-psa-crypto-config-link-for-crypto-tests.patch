@@ -1,7 +1,7 @@
-From 02602c5d43fdd7a9bddfcfca2cceda750198f760 Mon Sep 17 00:00:00 2001
+From 59b41bbe64a3f9f11d07c58db9db564ebedebf73 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Sun, 8 Oct 2023 16:44:42 +0800
-Subject: [PATCH 2/5] Crypto: Add psa crypto config link for crypto tests
+Subject: [PATCH 02/17] Crypto: Add psa crypto config link for crypto tests
 
 Test 16 uses macro PSA_EXPORT_KEY_PAIR_MAX_SIZE which is
 related with PSA_WANT_KEY_TYPE_xxx_KEY_PAIR_BASIC defines
@@ -14,10 +14,10 @@ Signed-off-by: Summer Qin <summer.qin@arm.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/api-tests/dev_apis/crypto/suite.cmake b/api-tests/dev_apis/crypto/suite.cmake
-index 7ae598b..e5e0fff 100644
+index fe6a2b4..99736b9 100644
 --- a/api-tests/dev_apis/crypto/suite.cmake
 +++ b/api-tests/dev_apis/crypto/suite.cmake
-@@ -62,3 +62,7 @@ target_include_directories(${PSA_TARGET_TEST_COMBINE_LIB} PRIVATE
+@@ -59,3 +59,7 @@ target_include_directories(${PSA_TARGET_TEST_COMBINE_LIB} PRIVATE
  	${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe
  	${PSA_SUITE_DIR}/common/
  )
@@ -26,5 +26,5 @@ index 7ae598b..e5e0fff 100644
 +    psa_crypto_config
 +)
 -- 
-2.47.0
+2.43.0
 

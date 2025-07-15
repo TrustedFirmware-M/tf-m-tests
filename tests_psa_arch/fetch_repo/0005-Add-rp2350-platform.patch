@@ -1,7 +1,7 @@
-From fb40e180945f17b78cc4c1d95eeb030efc05dcd3 Mon Sep 17 00:00:00 2001
+From 874f645fb6807ac99dfa0d6e6885064e4eeb88b7 Mon Sep 17 00:00:00 2001
 From: Gabor Abonyi <gabor.abonyi@arm.com>
 Date: Thu, 8 Aug 2024 15:44:55 +0200
-Subject: [PATCH 5/5] Add rp2350 platform
+Subject: [PATCH 05/17] Add rp2350 platform
 
 Change-Id: I50777e655dfecdac7e4cacecbff8459efa4d7a77
 Signed-off-by: Gabor Abonyi <gabor.abonyi@arm.com>
@@ -1895,5 +1895,5 @@ index 0000000..7f64359
 +	${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe
 +)
 -- 
-2.47.0
+2.43.0
 

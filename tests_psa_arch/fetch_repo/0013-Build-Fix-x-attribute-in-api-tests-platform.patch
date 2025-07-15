@@ -1,0 +1,82 @@
+From 55acfec3db422c57e49f6ecb9d3b7075210be906 Mon Sep 17 00:00:00 2001
+From: Antonio de Angelis <Antonio.deAngelis@arm.com>
+Date: Mon, 14 Jul 2025 12:49:23 +0100
+Subject: [PATCH 13/17] Build: Fix +x attribute in api-tests/platform
+
+Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
+---
+ api-tests/platform/targets/common/nspe/pal_nspe.cmake             | 0
+ api-tests/platform/targets/common/nspe/pal_weak.c                 | 0
+ api-tests/platform/targets/tgt_dev_apis_linux/README.md           | 0
+ api-tests/platform/targets/tgt_dev_apis_linux/nspe/main.c         | 0
+ .../targets/tgt_dev_apis_linux/nspe/pal_attestation_config.h      | 0
+ api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_config.h   | 0
+ .../platform/targets/tgt_dev_apis_linux/nspe/pal_crypto_config.h  | 0
+ .../platform/targets/tgt_dev_apis_linux/nspe/pal_storage_config.h | 0
+ api-tests/platform/targets/tgt_dev_apis_linux/target.cfg          | 0
+ api-tests/platform/targets/tgt_dev_apis_linux/target.cmake        | 0
+ .../tgt_dev_apis_tfm_musca_a/reference_logs/attestation.txt       | 0
+ .../tgt_dev_apis_tfm_musca_a/reference_logs/protected_storage.txt | 0
+ .../tgt_dev_apis_tfm_musca_b1/reference_logs/attestation.txt      | 0
+ .../reference_logs/protected_storage.txt                          | 0
+ 14 files changed, 0 insertions(+), 0 deletions(-)
+ mode change 100755 => 100644 api-tests/platform/targets/common/nspe/pal_nspe.cmake
+ mode change 100755 => 100644 api-tests/platform/targets/common/nspe/pal_weak.c
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/README.md
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/nspe/main.c
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_attestation_config.h
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_config.h
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_crypto_config.h
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_storage_config.h
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/target.cfg
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_linux/target.cmake
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_tfm_musca_a/reference_logs/attestation.txt
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_tfm_musca_a/reference_logs/protected_storage.txt
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/reference_logs/attestation.txt
+ mode change 100755 => 100644 api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/reference_logs/protected_storage.txt
+
+diff --git a/api-tests/platform/targets/common/nspe/pal_nspe.cmake b/api-tests/platform/targets/common/nspe/pal_nspe.cmake
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/common/nspe/pal_weak.c b/api-tests/platform/targets/common/nspe/pal_weak.c
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/README.md b/api-tests/platform/targets/tgt_dev_apis_linux/README.md
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/nspe/main.c b/api-tests/platform/targets/tgt_dev_apis_linux/nspe/main.c
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_attestation_config.h
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_config.h b/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_config.h
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_crypto_config.h
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_storage_config.h b/api-tests/platform/targets/tgt_dev_apis_linux/nspe/pal_storage_config.h
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/target.cfg b/api-tests/platform/targets/tgt_dev_apis_linux/target.cfg
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_linux/target.cmake b/api-tests/platform/targets/tgt_dev_apis_linux/target.cmake
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_a/reference_logs/attestation.txt b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_a/reference_logs/attestation.txt
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_a/reference_logs/protected_storage.txt b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_a/reference_logs/protected_storage.txt
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/reference_logs/attestation.txt b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/reference_logs/attestation.txt
+old mode 100755
+new mode 100644
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/reference_logs/protected_storage.txt b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/reference_logs/protected_storage.txt
+old mode 100755
+new mode 100644
+-- 
+2.43.0
+
