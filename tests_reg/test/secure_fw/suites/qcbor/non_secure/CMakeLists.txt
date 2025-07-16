@@ -1,44 +1,12 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-# Adding qcbor and qcbor_test libraries manually as logical target names
-# must be globally unique in CMake. The Secure image also relies on the qcbor
-# library (including its own CMake files), but a separate Non Secure library
-# target must be maintained (with a unique name) as they may be built
-# with different configurations - within the same CMake environment.
-
-if (NOT TEST_NS_QCBOR AND NOT TEST_NS_ATTESTATION AND NOT TEST_NS_T_COSE)
-    return()
-endif()
-
-####################### Non Secure qcbor library ###############################
-
-add_library(tfm_qcbor_ns STATIC EXCLUDE_FROM_ALL)
-
-target_sources(tfm_qcbor_ns
-    PRIVATE
-        ${QCBOR_PATH}/src/ieee754.c
-        ${QCBOR_PATH}/src/qcbor_encode.c
-        ${QCBOR_PATH}/src/qcbor_decode.c
-        ${QCBOR_PATH}/src/UsefulBuf.c
-)
-
-target_include_directories(tfm_qcbor_ns
-    PUBLIC
-        $<BUILD_INTERFACE:${QCBOR_PATH}/inc>
-        ${CONFIG_SPE_PATH}/qcbor/inc
-)
-
-target_compile_definitions(tfm_qcbor_ns
-    PUBLIC
-        QCBOR_DISABLE_FLOAT_HW_USE
-        USEFULBUF_DISABLE_ALL_FLOAT
-        QCBOR_DISABLE_PREFERRED_FLOAT
-)
+# Adding tfm_qcbor_test library manually as logical target name
+# must be globally unique in CMake.
 
 ####################### qcbor test library #####################################
 

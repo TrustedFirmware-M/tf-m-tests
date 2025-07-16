@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2025, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,12 +9,6 @@ if(CONFIG_TFM_ERPC_TEST_FRAMEWORK)
     add_subdirectory(erpc)
 endif()
 
-if(TEST_NS_ATTESTATION OR TEST_NS_QCBOR OR TEST_NS_T_COSE)
-    add_subdirectory(qcbor)
-endif()
-
-if(TEST_NS_ATTESTATION OR TEST_NS_T_COSE)
-    add_subdirectory(t_cose)
-endif()
-
+add_subdirectory(qcbor)
+add_subdirectory(t_cose)
 add_subdirectory(CMSIS)
