@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -1432,10 +1432,9 @@ void psa_unsupported_hash_test(const psa_algorithm_t alg,
     psa_status_t status;
     psa_hash_operation_t handle = PSA_HASH_OPERATION_INIT;
 
-    /* Setup the hash object for the unsupported hash algorithm */
-    status = psa_hash_setup(&handle, alg);
-    if (status != PSA_ERROR_NOT_SUPPORTED) {
-        TEST_FAIL("Should not successfully setup an unsupported hash alg");
+    /* Check whether PSA is capable of handling the unsupported hash algorithm. */
+    if (psa_can_do_hash(alg)) {
+        TEST_FAIL("Should not be capable of handling the specified hash alg");
         return;
     }
 
@@ -1493,15 +1492,16 @@ void psa_hash_test(const psa_algorithm_t alg,
     psa_status_t status;
     psa_hash_operation_t handle = psa_hash_operation_init();
 
+    /* Check whether PSA is capable of handling the specified hash algorithm. */
+    if (!psa_can_do_hash(alg)) {
+        TEST_FAIL("PSA is not capable of handling the specified hash algorithm.");
+        return;
+    }
+
     /* Setup the hash object for the desired hash*/
     status = psa_hash_setup(&handle, alg);
 
     if (status != PSA_SUCCESS) {
-        if (status == PSA_ERROR_NOT_SUPPORTED) {
-            TEST_FAIL("Algorithm NOT SUPPORTED by the implementation");
-            return;
-        }
-
         TEST_FAIL("Error setting up hash operation object");
         return;
     }
