@@ -1,4 +1,4 @@
-From 438f4d273713cbb0d7ab104b2159599baea6b532 Mon Sep 17 00:00:00 2001
+From 6e9fe14085a68cf6c66e5a641f0aecfd2c645a47 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Tue, 15 Jul 2025 13:51:51 +0100
 Subject: [PATCH 15/17] Put ARCH_TEST_RSA variables guard

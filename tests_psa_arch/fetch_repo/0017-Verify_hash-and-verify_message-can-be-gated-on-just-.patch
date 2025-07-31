@@ -1,4 +1,4 @@
-From dc2a61dd864b269b77be556c45ff21ae5ec64a31 Mon Sep 17 00:00:00 2001
+From b691493b059d4e65ac16ec7fe01a0b7b81224e39 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Fri, 18 Jul 2025 10:03:55 +0100
 Subject: [PATCH 17/17] Verify_hash and verify_message can be gated on just

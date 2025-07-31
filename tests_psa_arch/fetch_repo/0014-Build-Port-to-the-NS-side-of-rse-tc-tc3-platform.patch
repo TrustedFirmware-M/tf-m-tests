@@ -1,4 +1,4 @@
-From 08c674ca4a6b40c93eaedaf6b86fc711d6c8aa92 Mon Sep 17 00:00:00 2001
+From 6c632b84eb23e0ca0f3b25162aef82f8243d36a8 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Mon, 14 Jul 2025 15:54:09 +0100
 Subject: [PATCH 14/17] Build: Port to the NS side of rse/tc/tc3 platform
@@ -243,7 +243,7 @@ index 0000000..9c66edc
 +#endif /* _PAL_CONFIG_H_ */
 diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_crypto_config.h
 new file mode 100644
-index 0000000..85427b6
+index 0000000..f384e9d
 --- /dev/null
 +++ b/api-tests/platform/targets/tgt_dev_apis_tfm_tc3/nspe/pal_crypto_config.h
 @@ -0,0 +1,414 @@
@@ -628,7 +628,7 @@ index 0000000..85427b6
 + *
 + * Enable deterministic ECDSA (RFC 6979).
 +*/
-+//#define ARCH_TEST_DETERMINISTIC_ECDSA
++#define ARCH_TEST_DETERMINISTIC_ECDSA
 +
 +/**
 + * \def ARCH_TEST_ECC_ASYMMETRIC_API_SUPPORT
