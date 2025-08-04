@@ -1377,3 +1377,140 @@ void tfm_fwu_test_common_007(struct test_result_t *ret)
     ret->val = TEST_FAILED;
 }
 #endif
+
+void tfm_fwu_test_common_008(struct test_result_t *ret)
+{
+    psa_status_t status;
+    psa_fwu_component_info_t info;
+    uint8_t test_suite_number = 1;
+    const uint8_t invalid_tlv_dep_version_zero[128] =
+        { 0x08, 0x69, /* IMAGE_TLV_PROT_INFO_MAGIC */
+          0x7B, 0x00, /* The size of protected TLV area */
+          /* Secure count: */
+          0x50, 0x00, 0x04, 0x00, 0x00, 0x00, 0x03, 0x01,
+          /* Boot record: */
+          0x60, 0x00, 0x5b, 0x00, 0xa5, 0x01, 0x63, 0x53,
+          0x50, 0x45, 0x04, 0x65, 0x31, 0x2e, 0x33, 0x2e,
+          0x30, 0x05, 0x58, 0x20, 0xfc, 0x57, 0x01, 0xdc,
+          0x61, 0x35, 0xe1, 0x32, 0x38, 0x47, 0xbd, 0xc4,
+          0x0f, 0x04, 0xd2, 0xe5, 0xbe, 0xe5, 0x83, 0x3b,
+          0x23, 0xc2, 0x9f, 0x93, 0x59, 0x3d, 0x00, 0x01,
+          0x8c, 0xfa, 0x99, 0x94, 0x06, 0x66, 0x53, 0x48,
+          0x41, 0x32, 0x35, 0x36, 0x02, 0x58, 0x20, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          /* DEPENDENCY: nonsecure, MIN_VER:0.0.0+0 */
+          /* TLV size 0x0d, instead of 0x0c, is intentionally invalid */
+          0x40, 0x00, 0x0d, 0x00, 0x01, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          /* custom_tlvs: None */
+          0x07, 0x69, /* IMAGE_TLV_INFO_MAGIC */
+          0x50, 0x01, 0x10 /* Part of the SHA256 */
+        };
+
+    if (test_setup(test_suite_number, ret) != 0) {
+        /* Test result(ret) is set within test_setup(). */
+        return;
+    }
+
+    /* Trigger a FWU process. Image manifest is bundled within the image. */
+    status = psa_fwu_start(test_component, NULL, 0);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("psa_fwu_start fails.");
+        return;
+    }
+
+    /* Query the component. */
+    status = psa_fwu_query(test_component, &info);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Query fails");
+        return;
+    }
+
+    /* The component should be in PSA_FWU_WRITING after psa_fwu_start(). */
+    if (info.state != PSA_FWU_WRITING) {
+        TEST_LOG("The component is expected to be in PSA_FWU_WRITING after psa_fwu_start(), actual state is %d",
+                  info.state);
+        TEST_FAIL("Wrong component state is returned.");
+        return;
+    }
+
+    /* The image header(from header magic to image version) is downloaded
+     * into the target device by this psa_fwu_write operation.
+     */
+    status = psa_fwu_write(test_component,
+                           0,
+                           header_test_image_version_zero,
+                           sizeof(header_test_image_version_zero));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("psa_fwu_write should not fail when writing the image header data.");
+        return;
+    }
+
+    /* Query the staging image. */
+    status = psa_fwu_query(test_component, &info);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Query fails");
+        return;
+    }
+
+    /* The component should be in PSA_FWU_WRITING after psa_fwu_write(). */
+    if (info.state != PSA_FWU_WRITING) {
+        TEST_LOG("The component is expected to be in PSA_FWU_WRITING after psa_fwu_write(), actual state is %d",
+                  info.state);
+        TEST_FAIL("Wrong component state is returned.");
+        return;
+    }
+
+    /* Write the protected TLV + IMAGE_TLV_INFO_MAGIC + part of the SHA256.
+     * The image dependency information is downloaded into the target device
+     * by this psa_fwu_write operation.
+     */
+    status = psa_fwu_write(test_component,
+                           (size_t)PROTECTED_TLV_OFF_SECURE,
+                           invalid_tlv_dep_version_zero,
+                           sizeof(invalid_tlv_dep_version_zero));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("psa_fwu_write should not fail when writing the protected TLV data.");
+        return;
+    }
+
+    status = psa_fwu_finish(test_component);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("psa_fwu_finish should not fail.");
+        return;
+    }
+
+    /* Query the staging image. */
+    status = psa_fwu_query(test_component, &info);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Query fails");
+        return;
+    }
+
+    /* The component should be in PSA_FWU_WRITING after psa_fwu_write(). */
+    if (info.state != PSA_FWU_CANDIDATE) {
+        TEST_LOG("The component is expected to be in PSA_FWU_CANDIDATE after psa_fwu_finish(), actual state is %d",
+                  info.state);
+        TEST_FAIL("Wrong component state is returned.");
+        return;
+    }
+
+    status = psa_fwu_install();
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
+        TEST_FAIL("psa_fwu_write is expected to fail due to invalid TLV size");
+        return;
+    }
+
+    /* Clean the component to make the component back to READY state. */
+    status = psa_fwu_clean(test_component);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("psa_fwu_clean should succeed");
+        return;
+    }
+
+    /* End of the test. The candidate is back to PSA_FWU_READY state now. */
+    ret->val = TEST_PASSED;
+}

@@ -31,6 +31,8 @@ static struct test_t psa_fwu_s_tests[] = {
     {&tfm_fwu_test_common_007, "TFM_S_FWU_TEST_1007",
      "Reboot interface"},
 #endif
+    {&tfm_fwu_test_common_008, "TFM_S_FWU_TEST_1008",
+     "Invalid TLV payload."},
 };
 
 void register_testsuite_s_psa_fwu_interface(struct test_suite_t *p_test_suite)
