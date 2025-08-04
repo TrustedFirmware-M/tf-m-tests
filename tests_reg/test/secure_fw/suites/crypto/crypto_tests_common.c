@@ -162,6 +162,12 @@ void psa_cipher_padded_modes_test(const psa_key_type_t key_type,
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
     bool bAbortDecryption = false;
 
+    /* Check whether PSA is capable of handling the specified cipher algorithm. */
+    if (!psa_can_do_cipher(key_type, alg)) {
+        TEST_FAIL("PSA is not capable of handling the specified cipher algorithm.");
+        return;
+    }
+
     if (iv_length != sizeof(iv)) {
         /* Whenever this condition is hit, it's likely the test requires
          * refactoring to remove any hardcoded behaviour
@@ -549,6 +555,12 @@ void psa_cipher_rfc7539_test(struct test_result_t *ret)
     int comp_result;
 
     ret->val = TEST_PASSED;
+
+    /* Check whether PSA is capable of handling the specified cipher algorithm. */
+    if (!psa_can_do_cipher(key_type, alg)) {
+        TEST_FAIL("PSA is not capable of handling the specified cipher algorithm.");
+        return;
+    }
 
     /* Setup the key policy */
     psa_set_key_usage_flags(&key_attributes, usage);
@@ -1106,6 +1118,12 @@ void psa_cipher_test(const psa_key_type_t key_type,
     uint8_t encrypted_data_single_shot[ENC_DEC_BUFFER_SIZE];
 #endif
 
+    /* Check whether PSA is capable of handling the specified cipher algorithm. */
+    if (!psa_can_do_cipher(key_type, alg)) {
+        TEST_FAIL("PSA is not capable of handling the specified cipher algorithm.");
+        return;
+    }
+
     if (iv_length > 16) {
         TEST_FAIL("Unexpected IV length greater than 16 for this alg/key type");
         return;
@@ -1398,6 +1416,12 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
     uint8_t data[TEST_MAX_KEY_LENGTH];
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+
+    /* Check whether PSA is capable of handling the specified cipher algorithm. */
+    if (psa_can_do_cipher(key_type, alg)) {
+        TEST_FAIL("Should not capable of handling the specified cipher algorithm.");
+        return;
+    }
 
     /* Setup the key policy */
     psa_set_key_usage_flags(&key_attributes, usage);
