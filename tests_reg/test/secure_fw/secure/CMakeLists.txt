@@ -19,3 +19,4 @@ add_subdirectory(../suites/platform/secure      ${CMAKE_CURRENT_BINARY_DIR}/suit
 add_subdirectory(../suites/fwu/secure           ${CMAKE_CURRENT_BINARY_DIR}/suites/fwu)
 add_subdirectory(../suites/fpu/secure           ${CMAKE_CURRENT_BINARY_DIR}/suites/fpu)
 add_subdirectory(../suites/spm/secure           ${CMAKE_CURRENT_BINARY_DIR}/suites/spm)
+add_subdirectory(../suites/fih/secure           ${CMAKE_CURRENT_BINARY_DIR}/suites/fih)

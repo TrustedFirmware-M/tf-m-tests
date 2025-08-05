@@ -24,6 +24,8 @@ tfm_invalid_config((NOT TFM_MULTI_CORE_TOPOLOGY) AND TEST_NS_MULTI_CORE)
 tfm_invalid_config((NOT TFM_NS_MANAGE_NSID) AND TEST_NS_MANAGE_NSID)
 tfm_invalid_config(TFM_PXN_ENABLE AND PS_TEST_NV_COUNTERS)
 
+tfm_invalid_config(TFM_FIH_PROFILE STREQUAL "OFF" AND TEST_S_FIH)
+
 ########################## Check suites dependence #############################
 
 tfm_invalid_config(TEST_NS_PS AND NOT TEST_NS_ITS)

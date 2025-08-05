@@ -36,6 +36,9 @@
 #if defined (TEST_S_FPU)
 #include "fpu_s_tests.h"
 #endif
+#if defined (TEST_S_FIH)
+#include "fih_s_tests.h"
+#endif
 #ifdef EXTRA_S_TEST_SUITE
 #include "extra_s_tests.h"
 #endif
@@ -90,6 +93,11 @@ static struct test_suite_t test_suites[] = {
 #ifdef TEST_S_FPU
     /* Secure FPU test cases */
     {&register_testsuite_s_fpu_interface, 0, 0, 0},
+#endif
+
+#ifdef TEST_S_FIH
+    /* Secure FIH test cases */
+    {&register_testsuite_s_fih_interface, 0, 0, 0},
 #endif
 
     /* Run extra tests as last test suite, this way platform
