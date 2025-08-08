@@ -56,7 +56,7 @@ target_include_directories(tfm_qcbor_ns
 )
 
 target_compile_definitions(tfm_qcbor_ns
-    PRIVATE
+    PUBLIC
         $<$<BOOL:${QCBOR_OPT_DISABLE_FLOAT_HW_USE}>:QCBOR_DISABLE_FLOAT_HW_USE>
         $<$<BOOL:${QCBOR_OPT_DISABLE_FLOAT_PREFERRED}>:QCBOR_DISABLE_PREFERRED_FLOAT>
         $<$<BOOL:${QCBOR_OPT_DISABLE_FLOAT_ALL}>:USEFULBUF_DISABLE_ALL_FLOAT>
