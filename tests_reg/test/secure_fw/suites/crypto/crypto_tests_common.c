@@ -252,6 +252,11 @@ void psa_cipher_padded_modes_test(const psa_key_type_t key_type,
             goto abort;
         }
 
+        if (output_length != BYTE_SIZE_CHUNK) {
+            TEST_FAIL("Expected encrypted_length is different than expected");
+            goto abort;
+        }
+
     } else if (len < 2 * BYTE_SIZE_CHUNK) {
         status = psa_cipher_update(&handle, plain_text,
                                    BYTE_SIZE_CHUNK,
