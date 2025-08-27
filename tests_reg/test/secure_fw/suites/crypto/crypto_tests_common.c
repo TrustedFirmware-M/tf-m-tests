@@ -1434,9 +1434,6 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
 void psa_unsupported_hash_test(const psa_algorithm_t alg,
                                struct test_result_t *ret)
 {
-    psa_status_t status;
-    psa_hash_operation_t handle = PSA_HASH_OPERATION_INIT;
-
     /* Check whether PSA is capable of handling the unsupported hash algorithm. */
     if (psa_can_do_hash(alg)) {
         TEST_FAIL("Should not be capable of handling the specified hash alg");
