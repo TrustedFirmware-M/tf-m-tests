@@ -5,8 +5,13 @@
 #
 #-------------------------------------------------------------------------------
 
+# TFM_SKIP_NS_TEST_CONFIG allows to ignore NS tests configurations that ware
+# passed from SPE build. This may be desired if several NS images are build with
+# the same api_ns install folder and each image requires fine tests configuration.
+if(NOT TFM_SKIP_NS_TEST_CONFIG)
 # This file is consumed by NS test build to get test configurations
 @NS_TEST_CONFIG_OPTIONS@
+endif()
 
 # Testing related options exported by TF-M
 
