@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -39,14 +39,14 @@ static void sha256_vector_test(struct test_result_t *ret,
 {
     size_t vec_idx, hash_size;
     uint8_t hash_out[SHA256_LEN];
-    fih_int fih_rc;
+    FIH_DECLARE(fih_rc, FIH_FAILURE);
 
     for (vec_idx = 0; vec_idx < vec_am; vec_idx++) {
         TEST_LOG("  > Vector %d of %d\r", vec_idx + 1, vec_am);
         const struct sha256_test_vector_t * const vec = vecs + vec_idx;
-        fih_rc = bl1_hash_compute(TFM_BL1_HASH_ALG_SHA256, (const uint8_t *)vec->message, vec->len,
+        FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_HASH_ALG_SHA256, (const uint8_t *)vec->message, vec->len,
                                   hash_out, SHA256_LEN, &hash_size);
-        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
             TEST_FAIL("\nHash function returned error");
             return;
         }
@@ -143,12 +143,11 @@ static void tfm_bl1_crypto_test_2002(struct test_result_t *ret)
 {
     uint8_t hash_out[SHA256_LEN];
     size_t hash_size;
-    fih_int fih_rc;
+    FIH_DECLARE(fih_rc, FIH_FAILURE);
 
     const struct sha256_test_vector_t * const vec = test_2001_vectors;
-    fih_rc =
-        bl1_hash_compute(TFM_BL1_HASH_ALG_SHA256, NULL, vec->len, hash_out, SHA256_LEN, &hash_size);
-    if (fih_eq(fih_rc, FIH_SUCCESS)) {
+    FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_HASH_ALG_SHA256, NULL, vec->len, hash_out, SHA256_LEN, &hash_size);
+    if (FIH_EQ(fih_rc, FIH_SUCCESS)) {
         TEST_FAIL("Hash function returned success");
         return;
     }
@@ -159,13 +158,13 @@ static void tfm_bl1_crypto_test_2002(struct test_result_t *ret)
 
 static void tfm_bl1_crypto_test_2003(struct test_result_t *ret)
 {
-    fih_int fih_rc;
+    FIH_DECLARE(fih_rc, FIH_FAILURE);
     size_t hash_size;
 
     const struct sha256_test_vector_t * const vec = test_2001_vectors;
-    fih_rc = bl1_hash_compute(TFM_BL1_HASH_ALG_SHA256, (const uint8_t *)vec->message, vec->len,
+    FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_HASH_ALG_SHA256, (const uint8_t *)vec->message, vec->len,
                               NULL, 0, &hash_size);
-    if (fih_eq(fih_rc, FIH_SUCCESS)) {
+    if (FIH_EQ(fih_rc, FIH_SUCCESS)) {
         TEST_FAIL("Hash function returned success");
         return;
     }
@@ -202,10 +201,10 @@ static void aes_256_vector_test(struct test_result_t *ret,
 
         memcpy(counter, vec->iv, CTR_IV_LEN);
 
-        rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, vec->key,
+        FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key,
                                      counter, (const uint8_t *)vec->ciphertext,
                                      vec->len, plaintext_out);
-        if (rc) {
+        if (FIH_NOT_EQ(rc, FIH_SUCCESS)) {
             free(plaintext_out);
             TEST_FAIL("\nAES operation failed");
             return;
@@ -499,19 +498,19 @@ static void tfm_bl1_crypto_test_2012(struct test_result_t *ret)
 
     memcpy(counter, vec->iv, CTR_IV_LEN);
 
-    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, vec->key, counter,
+    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key, counter,
                                  NULL,
                                  vec->len, plaintext_out);
-    if (rc == 0) {
+    if (FIH_EQ(rc, FIH_SUCCESS)) {
         free(plaintext_out);
         TEST_FAIL("AES operation return success when ciphertext was NULL");
         return;
     }
 
-    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, vec->key, NULL,
+    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key, NULL,
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, plaintext_out);
-    if (rc == 0) {
+    if (FIH_EQ(rc, FIH_SUCCESS)) {
         free(plaintext_out);
         TEST_FAIL("AES operation return success when counter was NULL");
         return;
@@ -532,10 +531,10 @@ static void tfm_bl1_crypto_test_2013(struct test_result_t *ret)
 
     memcpy(counter, vec->iv, CTR_IV_LEN);
 
-    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, vec->key, counter,
+    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key, counter,
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, NULL);
-    if (rc == 0) {
+    if (FIH_EQ(rc, FIH_SUCCESS)) {
         TEST_FAIL("AES operation return success");
         return;
     }
@@ -599,19 +598,19 @@ static void tfm_bl1_crypto_test_2015(struct test_result_t *ret)
 
     memcpy(counter, vec->iv, CTR_IV_LEN);
 
-    rc = bl1_aes_256_ctr_decrypt(-1, NULL, counter,
+    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, -1, NULL, counter,
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, plaintext_out);
-    if (rc == 0) {
+    if (FIH_EQ(rc, FIH_SUCCESS)) {
         free(plaintext_out);
         TEST_FAIL("AES operation return success when key id was negative");
         return;
     }
 
-    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER + 1, NULL, counter,
+    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER + 1, NULL, counter,
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, plaintext_out);
-    if (rc == 0) {
+    if (FIH_EQ(rc, FIH_SUCCESS)) {
         free(plaintext_out);
         TEST_FAIL("AES operation return success when key id was invalid");
         return;
