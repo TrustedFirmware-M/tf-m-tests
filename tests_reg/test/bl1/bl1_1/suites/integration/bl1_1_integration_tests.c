@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,9 @@
 #include "fih.h"
 #include "otp.h"
 #include "test_framework_helpers.h"
+
+fih_int bl1_1_validate_image_at_addr(const uint8_t *image);
+fih_int bl1_read_bl1_2_image(uint8_t *image);
 
 static void tfm_bl1_integration_test_5001(struct test_result_t *ret)
 {
