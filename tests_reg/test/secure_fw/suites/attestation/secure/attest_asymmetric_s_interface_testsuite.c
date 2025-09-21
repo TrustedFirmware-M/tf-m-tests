@@ -103,6 +103,7 @@ static void tfm_attest_test_1002(struct test_result_t *ret)
     err = psa_initial_attest_get_token_size(sizeof(challenge_buffer),
                                             &token_size);
     if (err != PSA_SUCCESS) {
+        TEST_LOG("psa_initial_attest_get_token_size() returned: %d\r\n", err);
         TEST_FAIL("Attest test tfm_attest_test_1002() has failed");
         return;
     }
