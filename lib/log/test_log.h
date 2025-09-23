@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#ifndef __TFM_LOG_H__
-#define __TFM_LOG_H__
+#ifndef __TEST_LOG_H__
+#define __TEST_LOG_H__
 
 #include "tfm_log_raw.h"
 
@@ -18,4 +18,4 @@
 #define LOG_MSG(...)
 #endif
 
-#endif /* __TFM_LOG_H__ */
+#endif /* __TEST_LOG_H__ */

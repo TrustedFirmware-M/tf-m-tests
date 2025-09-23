@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -19,7 +19,7 @@
 #include "tfm_multi_core_api.h"
 #include "tfm_ns_mailbox.h"
 #endif
-#include "tfm_log.h"
+#include "test_log.h"
 #include "uart_stdout.h"
 #if (CONFIG_TFM_FLOAT_ABI >= 1)
 #include "cmsis.h"
