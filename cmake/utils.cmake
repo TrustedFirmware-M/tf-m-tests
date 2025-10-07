@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -73,13 +73,25 @@ function(collect_build_cmd_args cmd_line)
             # directory, relative paths will be incorrectly converted inside external projects.
             # Enforce all the relative paths into abosulte paths before collecting them in the
             # build command argument list.
-            if(NOT ${ARG_VAL} STREQUAL "")
-                if(IS_DIRECTORY ${ARG_VAL} AND NOT IS_ABSOLUTE ${ARG_VAL})
-                    get_filename_component(ABS_PATH ${ARG_VAL} ABSOLUTE)
-                    set(ARG_VAL ${ABS_PATH})
-                endif()
+            if(NOT "${ARG_VAL}" STREQUAL "")
+                set(ABS_PATH_LIST)
+                # Handle list values and normalize relative paths per-item.
+                foreach(_v IN LISTS ARG_VAL)
+                    if(IS_DIRECTORY ${_v} AND NOT IS_ABSOLUTE ${_v})
+                        get_filename_component(ABS_PATH ${_v} ABSOLUTE)
+                        list(APPEND ABS_PATH_LIST ${ABS_PATH})
+                    else()
+                        list(APPEND ABS_PATH_LIST ${_v})
+                    endif()
+
+                endforeach()
+                set(ARG_VAL "${ABS_PATH_LIST}")
             endif()
-            list(APPEND TEMP_CMD_LINE "-D${CACHE_ARG}:${CACHE_ARG_TYPE}=${ARG_VAL}")
+
+            # Keep the -D entry as a single list element even if ARG_VAL contains semicolons, and
+            # the list elements will be properly separated by ";" in the result.
+            string(REPLACE ";" "\\;" ARG_VAL_ESC "${ARG_VAL}")
+            list(APPEND TEMP_CMD_LINE "-D${CACHE_ARG}:${CACHE_ARG_TYPE}=${ARG_VAL_ESC}")
         endif()
     endforeach()
 
