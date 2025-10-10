@@ -75,29 +75,31 @@ endif()
 
 # In actual NS integration, NS side build should include the source files
 # exported by TF-M build.
-set(INTERFACE_SRC_DIR    ${CONFIG_SPE_PATH}/interface/src)
-set(INTERFACE_INC_DIR    ${CONFIG_SPE_PATH}/interface/include)
-set(PLATFORM_INC_DIR     ${CONFIG_SPE_PATH}/platform/include)   # For crypto accelerator configuration
+set(API_NS_INTERFACE_SRC_DIR    ${CONFIG_SPE_PATH}/interface/src)
+set(API_NS_INTERFACE_INC_DIR    ${CONFIG_SPE_PATH}/interface/include)
+set(API_NS_PLATFORM_DIR         ${CONFIG_SPE_PATH}/platform)
 
 # INTERFACE because there might be no API files below
 add_library(tfm_api_ns INTERFACE)
 
 target_sources(tfm_api_ns
     INTERFACE
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${INTERFACE_SRC_DIR}/tfm_platform_api.c>
-        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${INTERFACE_SRC_DIR}/tfm_ps_api.c>
-        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${INTERFACE_SRC_DIR}/tfm_its_api.c>
-        $<$<BOOL:${TFM_PARTITION_CRYPTO}>:${INTERFACE_SRC_DIR}/tfm_crypto_api.c>
-        $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:${INTERFACE_SRC_DIR}/tfm_attest_api.c>
-        $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:${INTERFACE_SRC_DIR}/tfm_fwu_api.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${API_NS_INTERFACE_SRC_DIR}/tfm_platform_api.c>
+        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${API_NS_INTERFACE_SRC_DIR}/tfm_ps_api.c>
+        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${API_NS_INTERFACE_SRC_DIR}/tfm_its_api.c>
+        $<$<BOOL:${TFM_PARTITION_CRYPTO}>:${API_NS_INTERFACE_SRC_DIR}/tfm_crypto_api.c>
+        $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:${API_NS_INTERFACE_SRC_DIR}/tfm_attest_api.c>
+        $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:${API_NS_INTERFACE_SRC_DIR}/tfm_fwu_api.c>
 )
 
 # Include interface headers exported by TF-M
 target_include_directories(tfm_api_ns
     INTERFACE
-        ${INTERFACE_INC_DIR}
-        ${PLATFORM_INC_DIR}
-        $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:${INTERFACE_INC_DIR}/crypto_keys>
+        ${API_NS_INTERFACE_INC_DIR}
+        ${API_NS_PLATFORM_DIR}/config
+        ${API_NS_PLATFORM_DIR}/include
+        ${API_NS_PLATFORM_DIR}/partition
+        $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:${API_NS_INTERFACE_INC_DIR}/crypto_keys>
 )
 
 if (TFM_PARTITION_CRYPTO)
@@ -157,12 +159,11 @@ add_library(tfm_ns_log INTERFACE)
 set(USE_STDIO ON)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../lib/ext/qcbor  ${CMAKE_BINARY_DIR}/lib/ext/qcbor)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../lib/ext/t_cose ${CMAKE_BINARY_DIR}/lib/ext/t_cose)
-add_subdirectory(${TFM_REG_TEST_ROOT}/ns_regression      ${CMAKE_BINARY_DIR}/ns_regression)
+add_subdirectory(${TFM_REG_TEST_ROOT}/ns_regression             ${CMAKE_BINARY_DIR}/ns_regression)
 
 target_link_libraries(erpc_main
     PRIVATE
         erpc_client
-        tfm_api_ns
         tfm_ns_tests
         $<$<STREQUAL:${ERPC_TRANSPORT},TCP>:pthread>
 )
