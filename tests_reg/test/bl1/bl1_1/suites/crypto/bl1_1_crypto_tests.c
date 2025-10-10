@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "test_framework_helpers.h"
-#include "crypto.h"
+#include "bl1_crypto.h"
 
 #define SHA256_LEN 32
 
