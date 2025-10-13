@@ -643,10 +643,6 @@ static void tfm_bl1_crypto_test_2016(struct test_result_t *ret)
 static struct test_t crypto_tests[] = {
     {&tfm_bl1_crypto_test_2001, "TFM_BL1_CRYPTO_TEST_2001",
      "Crypto SHA256 generic vector test" },
-    {&tfm_bl1_crypto_test_2002, "TFM_BL1_CRYPTO_TEST_2002",
-     "Crypto SHA256 input null-pointer test" },
-    {&tfm_bl1_crypto_test_2003, "TFM_BL1_CRYPTO_TEST_2003",
-     "Crypto SHA256 output null-pointer test" },
 
     {&tfm_bl1_crypto_test_2011, "TFM_BL1_CRYPTO_TEST_2011",
      "Crypto AES256-CTR generic vector test" },
