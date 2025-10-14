@@ -37,6 +37,7 @@ include(utils)
         TEST_S_SFN_BACKEND;
         TEST_S_FPU;
         TEST_S_FIH;
+        TEST_S_SCMI_COMMS;
     "
     )
 
