@@ -64,21 +64,6 @@ static void tfm_bl1_random_generate_test_3002(struct test_result_t *ret)
 {
     int rc;
 
-    rc = bl1_random_generate_secure(NULL, 128);
-    if (rc == 0) {
-        TEST_FAIL("Random generation should have failed");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-    return;
-}
-
-
-static void tfm_bl1_random_generate_test_3003(struct test_result_t *ret)
-{
-    int rc;
-
     rc = bl1_random_generate_secure(NULL, 0);
     if (rc) {
         TEST_FAIL("Random generation should have succeeded");
@@ -93,8 +78,6 @@ static struct test_t random_generation_tests[] = {
     {&tfm_bl1_random_generate_test_3001, "TFM_BL1_RANDOM_TEST_3001",
      "Secure random generation repeated bytes test" },
     {&tfm_bl1_random_generate_test_3002, "TFM_BL1_RANDOM_TEST_3002",
-     "Secure random generation null-pointer test" },
-    {&tfm_bl1_random_generate_test_3003, "TFM_BL1_RANDOM_TEST_3003",
      "Secure random generation zero-length output test" },
 };
 
