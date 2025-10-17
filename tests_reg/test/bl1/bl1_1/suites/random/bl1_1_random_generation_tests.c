@@ -14,7 +14,7 @@
 #include <stdbool.h>
 
 #include "test_framework_helpers.h"
-#include "bl1_random.h"
+#include "psa/crypto.h"
 
 #define TEST_VAL_AM      512
 #define REPEAT_THRESHOLD (TEST_VAL_AM / 16)
@@ -26,11 +26,11 @@ static void tfm_bl1_random_generate_test_3001(struct test_result_t *ret)
     uint16_t table[UINT8_MAX + 1];
     size_t table_idx;
     bool failed = false;
-    int rc;
+    psa_status_t status;
 
     memset(table, 0, sizeof(table));
-    rc = bl1_random_generate_secure(buf, sizeof(buf));
-    if (rc) {
+    status = psa_generate_random(buf, sizeof(buf));
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Random generation returned error");
         return;
     }
@@ -62,10 +62,10 @@ static void tfm_bl1_random_generate_test_3001(struct test_result_t *ret)
 
 static void tfm_bl1_random_generate_test_3002(struct test_result_t *ret)
 {
-    int rc;
+    psa_status_t status;
 
-    rc = bl1_random_generate_secure(NULL, 0);
-    if (rc) {
+    status = psa_generate_random(NULL, 0);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Random generation should have succeeded");
         return;
     }
