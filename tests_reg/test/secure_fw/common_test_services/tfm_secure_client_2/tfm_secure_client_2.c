@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,16 +30,16 @@ uint8_t *secure_client_2_data_p = &secure_client_2_data;
 static psa_status_t secure_client_2_test_crypto_access_ctrl(const void *arg,
                                                             size_t arg_len)
 {
-    psa_key_handle_t key_handle;
+    psa_key_id_t key_id;
 
-    if (arg_len != sizeof(key_handle)) {
+    if (arg_len != sizeof(key_id)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    key_handle = *((psa_key_handle_t *)arg);
+    key_id = *((psa_key_id_t *)arg);
 
     /* Attempt to destroy the key handle */
-    return psa_destroy_key(key_handle);
+    return psa_destroy_key(key_id);
 }
 #endif /* defined(TFM_PARTITION_CRYPTO) */
 

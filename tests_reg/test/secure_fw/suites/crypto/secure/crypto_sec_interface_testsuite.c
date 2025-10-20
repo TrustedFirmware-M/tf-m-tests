@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -497,7 +497,7 @@ static void tfm_crypto_test_1034(struct test_result_t *ret)
 static void tfm_crypto_test_1035(struct test_result_t *ret)
 {
     psa_status_t status;
-    psa_key_handle_t key_handle;
+    psa_key_id_t key_id;
     const uint8_t data[] = "THIS IS MY KEY1";
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
 
@@ -506,7 +506,7 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
     psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
 
     status = psa_import_key(&key_attributes, data, sizeof(data),
-                            &key_handle);
+                            &key_id);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to import key");
         return;
@@ -515,14 +515,14 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
     /* Attempt to destroy the key handle from the Secure Client 2 partition */
     status = tfm_secure_client_2_call_test(
                                       TFM_SECURE_CLIENT_2_ID_CRYPTO_ACCESS_CTRL,
-                                      &key_handle, sizeof(key_handle));
+                                      &key_id, sizeof(key_id));
     if (status != PSA_ERROR_INVALID_HANDLE) {
         TEST_FAIL("Should not be able to destroy key from another partition");
         return;
     }
 
     /* Destroy the key */
-    status = psa_destroy_key(key_handle);
+    status = psa_destroy_key(key_id);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying a key");
     }

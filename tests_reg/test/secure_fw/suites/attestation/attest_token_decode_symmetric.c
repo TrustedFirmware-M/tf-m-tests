@@ -2,7 +2,7 @@
  * attest_symmetric_iat_decode.c
  *
  * Copyright (c) 2019, Laurence Lundblade.
- * Copyright (c) 2020-2025, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -76,11 +76,11 @@ attest_token_decode_validate_token(struct attest_token_decode_context *me,
     enum attest_token_err_t         return_value;
     struct t_cose_mac_validate_ctx  validate_ctx;
     struct t_cose_key               attest_key;
-    psa_key_handle_t                key_handle = TFM_BUILTIN_KEY_ID_IAK;
+    psa_key_id_t                    key_id = TFM_BUILTIN_KEY_ID_IAK;
 
     t_cose_mac_validate_init(&validate_ctx, 0);
 
-    attest_key.key.handle = (uint64_t)key_handle;
+    attest_key.key.handle = (uint64_t)key_id;
     t_cose_mac_set_validate_key(&validate_ctx, attest_key);
 
     t_cose_error = t_cose_mac_validate(&validate_ctx,
