@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "thread.h"
+#include "os_wrapper/kernel.h"
 #include "os_wrapper/mutex.h"
 #include "semaphore.h"
 #include "delay.h"
@@ -272,4 +273,15 @@ int32_t os_wrapper_delay(uint32_t ticks)
     }
 
     return OS_WRAPPER_ERROR;
+}
+
+bool os_wrapper_is_kernel_started(void)
+{
+    osKernelState_t st = osKernelGetState();
+
+    if ((st == osKernelInactive) || (st == osKernelReady)) {
+        return false; /* safe without the MT lock */
+    } else {
+        return true;
+    }
 }
