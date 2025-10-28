@@ -5,6 +5,8 @@
 
 cmake_minimum_required(VERSION 3.21)
 
+include(remote_library)
+
 # Default configuration of T_COSE repository
 set(T_COSE_PATH     "DOWNLOAD"      CACHE PATH      "Path to t_cose (or DOWNLOAD to fetch automatically")
 set(T_COSE_VERSION  "v2.0-alpha-2"  CACHE STRING    "The version of t_cose to use")

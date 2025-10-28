@@ -7,6 +7,8 @@
 #
 #-------------------------------------------------------------------------------
 
+include(remote_library)
+
 set(PSA_ARCH_TESTS_PATH     "DOWNLOAD"  CACHE PATH      "Path to PSA arch test repository used for SPE build")
 set(PSA_ARCH_TESTS_VERSION  "v24.03_API1.6_CRYPTO_1.1.0"   CACHE STRING    "The version of PSA arch tests to use")
 

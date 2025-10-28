@@ -7,6 +7,8 @@
 
 cmake_minimum_required(VERSION 3.21)
 
+include(remote_library)
+
 # Default configuration of QCBOR repository
 set(QCBOR_PATH      "DOWNLOAD"  CACHE PATH      "Path to qcbor (or DOWNLOAD to fetch automatically")
 set(QCBOR_VERSION   "v1.2"      CACHE STRING    "The version of qcbor to use")

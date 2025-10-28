@@ -5,6 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
+include(remote_library)
+
 set(ERPC_REPO_PATH   "DOWNLOAD"  CACHE PATH      "Path to eRPC repo (or DOWNLOAD to fetch automatically")
 set(ERPC_VERSION     "1.9.1"     CACHE STRING    "The version of eRPC to use")
 

@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 3.21)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
 include(toolchain_selection)
-include(remote_library)
 
 #--- SPE artifacts -------------------------------------------------------------
 

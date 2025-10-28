@@ -20,7 +20,6 @@ project("TF-M SPE for PSA tests" LANGUAGES C)
 
 # use tf-m-tests/cmake folder
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../cmake)
-include(remote_library)
 
 # User must specify which TEST_PSA_API suit name
 if (NOT DEFINED TEST_PSA_API)
