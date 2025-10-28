@@ -5,6 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
+include(utils)
+
 ########################## Check Flags Input ###################################
 
 tfm_invalid_config((NOT TFM_PARTITION_PROTECTED_STORAGE) AND (TEST_NS_PS OR TEST_S_PS))

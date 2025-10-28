@@ -15,7 +15,6 @@ list(APPEND CMAKE_MODULE_PATH ${CONFIG_SPE_PATH}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(remote_library)
 include(toolchain_selection)
-include(utils)
 
 # A platform sprecific MCPU and architecture flags for NS side
 include(${CONFIG_SPE_PATH}/platform/cpuarch.cmake)

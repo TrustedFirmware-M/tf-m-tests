@@ -28,7 +28,6 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CONFIG_SPE_PATH}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../cmake)
 
-include(utils)
 include(remote_library)
 
 project("ERPC Host" LANGUAGES CXX C)
