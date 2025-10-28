@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
-include(utils)
+include(collect_args)
 
 # Force cross compilation and avoid compiler search and test
 set(CMAKE_SYSTEM_NAME Generic)
