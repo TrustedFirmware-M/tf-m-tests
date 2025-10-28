@@ -23,5 +23,4 @@ fetch_remote_library(
         GIT_TAG             ${PSA_ARCH_TESTS_VERSION}
         GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
-        GIT_SUBMODULES      ""
 )

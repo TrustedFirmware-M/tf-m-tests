@@ -21,6 +21,10 @@ fetch_remote_library(
         GIT_TAG             ${T_COSE_VERSION}
         GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
+# We set the SOURCE_SUBDIR variable to a non-existent directory as a workaround
+# to avoid adding the library directory into the project.
+# Related issue: https://gitlab.kitware.com/cmake/cmake/-/issues/26220
+        SOURCE_SUBDIR       non-exist-dir
 )
 
 ############################ Non Secure t_cose defs ############################

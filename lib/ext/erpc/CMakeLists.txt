@@ -19,5 +19,4 @@ fetch_remote_library(
         GIT_TAG             ${ERPC_VERSION}
         GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
-        GIT_SUBMODULES      ""
 )
