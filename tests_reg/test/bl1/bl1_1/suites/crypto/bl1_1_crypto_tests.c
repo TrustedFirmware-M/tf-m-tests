@@ -8,14 +8,15 @@
 #include "bl1_1_crypto_tests.h"
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <assert.h>
 
 #include "test_framework_helpers.h"
 #include "bl1_crypto.h"
 
 #define SHA256_LEN 32
+#define AES256_TEST_LEN 128
 
 uint8_t tfm_bl1_key_test_1_buf[32] = {
     0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23,
@@ -186,7 +187,7 @@ static void aes_256_vector_test(struct test_result_t *ret,
                                 size_t vec_am)
 {
     size_t vec_idx;
-    uint8_t *plaintext_out;
+    uint8_t plaintext_out[AES256_TEST_LEN];
     uint8_t counter[CTR_IV_LEN];
     int rc;
 
@@ -194,10 +195,7 @@ static void aes_256_vector_test(struct test_result_t *ret,
         TEST_LOG("  > Vector %d of %d\r", vec_idx + 1, vec_am);
         const struct aes256_ctr_test_vector_t * const vec = vecs + vec_idx;
 
-        plaintext_out = malloc(vec->len);
-        if (plaintext_out == NULL) {
-            TEST_FAIL("\nFailed to allocate memory");
-        }
+        assert(sizeof(plaintext_out) >= vec->len);
 
         memcpy(counter, vec->iv, CTR_IV_LEN);
 
@@ -205,7 +203,6 @@ static void aes_256_vector_test(struct test_result_t *ret,
                                      counter, (const uint8_t *)vec->ciphertext,
                                      vec->len, plaintext_out);
         if (FIH_NOT_EQ(rc, FIH_SUCCESS)) {
-            free(plaintext_out);
             TEST_FAIL("\nAES operation failed");
             return;
         }
@@ -220,12 +217,9 @@ static void aes_256_vector_test(struct test_result_t *ret,
                 TEST_LOG("%X ", vec->plaintext[I]);
             }
             TEST_LOG("\r\n");
-            free(plaintext_out);
             TEST_FAIL("\nVector comparison failed");
             return;
         }
-
-        free(plaintext_out);
     }
 
     return;
@@ -485,16 +479,13 @@ static void tfm_bl1_crypto_test_2011(struct test_result_t *ret)
 
 static void tfm_bl1_crypto_test_2012(struct test_result_t *ret)
 {
-    uint8_t *plaintext_out;
+    uint8_t plaintext_out[AES256_TEST_LEN];
     uint8_t counter[CTR_IV_LEN];
     int rc;
 
     const struct aes256_ctr_test_vector_t * const vec = test_2011_vectors;
 
-    plaintext_out = malloc(vec->len);
-    if (plaintext_out == NULL) {
-        TEST_FAIL("Failed to allocate memory");
-    }
+    assert(sizeof(plaintext_out) >= vec->len);
 
     memcpy(counter, vec->iv, CTR_IV_LEN);
 
@@ -502,7 +493,6 @@ static void tfm_bl1_crypto_test_2012(struct test_result_t *ret)
                                  NULL,
                                  vec->len, plaintext_out);
     if (FIH_EQ(rc, FIH_SUCCESS)) {
-        free(plaintext_out);
         TEST_FAIL("AES operation return success when ciphertext was NULL");
         return;
     }
@@ -511,12 +501,9 @@ static void tfm_bl1_crypto_test_2012(struct test_result_t *ret)
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, plaintext_out);
     if (FIH_EQ(rc, FIH_SUCCESS)) {
-        free(plaintext_out);
         TEST_FAIL("AES operation return success when counter was NULL");
         return;
     }
-
-    free(plaintext_out);
 
     ret->val = TEST_PASSED;
     return;
@@ -585,16 +572,13 @@ static void tfm_bl1_crypto_test_2014(struct test_result_t *ret)
 
 static void tfm_bl1_crypto_test_2015(struct test_result_t *ret)
 {
-    uint8_t *plaintext_out;
+    uint8_t plaintext_out[AES256_TEST_LEN];
     uint8_t counter[CTR_IV_LEN];
     int rc;
 
     const struct aes256_ctr_test_vector_t * const vec = test_2011_vectors;
 
-    plaintext_out = malloc(vec->len);
-    if (plaintext_out == NULL) {
-        TEST_FAIL("Failed to allocate memory");
-    }
+    assert(sizeof(plaintext_out) >= vec->len);
 
     memcpy(counter, vec->iv, CTR_IV_LEN);
 
@@ -602,7 +586,6 @@ static void tfm_bl1_crypto_test_2015(struct test_result_t *ret)
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, plaintext_out);
     if (FIH_EQ(rc, FIH_SUCCESS)) {
-        free(plaintext_out);
         TEST_FAIL("AES operation return success when key id was negative");
         return;
     }
@@ -611,12 +594,9 @@ static void tfm_bl1_crypto_test_2015(struct test_result_t *ret)
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, plaintext_out);
     if (FIH_EQ(rc, FIH_SUCCESS)) {
-        free(plaintext_out);
         TEST_FAIL("AES operation return success when key id was invalid");
         return;
     }
-
-    free(plaintext_out);
 
     ret->val = TEST_PASSED;
     return;
