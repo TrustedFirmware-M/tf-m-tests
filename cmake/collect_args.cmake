@@ -22,19 +22,23 @@ function(collect_build_cmd_args cmd_line)
             # CMake automatically converts relative paths passed via command line into absolute
             # ones. Since external projects have different base directories compared to root
             # directory, relative paths will be incorrectly converted inside external projects.
-            # Enforce all the relative paths into abosulte paths before collecting them in the
+            # Enforce all the relative paths into absolute paths before collecting them in the
             # build command argument list.
             if(NOT "${ARG_VAL}" STREQUAL "")
                 set(ABS_PATH_LIST)
                 # Handle list values and normalize relative paths per-item.
                 foreach(_v IN LISTS ARG_VAL)
-                    if(IS_DIRECTORY ${_v} AND NOT IS_ABSOLUTE ${_v})
+                    # Perform path conversion only for the variables with PATH or
+                    # UNINITIALIZED type to avoid unnecessary conversions for other
+                    # types (e.g. BOOL, STRING, etc.)
+                    if((CACHE_ARG_TYPE STREQUAL "PATH" OR
+                        CACHE_ARG_TYPE STREQUAL "UNINITIALIZED") AND
+                       (IS_DIRECTORY ${_v} AND NOT IS_ABSOLUTE ${_v}))
                         get_filename_component(ABS_PATH ${_v} ABSOLUTE)
                         list(APPEND ABS_PATH_LIST ${ABS_PATH})
                     else()
                         list(APPEND ABS_PATH_LIST ${_v})
                     endif()
-
                 endforeach()
                 set(ARG_VAL "${ABS_PATH_LIST}")
             endif()
