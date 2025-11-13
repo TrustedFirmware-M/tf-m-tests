@@ -647,7 +647,7 @@ static int_fast16_t decode_test_internal(enum decode_test_mode_t mode)
     }
 
 #ifdef DUMP_TOKEN
-    dump_token(completed_token);
+    dump_token(&completed_token);
 #endif
 
     /* -- Initialize and validate the signature on the token -- */
