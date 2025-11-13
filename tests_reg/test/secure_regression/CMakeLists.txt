@@ -22,7 +22,7 @@ if(TFM_S_REG_TEST OR TEST_BL2 OR TEST_BL1_1 OR TEST_BL1_2)
     set(TFM_TESTS_ROOT_DIR    ${CMAKE_CURRENT_LIST_DIR}/../../../)
 
     list(APPEND CMAKE_MODULE_PATH ${TFM_TESTS_ROOT_DIR}/cmake)
-    list(APPEND CMAKE_MODULE_PATH ${REG_TEST_DIR}/../utils)
+    list(APPEND CMAKE_MODULE_PATH ${REG_TEST_DIR}/../cmake)
     include(utils)
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../framework ${CMAKE_CURRENT_BINARY_DIR}/framework)

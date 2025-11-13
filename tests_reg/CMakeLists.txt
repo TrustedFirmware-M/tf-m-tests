@@ -12,7 +12,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
 list(APPEND CMAKE_MODULE_PATH ${CONFIG_SPE_PATH}/cmake)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/utils)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(remote_library)
 include(toolchain_selection)
 include(utils)
