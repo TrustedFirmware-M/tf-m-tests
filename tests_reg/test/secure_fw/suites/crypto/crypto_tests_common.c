@@ -1628,7 +1628,8 @@ void psa_mac_test(const psa_algorithm_t alg,
     uint32_t idx, start_idx = 0;
     uint8_t *hmac_res;
 #ifdef TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
-    uint8_t hmac[PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg))];
+    /* Use a fixed-size buffer for the largest supported hash size */
+    uint8_t hmac[PSA_MAC_MAX_SIZE];
     size_t hmac_length = 0;
     uint32_t comp_result;
 #endif /* TFM_CRYPTO_TEST_SINGLE_PART_FUNCS */
