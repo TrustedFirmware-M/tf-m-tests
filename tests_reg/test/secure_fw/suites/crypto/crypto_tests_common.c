@@ -3311,9 +3311,7 @@ void psa_sign_verify_hash_test(psa_algorithm_t alg, uint8_t curve_selector,
     size_t pub_key_length = 0;
     const psa_algorithm_t hash_alg = PSA_ALG_GET_HASH(alg);
 
-    assert(PSA_HASH_LENGTH_MAX >= PSA_HASH_LENGTH(hash_alg));
-
-    uint8_t hash[PSA_HASH_LENGTH_MAX];
+    uint8_t hash[PSA_HASH_MAX_SIZE];
     size_t hash_length = 0;
     uint8_t scratch_buffer[48 * 2 + 1]; /* Up to the P-384 pub key in uncompressed format */
 
