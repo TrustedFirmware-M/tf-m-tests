@@ -1,4 +1,4 @@
-From 94c15124792d198fdf7abbcdc46f061435334522 Mon Sep 17 00:00:00 2001
+From d31baab87b4a89119bcc2a4d922d0b8011cba4ec Mon Sep 17 00:00:00 2001
 From: David Vincze <david.vincze@arm.com>
 Date: Thu, 24 Apr 2025 15:44:22 +0000
 Subject: [PATCH 2/2] Add missing type casts to fix compile warnings
@@ -13,7 +13,7 @@ Signed-off-by: Bohdan Hunko <Bohdan.Hunko@infineon.com>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/src/qcbor_decode.c b/src/qcbor_decode.c
-index 70aa41d8..ef4ce759 100644
+index 70aa41d..ef4ce75 100644
 --- a/src/qcbor_decode.c
 +++ b/src/qcbor_decode.c
 @@ -2624,7 +2624,7 @@ QCBORError QCBORDecode_PartialFinish(QCBORDecodeContext *pMe, size_t *puConsumed
@@ -44,5 +44,5 @@ index 70aa41d8..ef4ce759 100644
  
     QCBORError uError;
 -- 
-2.34.1
+2.43.0
 
