@@ -651,7 +651,7 @@ static void tfm_crypto_test_1056(struct test_result_t *ret)
     psa_verify_hash_test(PSA_ALG_ECDSA(PSA_ALG_SHA_384), 1 /* Unused */, ret);
 #else
     TEST_LOG("P384 is unsupported. Skipping...");
-    ret->val = 0;
+    ret->val = TEST_PASSED;
 #endif
 }
 #endif /* TFM_CRYPTO_TEST_ALG_ECDSA */
