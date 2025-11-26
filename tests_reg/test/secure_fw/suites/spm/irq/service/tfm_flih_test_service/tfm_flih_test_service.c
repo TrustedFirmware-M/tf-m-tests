@@ -45,8 +45,6 @@ static psa_flih_result_t tfm_flih_test_timer_handler(void)
         psa_panic();
         break;
     }
-
-    return PSA_FLIH_NO_SIGNAL;
 }
 
 static void flih_test_case_1(const psa_msg_t *msg, psa_signal_t timer_irq_signal)
