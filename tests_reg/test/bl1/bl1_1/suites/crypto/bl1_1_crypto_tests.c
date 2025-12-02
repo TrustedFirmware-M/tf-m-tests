@@ -14,6 +14,7 @@
 
 #include "test_framework_helpers.h"
 #include "bl1_crypto.h"
+#include "psa/crypto.h"
 
 #define SHA256_LEN 32
 #define AES256_TEST_LEN 128
@@ -40,14 +41,15 @@ static void sha256_vector_test(struct test_result_t *ret,
 {
     size_t vec_idx, hash_size;
     uint8_t hash_out[SHA256_LEN];
-    FIH_DECLARE(fih_rc, FIH_FAILURE);
+    psa_status_t status;
 
     for (vec_idx = 0; vec_idx < vec_am; vec_idx++) {
         TEST_LOG("  > Vector %d of %d\r", vec_idx + 1, vec_am);
         const struct sha256_test_vector_t * const vec = vecs + vec_idx;
-        FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_HASH_ALG_SHA256, (const uint8_t *)vec->message, vec->len,
+        status = psa_hash_compute(PSA_ALG_SHA_256,
+                                  (const uint8_t *)vec->message, vec->len,
                                   hash_out, SHA256_LEN, &hash_size);
-        if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
+        if (status != PSA_SUCCESS) {
             TEST_FAIL("\nHash function returned error");
             return;
         }
@@ -144,34 +146,34 @@ static void tfm_bl1_crypto_test_2002(struct test_result_t *ret)
 {
     uint8_t hash_out[SHA256_LEN];
     size_t hash_size;
-    FIH_DECLARE(fih_rc, FIH_FAILURE);
+    psa_status_t status;
 
     const struct sha256_test_vector_t * const vec = test_2001_vectors;
-    FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_HASH_ALG_SHA256, NULL, vec->len, hash_out, SHA256_LEN, &hash_size);
-    if (FIH_EQ(fih_rc, FIH_SUCCESS)) {
+    status = psa_hash_compute(PSA_ALG_SHA_256,
+                              NULL, vec->len, hash_out, SHA256_LEN, &hash_size);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Hash function returned success");
         return;
     }
 
     ret->val = TEST_PASSED;
-    return;
 }
 
 static void tfm_bl1_crypto_test_2003(struct test_result_t *ret)
 {
-    FIH_DECLARE(fih_rc, FIH_FAILURE);
+    psa_status_t status;
     size_t hash_size;
 
     const struct sha256_test_vector_t * const vec = test_2001_vectors;
-    FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_HASH_ALG_SHA256, (const uint8_t *)vec->message, vec->len,
+    status = psa_hash_compute(PSA_ALG_SHA_256,
+                              (const uint8_t *)vec->message, vec->len,
                               NULL, 0, &hash_size);
-    if (FIH_EQ(fih_rc, FIH_SUCCESS)) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Hash function returned success");
         return;
     }
 
     ret->val = TEST_PASSED;
-    return;
 }
 
 struct aes256_ctr_test_vector_t {
