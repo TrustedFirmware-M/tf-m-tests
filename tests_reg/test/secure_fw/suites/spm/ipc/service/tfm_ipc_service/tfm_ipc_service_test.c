@@ -252,7 +252,7 @@ static void ipc_service_mmiovec_test_handle(uint32_t signals)
     case PSA_IPC_DISCONNECT:
 
         /* Only entertain cases when the call is from a connection-based test context */
-        if (signal & IPC_SERVICE_TEST_MMIOVEC_STATEFUL_SIGNAL) {
+        if (signals & IPC_SERVICE_TEST_MMIOVEC_STATEFUL_SIGNAL) {
             status = PSA_SUCCESS;
         }
         break;
