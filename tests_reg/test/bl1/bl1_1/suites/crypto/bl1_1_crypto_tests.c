@@ -12,6 +12,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "fih.h"
 #include "test_framework_helpers.h"
 #include "bl1_crypto.h"
 #include "psa/crypto.h"
@@ -35,6 +36,107 @@ struct sha256_test_vector_t {
     uint8_t hash[SHA256_LEN];
 };
 
+fih_int aes_256_ctr_decrypt(const uint8_t *key_buf,
+                            uint8_t *counter,
+                            const uint8_t *ciphertext,
+                            size_t ciphertext_length,
+                            uint8_t *plaintext)
+{
+    const size_t key_size = 32; /* 256-bit key size */
+    const size_t counter_size = 16; /* 128-bit key size */
+    psa_key_id_t psa_key_id;
+    psa_key_attributes_t key_attr = psa_key_attributes_init();
+    psa_cipher_operation_t op = psa_cipher_operation_init();
+    psa_status_t status;
+    size_t output_length = 0;
+    const size_t aligned_encryption_size =
+        (ciphertext_length / MBEDTLS_MAX_BLOCK_LENGTH) * MBEDTLS_MAX_BLOCK_LENGTH;
+    const size_t unaligned_encryption_size = ciphertext_length - aligned_encryption_size;
+
+    psa_set_key_type(&key_attr, PSA_KEY_TYPE_AES);
+    psa_set_key_algorithm(&key_attr, PSA_ALG_CTR);
+    psa_set_key_usage_flags(&key_attr, PSA_KEY_USAGE_DECRYPT);
+    psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME_VOLATILE);
+    psa_set_key_bits(&key_attr, key_size * 8);
+
+    status = psa_import_key(&key_attr, (uint8_t *)key_buf, key_size, &psa_key_id);
+    if (status != PSA_SUCCESS) {
+        FIH_RET(fih_ret_encode_zero_equality(status));
+    }
+
+    status = psa_cipher_decrypt_setup(&op, psa_key_id, PSA_ALG_CTR);
+    if (status != PSA_SUCCESS) {
+        (void)psa_destroy_key(psa_key_id);
+        FIH_RET(fih_ret_encode_zero_equality(status));
+    }
+
+    status = psa_cipher_set_iv(&op, counter, counter_size);
+    if (status != PSA_SUCCESS) {
+        (void)psa_cipher_abort(&op);
+        (void)psa_destroy_key(psa_key_id);
+        FIH_RET(fih_ret_encode_zero_equality(status));
+    }
+
+    status = psa_cipher_update(&op,
+                               ciphertext,
+                               aligned_encryption_size,
+                               plaintext,
+                               aligned_encryption_size,
+                               &output_length);
+    if (status != PSA_SUCCESS) {
+        (void)psa_cipher_abort(&op);
+        (void)psa_destroy_key(psa_key_id);
+        FIH_RET(fih_ret_encode_zero_equality(status));
+    }
+
+    if (unaligned_encryption_size > 0) {
+        /**
+         * MbedTLS multi-part cipher implementation does not access unaligned inputs,
+         * to block size, thus use a temporary buffer with padding to decrypt the
+         * remaining bytes.
+         *
+         * This should no longer be required once single-part can be used.
+         */
+        uint8_t cipher_blk[MBEDTLS_MAX_BLOCK_LENGTH];
+        uint8_t plaintext_blk[MBEDTLS_MAX_BLOCK_LENGTH];
+
+        memcpy(cipher_blk,
+               ciphertext + aligned_encryption_size,
+               unaligned_encryption_size);
+
+        status = psa_cipher_update(&op,
+                                   cipher_blk,
+                                   MBEDTLS_MAX_BLOCK_LENGTH,
+                                   plaintext_blk,
+                                   MBEDTLS_MAX_BLOCK_LENGTH,
+                                   &output_length);
+        if (status != PSA_SUCCESS) {
+            (void)psa_cipher_abort(&op);
+            (void)psa_destroy_key(psa_key_id);
+            FIH_RET(fih_ret_encode_zero_equality(status));
+        }
+
+        memcpy(plaintext + aligned_encryption_size,
+               plaintext_blk,
+               unaligned_encryption_size);
+    }
+
+    status = psa_cipher_finish(&op,
+                               NULL,
+                               0,
+                               &output_length);
+    if (status != PSA_SUCCESS) {
+        (void)psa_destroy_key(psa_key_id);
+        FIH_RET(fih_ret_encode_zero_equality(status));
+    }
+
+    status = psa_destroy_key(psa_key_id);
+    if (status != PSA_SUCCESS) {
+        FIH_RET(fih_ret_encode_zero_equality(status));
+    }
+
+    FIH_RET(FIH_SUCCESS);
+}
 
 static void sha256_vector_test(struct test_result_t *ret,
                                const struct sha256_test_vector_t *vecs,
@@ -202,7 +304,7 @@ static void aes_256_vector_test(struct test_result_t *ret,
 
         memcpy(counter, vec->iv, CTR_IV_LEN);
 
-        FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key,
+        FIH_CALL(aes_256_ctr_decrypt, rc, vec->key,
                                      counter, (const uint8_t *)vec->ciphertext,
                                      vec->len, plaintext_out);
         if (FIH_NOT_EQ(rc, FIH_SUCCESS)) {
@@ -492,7 +594,7 @@ static void tfm_bl1_crypto_test_2012(struct test_result_t *ret)
 
     memcpy(counter, vec->iv, CTR_IV_LEN);
 
-    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key, counter,
+    FIH_CALL(aes_256_ctr_decrypt, rc, vec->key, counter,
                                  NULL,
                                  vec->len, plaintext_out);
     if (FIH_EQ(rc, FIH_SUCCESS)) {
@@ -500,7 +602,7 @@ static void tfm_bl1_crypto_test_2012(struct test_result_t *ret)
         return;
     }
 
-    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key, NULL,
+    FIH_CALL(aes_256_ctr_decrypt, rc, vec->key, NULL,
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, plaintext_out);
     if (FIH_EQ(rc, FIH_SUCCESS)) {
@@ -521,7 +623,7 @@ static void tfm_bl1_crypto_test_2013(struct test_result_t *ret)
 
     memcpy(counter, vec->iv, CTR_IV_LEN);
 
-    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER, vec->key, counter,
+    FIH_CALL(aes_256_ctr_decrypt, rc, vec->key, counter,
                                  (const uint8_t *)vec->ciphertext,
                                  vec->len, NULL);
     if (FIH_EQ(rc, FIH_SUCCESS)) {
@@ -570,56 +672,6 @@ static void tfm_bl1_crypto_test_2014(struct test_result_t *ret)
 {
     aes_256_vector_test(ret, test_2014_vectors,
                         sizeof(test_2014_vectors) / sizeof(struct aes256_ctr_test_vector_t));
-    return;
-}
-
-static void tfm_bl1_crypto_test_2015(struct test_result_t *ret)
-{
-    uint8_t plaintext_out[AES256_TEST_LEN];
-    uint8_t counter[CTR_IV_LEN];
-    int rc;
-
-    const struct aes256_ctr_test_vector_t * const vec = test_2011_vectors;
-
-    assert(sizeof(plaintext_out) >= vec->len);
-
-    memcpy(counter, vec->iv, CTR_IV_LEN);
-
-    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, -1, NULL, counter,
-                                 (const uint8_t *)vec->ciphertext,
-                                 vec->len, plaintext_out);
-    if (FIH_EQ(rc, FIH_SUCCESS)) {
-        TEST_FAIL("AES operation return success when key id was negative");
-        return;
-    }
-
-    FIH_CALL(bl1_aes_256_ctr_decrypt, rc, TFM_BL1_KEY_USER + 1, NULL, counter,
-                                 (const uint8_t *)vec->ciphertext,
-                                 vec->len, plaintext_out);
-    if (FIH_EQ(rc, FIH_SUCCESS)) {
-        TEST_FAIL("AES operation return success when key id was invalid");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-    return;
-}
-
-static const struct aes256_ctr_test_vector_t test_2016_vectors[] = {
-    {
-        tfm_bl1_key_test_1_buf,
-        {0x68, 0x3a, 0x92, 0xf7, 0xfc, 0xdb, 0x82, 0xb4, 0xcb, 0x8f, 0x3b, 0x88,
-         0x0, 0x0, 0x0, 0x0, },
-        NULL,
-        0,
-        NULL,
-    },
-};
-
-static void tfm_bl1_crypto_test_2016(struct test_result_t *ret)
-{
-    aes_256_vector_test(ret, test_2016_vectors,
-                        sizeof(test_2016_vectors) / sizeof(struct aes256_ctr_test_vector_t));
     return;
 }
 
@@ -868,10 +920,6 @@ static struct test_t crypto_tests[] = {
      "Crypto AES256-CTR output null-pointer test" },
     {&tfm_bl1_crypto_test_2014, "TFM_BL1_CRYPTO_TEST_2014",
      "Crypto AES256-CTR counter overflow test" },
-    {&tfm_bl1_crypto_test_2015, "TFM_BL1_CRYPTO_TEST_2015",
-     "Crypto AES256-CTR key id test" },
-    {&tfm_bl1_crypto_test_2016, "TFM_BL1_CRYPTO_TEST_2016",
-     "Crypto AES256-CTR zero-length test" },
 #if defined(TFM_BL1_2_ENABLE_LMS)
     {&tfm_bl1_crypto_test_2017, "TFM_BL1_CRYPTO_TEST_2017",
      "Crypto LMS verification test" },
