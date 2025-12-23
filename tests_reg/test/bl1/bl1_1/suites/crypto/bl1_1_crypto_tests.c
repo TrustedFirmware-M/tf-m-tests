@@ -872,8 +872,10 @@ static struct test_t crypto_tests[] = {
      "Crypto AES256-CTR key id test" },
     {&tfm_bl1_crypto_test_2016, "TFM_BL1_CRYPTO_TEST_2016",
      "Crypto AES256-CTR zero-length test" },
+#if defined(TFM_BL1_2_ENABLE_LMS)
     {&tfm_bl1_crypto_test_2017, "TFM_BL1_CRYPTO_TEST_2017",
      "Crypto LMS verification test" },
+#endif
 };
 
 void register_testsuite_bl1_crypto_interface(struct test_suite_t *p_test_suite)
