@@ -1,7 +1,7 @@
 From a64554d66b1308ca19e45a4bd78ec4df955cd7bb Mon Sep 17 00:00:00 2001
 From: Waleed Elmelegy <waleed.elmelegy@arm.com>
 Date: Wed, 26 Mar 2025 16:11:55 +0000
-Subject: [PATCH 10/17] Update Musca S1/B1 platform configuration
+Subject: [PATCH 10/18] Update Musca S1/B1 platform configuration
 
 Signed-off-by: Waleed Elmelegy <waleed.elmelegy@arm.com>
 ---

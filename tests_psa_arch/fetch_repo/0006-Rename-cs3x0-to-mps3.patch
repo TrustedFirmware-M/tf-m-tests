@@ -1,7 +1,7 @@
 From 1c0e191e5005959b8f0a268c3836e4260126ae48 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Gergely=20Korcs=C3=A1k?= <gergely.korcsak@arm.com>
 Date: Thu, 7 Nov 2024 15:23:43 +0100
-Subject: [PATCH 06/17] Rename cs3x0 to mps3
+Subject: [PATCH 06/18] Rename cs3x0 to mps3
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

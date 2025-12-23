@@ -1,7 +1,7 @@
 From 3d7c2f5459f64cfc73d831d0e2321c2dfb17faff Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Mon, 14 Jul 2025 15:54:09 +0100
-Subject: [PATCH 14/17] Build: Port to the NS side of rse/tc/tc3 platform
+Subject: [PATCH 14/18] Build: Port to the NS side of rse/tc/tc3 platform
 
 Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
 ---

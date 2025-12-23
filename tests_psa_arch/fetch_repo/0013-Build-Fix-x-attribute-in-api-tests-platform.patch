@@ -1,7 +1,7 @@
 From 55acfec3db422c57e49f6ecb9d3b7075210be906 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Mon, 14 Jul 2025 12:49:23 +0100
-Subject: [PATCH 13/17] Build: Fix +x attribute in api-tests/platform
+Subject: [PATCH 13/18] Build: Fix +x attribute in api-tests/platform
 
 Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
 ---

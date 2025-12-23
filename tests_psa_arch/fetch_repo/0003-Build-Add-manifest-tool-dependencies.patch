@@ -1,7 +1,7 @@
 From 7f27ad5b37e82bdc75f3733acbb3a479eda97029 Mon Sep 17 00:00:00 2001
 From: Kevin Peng <kevin.peng@arm.com>
 Date: Thu, 9 Nov 2023 14:40:48 +0800
-Subject: [PATCH 03/17] Build: Add manifest tool dependencies
+Subject: [PATCH 03/18] Build: Add manifest tool dependencies
 
 Signed-off-by: Kevin Peng <kevin.peng@arm.com>
 ---

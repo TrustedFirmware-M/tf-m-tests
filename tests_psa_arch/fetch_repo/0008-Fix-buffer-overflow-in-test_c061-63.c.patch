@@ -1,7 +1,7 @@
 From e44e07fcb31775399ba31eba082d8ed95600a828 Mon Sep 17 00:00:00 2001
 From: Waleed Elmelegy <waleed.elmelegy@arm.com>
 Date: Mon, 3 Mar 2025 16:23:11 +0000
-Subject: [PATCH 08/17] Fix buffer overflow in test_c061/63.c
+Subject: [PATCH 08/18] Fix buffer overflow in test_c061/63.c
 
 Signed-off-by: Waleed Elmelegy <waleed.elmelegy@arm.com>
 ---

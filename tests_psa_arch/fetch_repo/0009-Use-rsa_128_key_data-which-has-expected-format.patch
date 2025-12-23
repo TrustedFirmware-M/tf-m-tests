@@ -1,7 +1,7 @@
 From dd2b65274de6f62258fc60137f5be11dff8e8caf Mon Sep 17 00:00:00 2001
 From: Stephan Koch <koch@oberon.ch>
 Date: Fri, 28 Jun 2024 18:18:55 +0200
-Subject: [PATCH 09/17] Use rsa_128_key_data which has expected format.
+Subject: [PATCH 09/18] Use rsa_128_key_data which has expected format.
 
 Signed-off-by: Stephan Koch <koch@oberon.ch>
 ---
