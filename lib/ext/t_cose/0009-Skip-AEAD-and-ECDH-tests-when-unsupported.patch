@@ -1,7 +1,7 @@
-From ff6b765e0bf7faa01b7ef1fcf0de1c6543435241 Mon Sep 17 00:00:00 2001
+From 73aa467c8c85d4fe53221161b59aad1514f6d9a4 Mon Sep 17 00:00:00 2001
 From: "G. Varga, Gabor" <Gabor.G.Varga@arm.com>
 Date: Mon, 29 Sep 2025 15:22:24 +0200
-Subject: [PATCH 09/10] Skip AEAD and ECDH tests when unsupported
+Subject: [PATCH 09/13] Skip AEAD and ECDH tests when unsupported
 
 Refactor the AEAD and ECDH tests to detect when the crypto backend
 does not support the required algorithms. In that case, treat them as
@@ -12,9 +12,9 @@ Signed-off-by: G. Varga, Gabor <Gabor.G.Varga@arm.com>
 Change-Id: I542376ca168025c4e558be99eb55a7b771282f22
 ---
  crypto_adapters/t_cose_psa_crypto.c |  5 +-
- examples/init_keys_psa.c            | 25 ++++++----
+ examples/init_keys_psa.c            | 20 ++++++--
  test/t_cose_crypto_test.c           | 75 +++++++++++++++++++++--------
- 3 files changed, 75 insertions(+), 30 deletions(-)
+ 3 files changed, 75 insertions(+), 25 deletions(-)
 
 diff --git a/crypto_adapters/t_cose_psa_crypto.c b/crypto_adapters/t_cose_psa_crypto.c
 index 2d3ba4f..c9203db 100644
@@ -33,7 +33,7 @@ index 2d3ba4f..c9203db 100644
      }
  
 diff --git a/examples/init_keys_psa.c b/examples/init_keys_psa.c
-index c4f33aa..2fa27ab 100644
+index c4f33aa..5c7c928 100644
 --- a/examples/init_keys_psa.c
 +++ b/examples/init_keys_psa.c
 @@ -2,7 +2,7 @@
@@ -45,40 +45,7 @@ index c4f33aa..2fa27ab 100644
   *
   * SPDX-License-Identifier: BSD-3-Clause
   *
-@@ -33,7 +33,6 @@ init_signing_key_from_xx(int32_t               cose_algorithm_id,
-     psa_algorithm_t      key_alg;
-     psa_key_attributes_t key_attributes;
- 
--
-     /* There is not a 1:1 mapping from COSE algorithm to key type, but
-      * there is usually an obvious curve for an algorithm. That
-      * is what this does.
-@@ -80,7 +79,6 @@ init_signing_key_from_xx(int32_t               cose_algorithm_id,
-         return T_COSE_ERR_FAIL;
-     }
- 
--
-     /* When importing a key with the PSA API there are two main things
-      * to do.
-      *
-@@ -104,7 +102,6 @@ init_signing_key_from_xx(int32_t               cose_algorithm_id,
-     psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH);
-     psa_set_key_algorithm(&key_attributes, key_alg);
- 
--
-     /* Import the private key. psa_import_key() automatically
-      * generates the public key from the private so no need to import
-      * more than the private key. With ECDSA the public key is always
-@@ -131,8 +128,6 @@ init_signing_key_from_xx(int32_t               cose_algorithm_id,
-     return T_COSE_SUCCESS;
- }
- 
--
--
- /*
-  * Public function, see init_keys.h
-  */
-@@ -239,7 +234,14 @@ init_fixed_test_ec_encryption_key(int32_t            cose_ec_curve_id,
+@@ -239,7 +239,14 @@ init_fixed_test_ec_encryption_key(int32_t            cose_ec_curve_id,
      status = psa_import_key(&attributes,
                              priv_key_bytes.ptr, priv_key_bytes.len,
                              (mbedtls_svc_key_id_t *)(&private_key->key.handle));
@@ -93,7 +60,7 @@ index c4f33aa..2fa27ab 100644
  
      /* Import the public key from the SEC1 representation. It is
       * the only format supported by psa_import_key(). ASN.1/DER/PEM
-@@ -253,6 +255,7 @@ init_fixed_test_ec_encryption_key(int32_t            cose_ec_curve_id,
+@@ -253,6 +260,7 @@ init_fixed_test_ec_encryption_key(int32_t            cose_ec_curve_id,
      status = psa_import_key(&attributes,
                               pub_key_bytes.ptr, pub_key_bytes.len,
                               (mbedtls_svc_key_id_t *)(&public_key->key.handle));
@@ -101,7 +68,7 @@ index c4f33aa..2fa27ab 100644
  
      /*
       * With PSA, it is also possible to import the private key as
-@@ -269,9 +272,13 @@ init_fixed_test_ec_encryption_key(int32_t            cose_ec_curve_id,
+@@ -269,9 +277,13 @@ init_fixed_test_ec_encryption_key(int32_t            cose_ec_curve_id,
      */
  
  
@@ -284,5 +251,5 @@ index 48ff555..d0aedea 100644
  
  
 -- 
-2.51.1
+2.34.1
 

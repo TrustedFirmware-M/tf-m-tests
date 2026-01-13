@@ -1,7 +1,7 @@
-From c79774fa7325d2be77da451c4721c7672cc26d2b Mon Sep 17 00:00:00 2001
+From 3f636c325afc36343cc59bca6e6e9da3c3e42e53 Mon Sep 17 00:00:00 2001
 From: David Vincze <david.vincze@arm.com>
 Date: Tue, 10 Dec 2024 14:52:50 +0000
-Subject: [PATCH 06/10] Disable unnecessary test cases
+Subject: [PATCH 06/13] Disable unnecessary test cases
 
 - HKDF: not implemented properly by the PSA Crypto layer,
 - Encrypt/Decrypt: not needed to be covered (not relevant to TF-M).
@@ -62,5 +62,5 @@ index 17b3b49..510e981 100644
  };
  
 -- 
-2.51.1
+2.34.1
 

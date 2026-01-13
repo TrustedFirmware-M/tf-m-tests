@@ -1,7 +1,7 @@
-From 1cb4ab3d719663c97acb55ba549ec5ad91a1a8db Mon Sep 17 00:00:00 2001
+From 58023dd9ec807e5b6254bef7d77803423d19b2fc Mon Sep 17 00:00:00 2001
 From: David Vincze <david.vincze@arm.com>
 Date: Wed, 15 Jan 2025 19:31:41 +0000
-Subject: [PATCH 05/10] Remove or disable unused functions in PSA Crypto layer
+Subject: [PATCH 05/13] Remove or disable unused functions in PSA Crypto layer
 
 - Remove unused HKDF function from the PSA Crypto adaptor
  layer to prevent build errors due to disabled MbedTLS
@@ -103,5 +103,5 @@ index bf4963c..5718f81 100644
  #if PSA_CRYPTO_HAS_RESTARTABLE_SIGNING
  struct t_cose_psa_crypto_context {
 -- 
-2.51.1
+2.34.1
 
