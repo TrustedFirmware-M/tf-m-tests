@@ -31,7 +31,7 @@ target_compile_definitions(tfm_test_suite_multi_core_ns
 target_link_libraries(tfm_test_suite_multi_core_ns
     PRIVATE
         tfm_test_framework_ns
-        ns_multi_core
+        $<$<BOOL:${TFM_NS_MAILBOX_API}>:ns_multi_core>
         os_wrapper
 )
 
