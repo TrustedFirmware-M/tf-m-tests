@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "config_tfm.h"
 #include "os_wrapper/mutex.h"
 #include "os_wrapper/thread.h"
 #include "os_wrapper/tick.h"
@@ -31,8 +32,12 @@
 #define MAX_NR_HEAVY_TEST_ROUND               0x20
 
 /* Default stack size for child thread */
+#ifndef MULTI_CALL_LIGHT_TEST_STACK_SIZE
 #define MULTI_CALL_LIGHT_TEST_STACK_SIZE      0x200
+#endif /* MULTI_CALL_LIGHT_TEST_STACK_SIZE */
+#ifndef MULTI_CALL_HEAVY_TEST_STACK_SIZE
 #define MULTI_CALL_HEAVY_TEST_STACK_SIZE      0x300
+#endif /* MULTI_CALL_HEAVY_TEST_STACK_SIZE */
 
 /* Test UID copied from ITS test cases */
 #define TEST_UID_1                            2U
