@@ -15,6 +15,8 @@
 #include "psa/internal_trusted_storage.h"
 #include "psa_manifest/sid.h"
 #include "test_framework_helpers.h"
+
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 #include "tfm_ns_mailbox_test.h"
 
 #if (NUM_MAILBOX_QUEUE_SLOT > 1)
@@ -23,6 +25,9 @@
 #else
 #define NR_MULTI_CALL_CHILD                   0
 #endif
+#else /* TFM_PARTITION_NS_AGENT_MAILBOX */
+/* NR_MULTI_CALL_CHILD is expected to be defined by config_tfm.h */
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
 /* The event flag to sync up between parent thread and child threads */
 #define TEST_CHILD_EVENT_FLAG(x)              (uint32_t)(0x1UL << (x))
@@ -121,10 +126,14 @@ static void multi_client_call_test(struct test_result_t *ret,
     uint32_t current_thread_priority, err, total_ticks, total_calls, avg_ticks;
     void *mutex_handle;
     void *child_ids[NR_MULTI_CALL_CHILD];
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
     struct ns_mailbox_stats_res_t stats_res;
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
     struct test_params parent_params, params[NR_MULTI_CALL_CHILD];
 
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
     tfm_ns_mailbox_tx_stats_reinit();
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
     current_thread_handle = os_wrapper_thread_get_handle();
     if (!current_thread_handle) {
@@ -219,10 +228,12 @@ static void multi_client_call_test(struct test_result_t *ret,
         total_calls += params[i].nr_calls;
     }
 
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
     tfm_ns_mailbox_stats_avg_slot(&stats_res);
     TEST_LOG("Totally %d NS mailbox queue slots\r\n", NUM_MAILBOX_QUEUE_SLOT);
     TEST_LOG("%d.%d NS mailbox queue slots are occupied each time in average.\r\n",
              stats_res.avg_nr_slots, stats_res.avg_nr_slots_tenths);
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
     TEST_LOG("Cost %d ticks totally\r\n", total_ticks);
     avg_ticks = total_ticks / total_calls;

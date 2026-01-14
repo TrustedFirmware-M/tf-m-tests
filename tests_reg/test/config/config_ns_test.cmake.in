@@ -16,3 +16,5 @@ set(SYMMETRIC_INITIAL_ATTESTATION          @SYMMETRIC_INITIAL_ATTESTATION@    CA
 set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@  CACHE BOOL   "This variable controls whether the legacy driver interface is used for CC-312")
 
 set(TFM_FWU_BOOTLOADER_LIB                 @TFM_FWU_BOOTLOADER_LIB@           CACHE STRING "Bootloader configure file for Firmware Update partition")
+
+set(PLATFORM_MULTI_CORE_TEST_SUPPORT       @PLATFORM_MULTI_CORE_TEST_SUPPORT@ CACHE STRING "Whether platform has multi core tests support")

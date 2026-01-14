@@ -53,7 +53,12 @@ if (NOT TFM_PARTITION_FIRMWARE_UPDATE)
     set(TEST_S_FWU              OFF        CACHE BOOL      "Whether to build S regression FWU tests")
 endif()
 
-if (NOT TFM_MULTI_CORE_TOPOLOGY)
+# By default PLATFORM_MULTI_CORE_TEST_SUPPORT mirrors TFM_MULTI_CORE_TOPOLOGY,
+# but platform may override if required (e.g. multicore platform uses own
+# communication mechanism)
+set(PLATFORM_MULTI_CORE_TEST_SUPPORT       ${TFM_MULTI_CORE_TOPOLOGY} CACHE BOOL "Whether platform has multi core tests support")
+
+if (NOT PLATFORM_MULTI_CORE_TEST_SUPPORT)
     set(TEST_NS_MULTI_CORE      OFF        CACHE BOOL      "Whether to build NS regression multi-core tests")
 endif()
 
