@@ -50,7 +50,7 @@ __asm("  .global __ARM_use_no_argv\n");
  */
 static const osThreadAttr_t thread_attr = {
     .name = "test_thread",
-    .stack_size = 4096U,
+    .stack_size = 5120U,
     .tz_module = ((TZ_ModuleId_t)TFM_DEFAULT_NSID)
 };
 /**
