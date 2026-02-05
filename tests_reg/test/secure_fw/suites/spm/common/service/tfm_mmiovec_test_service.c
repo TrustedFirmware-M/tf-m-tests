@@ -54,6 +54,11 @@ psa_status_t test_service_outvec_not_unmap(const psa_msg_t *msg)
     for (i = 0; i < MMIOVEC_TEST_VEC_LEN; i++) {
         /* Map the output vector */
         outvec_base = (uint8_t *)psa_map_outvec(msg->handle, i);
+
+        /* check for successful mapping */
+        if (outvec_base == NULL) {
+            return TFM_MMIOVEC_TEST_ERROR;
+        }
     }
 
     return PSA_SUCCESS;
