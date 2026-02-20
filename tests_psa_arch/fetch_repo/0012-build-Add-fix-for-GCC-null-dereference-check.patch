@@ -1,7 +1,7 @@
-From 9a2123684e4c13fad421bf7ae4f53292c561c0ca Mon Sep 17 00:00:00 2001
+From b72e67c8b5e28d40aa55346dd3a0d4c15962f536 Mon Sep 17 00:00:00 2001
 From: Gabor Toth <gabor.toth@arm.com>
 Date: Thu, 17 Apr 2025 16:22:19 +0200
-Subject: [PATCH 12/18] build: Add fix for GCC null-dereference check
+Subject: [PATCH 12/19] build: Add fix for GCC null-dereference check
 
 Turn off GCC null-dereference check on specific test code, which
 should not be executed anyway.
@@ -46,5 +46,5 @@ index efa3a3f..899442c 100644
  }
  
 -- 
-2.43.0
+2.34.1
 

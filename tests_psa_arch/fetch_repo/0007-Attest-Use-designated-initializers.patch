@@ -1,7 +1,7 @@
-From 6d8b02ccff98413acec11c0d1b4542b3c0fdbb06 Mon Sep 17 00:00:00 2001
+From 928835f29a29331ba642ae62e18bf54c8ebfebb1 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Thu, 9 Nov 2023 14:28:04 +0800
-Subject: [PATCH 07/18] Attest: Use designated initializers.
+Subject: [PATCH 07/19] Attest: Use designated initializers.
 
 Armclang 6.21 reports missing-field-initializers warning for missing
 designated initializers. This will be fixed in armclang 6.22.
@@ -228,5 +228,5 @@ index 6817b5f..15d6ce4 100644
        0xDF, 0x93, 0x8D, 0xA3, 0xBB, 0x0B, 0xD1, 0x7D,
        0x00, 0x36, 0xED, 0x49, 0xA2, 0xD0, 0xFC, 0x3F,
 -- 
-2.43.0
+2.34.1
 

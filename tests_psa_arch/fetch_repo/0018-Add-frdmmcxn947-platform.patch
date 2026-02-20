@@ -1,7 +1,7 @@
-From a664f59f828d6505893b0cd2a01c604febeb00e5 Mon Sep 17 00:00:00 2001
+From ba96a60ecbafd2b1db11d3ad96bb5db41f791614 Mon Sep 17 00:00:00 2001
 From: Waqar Tahir <waqar.tahir@nxp.com>
 Date: Tue, 23 Dec 2025 16:20:33 +0100
-Subject: [PATCH 18/18] Add-frdmmcxn947-platform
+Subject: [PATCH 18/19] Add-frdmmcxn947-platform
 
 Added support for mcxn947 platform in psa-arch-test
 
@@ -1058,5 +1058,5 @@ index 0000000..c499d5c
 +)
 +endif()
 -- 
-2.42.0.windows.2
+2.34.1
 

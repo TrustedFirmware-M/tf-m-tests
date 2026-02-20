@@ -1,7 +1,7 @@
-From e44e07fcb31775399ba31eba082d8ed95600a828 Mon Sep 17 00:00:00 2001
+From ea62a03ad2f5f2f0c209f072a3df07d4ebc4c4a5 Mon Sep 17 00:00:00 2001
 From: Waleed Elmelegy <waleed.elmelegy@arm.com>
 Date: Mon, 3 Mar 2025 16:23:11 +0000
-Subject: [PATCH 08/18] Fix buffer overflow in test_c061/63.c
+Subject: [PATCH 08/19] Fix buffer overflow in test_c061/63.c
 
 Signed-off-by: Waleed Elmelegy <waleed.elmelegy@arm.com>
 ---
@@ -38,5 +38,5 @@ index 18b9789..948d902 100644
                           check1[i].expected_status[0],
                           check1[i].expected_status[1],
 -- 
-2.43.0
+2.34.1
 
