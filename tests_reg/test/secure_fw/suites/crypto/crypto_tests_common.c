@@ -2663,6 +2663,175 @@ destroy_key:
     return;
 }
 
+/**
+ * @Note Test vectors are taken from:
+ * https://github.com/ARM-software/psa-api/blob/main/examples/crypto/SP800-108_counter_KDF/README.md
+ */
+static psa_status_t psa_key_derivation_sp800_108_counter_cmac_test_vector(
+    const uint8_t *secret, size_t secret_len,
+    const uint8_t *label, size_t label_len,
+    const uint8_t *context, size_t context_len,
+    const uint8_t *expected, size_t expected_len)
+{
+    psa_key_id_t input_key_id_local = PSA_KEY_ID_NULL;
+    psa_key_attributes_t input_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_derivation_operation_t deriv_ops = psa_key_derivation_operation_init();
+    psa_status_t status;
+    uint8_t derived_output[expected_len];
+
+    /* Import secret key */
+    psa_set_key_usage_flags(&input_key_attr, PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_SIGN_MESSAGE);
+    psa_set_key_algorithm(&input_key_attr, PSA_ALG_CMAC);
+    psa_set_key_type(&input_key_attr, PSA_KEY_TYPE_AES);
+    status = psa_import_key(&input_key_attr, secret, secret_len, &input_key_id_local);
+    if (status != PSA_SUCCESS) {
+        TEST_LOG("psa_import_key failed: 0x%08x\n", status);
+        status = PSA_ERROR_GENERIC_ERROR;
+        goto cleanup;
+    }
+
+    /* Setup derivation */
+    status = psa_key_derivation_setup(&deriv_ops, PSA_ALG_SP800_108_COUNTER_CMAC);
+    if (status != PSA_SUCCESS) {
+        TEST_LOG("Failed to setup operation: 0x%08x\n", status);
+        goto cleanup;
+    }
+
+    /* Set capacity to expected output length (units: bytes for many implementations).
+       If your PSA requires bits, multiply by 8 here. */
+    status = psa_key_derivation_set_capacity(&deriv_ops, expected_len);
+    if (status != PSA_SUCCESS) {
+        TEST_LOG("Failed to set capacity 0x%08x\n", status);
+        goto deriv_abort;
+    }
+
+    /* Input the secret (using the imported key) */
+    status = psa_key_derivation_input_key(&deriv_ops,
+                                          PSA_KEY_DERIVATION_INPUT_SECRET,
+                                          input_key_id_local);
+    if (status != PSA_SUCCESS) {
+        TEST_LOG("Failed to input key: 0x%08x\n", status);
+        goto deriv_abort;
+    }
+
+    /* Input label */
+    status = psa_key_derivation_input_bytes(&deriv_ops,
+                                            PSA_KEY_DERIVATION_INPUT_LABEL,
+                                            label, label_len);
+    if (status != PSA_SUCCESS) {
+        TEST_LOG("Failed to input label: 0x%08x\n", status);
+        goto deriv_abort;
+    }
+
+    /* Input context only if provided (second vector is "without context") */
+    if (context != NULL && context_len > 0) {
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_CONTEXT,
+                                                context, context_len);
+        if (status != PSA_SUCCESS) {
+            TEST_LOG("Failed to input context: 0x%08x\n", status);
+            goto deriv_abort;
+        }
+    }
+
+    /* Produce derived bytes */
+    status = psa_key_derivation_output_bytes(&deriv_ops, derived_output, expected_len);
+    if (status != PSA_SUCCESS) {
+        TEST_LOG("Failed to output derived bytes: 0x%08x\n", status);
+        goto deriv_abort;
+    }
+
+    /* Compare */
+    if (memcmp(derived_output, expected, expected_len) != 0) {
+        TEST_LOG("Derived output mismatch!\n");
+        goto deriv_abort;
+    }
+
+    /* success */
+    status = PSA_SUCCESS;
+
+deriv_abort:
+    psa_key_derivation_abort(&deriv_ops);
+cleanup:
+    psa_destroy_key(input_key_id_local);
+
+    return status;
+}
+
+/* Parent: run multiple vectors; sets ret->val based on overall results */
+static void psa_key_derivation_sp800_108_counter_cmac_tests(struct test_result_t *ret)
+{
+    ret->val = TEST_FAILED;
+    psa_status_t status;
+
+    /* Vector #1: with context (the original vector you ran) */
+    const uint8_t secret1[] = {
+        0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
+        0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0d,0x0f
+    };
+    const uint8_t label1[] = {
+        0x50,0x53,0x41,0x5f,0x41,0x4c,0x47,0x5f,
+        0x53,0x50,0x38,0x30,0x30,0x5f,0x31,0x30,
+        0x38,0x5f,0x43,0x4f,0x55,0x4e,0x54,0x45,
+        0x52,0x20,0x53,0x61,0x6d,0x70,0x6c,0x65
+    };
+    const uint8_t context1[] = {
+        0x53,0x61,0x6d,0x70,0x6c,0x65,0x20,0x6b,0x65,0x79,0x20,0x63,0x72,0x65,0x61,
+        0x74,0x69,0x6f,0x6e,0x20,0x76,0x69,0x61,0x20,0x53,0x50,0x20,0x38,0x30,0x30,
+        0x2d,0x31,0x30,0x38,0x72,0x31,0x20,0x43,0x6f,0x75,0x6e,0x74,0x65,0x72,0x20,
+        0x6d,0x6f,0x64,0x65
+    };
+    const uint8_t expected1[] = {
+        0x3c,0x50,0xb5,0x5a,0x13,0xb9,0x49,0xad,0x25,0xb4,0xb4,0x0f,0xc3,0x7f,0x55,0x38,
+        0x36,0xb5,0x9f,0xa0,0xd0,0x74,0xb7,0x3c,0x83,0x17,0x6d,0x4c,0x10,0x5f,0xc2,0x17,
+        0x83,0x8e,0xc4,0xa1,0xb0,0x7b,0x8a,0xbe,0xa8,0xf1
+    };
+
+    TEST_LOG("Running SP800-108 CMAC vector #1 (with context)...\n");
+    status = psa_key_derivation_sp800_108_counter_cmac_test_vector(
+                secret1, sizeof(secret1),
+                label1, sizeof(label1),
+                context1, sizeof(context1),
+                expected1, sizeof(expected1));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Vector #1 failed");
+        return;
+    }
+
+    /* Vector #2: without context (CMAC without context derived key) */
+    const uint8_t secret2[] = {
+        0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
+        0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0d,0x0f
+    };
+    const uint8_t label2[] = {
+        0x50,0x53,0x41,0x5f,0x41,0x4c,0x47,0x5f,
+        0x53,0x50,0x38,0x30,0x30,0x5f,0x31,0x30,
+        0x38,0x5f,0x43,0x4f,0x55,0x4e,0x54,0x45,
+        0x52,0x20,0x53,0x61,0x6d,0x70,0x6c,0x65
+    };
+    /* no context: pass NULL and 0 */
+    const uint8_t expected2[] = {
+        0xe1,0xec,0xfc,0x00,0x1e,0x2e,0x9a,0xdb,0xd0,0x16,0xb3,0xb4,0xf3,0x23,0xce,0x00,
+        0xc1,0x05,0x82,0xec,0x81,0xe1,0xfc,0x19,0x40,0x47,0x4c,0xa6,0x84,0xf9,0xe5,0x07,
+        0xb5,0x8a,0xbd,0x03,0xbc,0xe5,0x23,0x82,0x05,0x11
+    };
+
+    TEST_LOG("Running SP800-108 CMAC vector #2 (without context)...\n");
+    status = psa_key_derivation_sp800_108_counter_cmac_test_vector(
+                secret2, sizeof(secret2),
+                label2, sizeof(label2),
+                NULL, 0,
+                expected2, sizeof(expected2));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Vector #2 failed");
+        return;
+    }
+
+    /* all vectors passed */
+    ret->val = TEST_PASSED;
+    TEST_LOG("All SP800-108 CMAC test vectors passed\n");
+}
+
 void psa_key_derivation_test(psa_algorithm_t deriv_alg,
                              struct test_result_t *ret)
 {
@@ -2821,6 +2990,10 @@ void psa_key_derivation_test(psa_algorithm_t deriv_alg,
     }
 
     ret->val = TEST_PASSED;
+
+    if (PSA_ALG_IS_SP800_108_COUNTER_CMAC(deriv_alg)) {
+        psa_key_derivation_sp800_108_counter_cmac_tests(ret);
+    }
 
 deriv_abort:
     psa_key_derivation_abort(&deriv_ops);
