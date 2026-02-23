@@ -2510,6 +2510,7 @@ void psa_persistent_key_test(psa_key_id_t key_id, struct test_result_t *ret)
 #define KEY_DERIV_SECRET_LEN       16
 #define KEY_DERIV_PEER_LEN         16
 #define KEY_DERIV_LABEL_INFO_LEN   8
+#define KEY_DERIV_CONTEXT_INFO_LEN 8
 #define KEY_DERIV_SEED_SALT_LEN    8
 #define KEY_DERIV_RAW_MAX_PEER_LEN 100
 #define KEY_DERIV_RAW_OUTPUT_LEN   48
@@ -2579,6 +2580,7 @@ static uint8_t raw_agreement_peer_key[KEY_DERIV_RAW_MAX_PEER_LEN];
 static uint8_t raw_agreement_output_buffer[KEY_DERIV_RAW_OUTPUT_LEN];
 static uint8_t key_deriv_secret[KEY_DERIV_SECRET_LEN];
 static uint8_t key_deriv_label_info[KEY_DERIV_LABEL_INFO_LEN];
+static uint8_t key_deriv_context_info[KEY_DERIV_CONTEXT_INFO_LEN];
 static uint8_t key_deriv_seed_salt[KEY_DERIV_SEED_SALT_LEN];
 /* Reference data for the shared secret obtained by multiplying the private
  * key contained in ecdsa_private_key and its associated public key, and
@@ -2671,22 +2673,34 @@ void psa_key_derivation_test(psa_algorithm_t deriv_alg,
     psa_key_derivation_operation_t deriv_ops;
     psa_status_t status;
     uint8_t counter = 0xA5;
+    psa_key_usage_t key_usage;
+    psa_algorithm_t key_alg;
     psa_key_type_t key_type;
+
+    switch(deriv_alg) {
+    case PSA_ALG_SP800_108_COUNTER_CMAC:
+        key_usage = PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_SIGN_MESSAGE;
+        key_alg = PSA_ALG_CMAC;
+        key_type = PSA_KEY_TYPE_AES;
+        break;
+    default:
+        key_usage = PSA_KEY_USAGE_DERIVE;
+        key_alg = deriv_alg;
+        key_type = PSA_KEY_TYPE_DERIVE;
+    }
 
     /* Prepare the parameters */
     memset(key_deriv_secret, counter, KEY_DERIV_SECRET_LEN);
     memset(key_deriv_label_info, counter++, KEY_DERIV_LABEL_INFO_LEN);
+    memset(key_deriv_context_info, counter++, KEY_DERIV_CONTEXT_INFO_LEN);
     memset(key_deriv_seed_salt, counter++, KEY_DERIV_SEED_SALT_LEN);
 
     deriv_ops = psa_key_derivation_operation_init();
-
-    psa_set_key_usage_flags(&input_key_attr, PSA_KEY_USAGE_DERIVE);
-    psa_set_key_algorithm(&input_key_attr, deriv_alg);
-    key_type = PSA_KEY_TYPE_DERIVE;
+    psa_set_key_usage_flags(&input_key_attr, key_usage);
+    psa_set_key_algorithm(&input_key_attr, key_alg);
     psa_set_key_type(&input_key_attr, key_type);
     status = psa_import_key(&input_key_attr, key_deriv_secret,
                             KEY_DERIV_SECRET_LEN, &input_key_id_local);
-
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to import secret");
         return;
@@ -2749,6 +2763,38 @@ void psa_key_derivation_test(psa_algorithm_t deriv_alg,
                                                 KEY_DERIV_LABEL_INFO_LEN);
         if (status != PSA_SUCCESS) {
             TEST_FAIL("Failed to input info");
+            goto deriv_abort;
+        }
+    } else if (PSA_ALG_IS_SP800_108_COUNTER_CMAC(deriv_alg)) {
+        status = psa_key_derivation_set_capacity(&deriv_ops, KEY_DERIV_OUTPUT_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to set capacity");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_key(&deriv_ops,
+                                              PSA_KEY_DERIVATION_INPUT_SECRET,
+                                              input_key_id_local);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input key");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_LABEL,
+                                                key_deriv_label_info,
+                                                KEY_DERIV_LABEL_INFO_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input label");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_CONTEXT,
+                                                key_deriv_context_info,
+                                                KEY_DERIV_CONTEXT_INFO_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input context");
             goto deriv_abort;
         }
     } else {

@@ -116,6 +116,9 @@ static void tfm_crypto_test_1053(struct test_result_t *ret);
 static void tfm_crypto_test_1055(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_GCM || TFM_CRYPTO_TEST_ALG_CCM */
 #endif /* TFM_CRYPTO_TEST_SINGLE_PART_FUNCS */
+#ifdef TFM_CRYPTO_TEST_SP800_108_COUNTER_CMAC
+static void tfm_crypto_test_1057(struct test_result_t *ret);
+#endif /* TFM_CRYPTO_TEST_SP800_108_COUNTER_CMAC */
 
 static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1001, "TFM_S_CRYPTO_TEST_1001",
@@ -272,6 +275,10 @@ static struct test_t crypto_tests[] = {
      "Secure authenticator based on AEAD"},
 #endif /* TFM_CRYPTO_TEST_ALG_GCM || TFM_CRYPTO_TEST_ALG_CCM */
 #endif /* TFM_CRYPTO_TEST_SINGLE_PART_FUNCS */
+#ifdef TFM_CRYPTO_TEST_SP800_108_COUNTER_CMAC
+    {&tfm_crypto_test_1057, "TFM_S_CRYPTO_TEST_1057",
+     "Secure SP800-108 Counter CMAC key derivation"},
+#endif /* TFM_CRYPTO_TEST_SP800_108_COUNTER_CMAC */
 };
 
 void register_testsuite_s_crypto_interface(struct test_suite_t *p_test_suite)
@@ -721,3 +728,10 @@ static void tfm_crypto_test_1055(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_ALG_GCM || TFM_CRYPTO_TEST_ALG_CCM */
 #endif /* TFM_CRYPTO_TEST_SINGLE_PART_FUNCS */
+
+#ifdef TFM_CRYPTO_TEST_SP800_108_COUNTER_CMAC
+static void tfm_crypto_test_1057(struct test_result_t *ret)
+{
+    psa_key_derivation_test(PSA_ALG_SP800_108_COUNTER_CMAC, ret);
+}
+#endif /* TFM_CRYPTO_TEST_SP800_108_COUNTER_CMAC */

@@ -35,6 +35,7 @@ set(TFM_CRYPTO_TEST_UNSUPPORTED_ALG             ON       CACHE BOOL      "Test u
 set(TFM_CRYPTO_TEST_ALG_DETERMINISTIC_ECDSA     ON       CACHE BOOL      "Test Deterministic ECDSA signing/verification algorithm")
 set(TFM_CRYPTO_TEST_ALG_ECDSA                   ON       CACHE BOOL      "Test ECDSA signing/verification algorithm")
 set(TFM_CRYPTO_TEST_WP_SECP384_R1               OFF      CACHE BOOL      "Test ECDSA verification on P384 curve using Wycheproof suite test vectors")
+set(TFM_CRYPTO_TEST_SP800_108_COUNTER_CMAC      ON       CACHE BOOL      "Test the SP800-108 Conuter CMAC key derivation algorithm")
 
 ################################## FWU Tests ###################################
 
