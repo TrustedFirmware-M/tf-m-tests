@@ -1,0 +1,281 @@
+From 01468c56543a664d5f6bcecc3b650b8d696aeca9 Mon Sep 17 00:00:00 2001
+From: David Vincze <david.vincze@arm.com>
+Date: Fri, 20 Feb 2026 09:45:50 +0000
+Subject: [PATCH 19/19] Replace deprecated psa_key_handle_t type
+
+Fix the Initial Attestation API and ADAC test build by replacing the
+deprecated psa_key_handle_t with psa_key_id_t type. With TF-M's
+transition to TF-PSA-Crypto v1.0, the psa_key_handle_t type
+is no longer used.
+
+Change-Id: I5412b864e6bbe0b3cce37409cbb8adf545987362
+Signed-off-by: David Vincze <david.vincze@arm.com>
+---
+ .../initial_attestation/pal_attestation_crypto.c   |  4 ++--
+ .../crypto/psa-crypto/adac_crypto_psa_mac.c        | 10 +++++-----
+ .../crypto/psa-crypto/adac_crypto_psa_pk.c         | 14 +++++++-------
+ secure-debug/platform/common/include/adac_util.h   |  6 +++---
+ .../platform/common/src/adac_command_util.c        |  6 +++---
+ secure-debug/tests/adac/test_a002/test_a002.c      |  4 ++--
+ secure-debug/tests/adac/test_a005/test_a005.c      |  5 ++---
+ secure-debug/tests/adac/test_a010/test_a010.c      |  4 ++--
+ 8 files changed, 26 insertions(+), 27 deletions(-)
+
+diff --git a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
+index 60040ca..e2f01f4 100644
+--- a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
++++ b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2019-2023, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2019-2026, Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -20,7 +20,7 @@
+ #define PSA_ALG_MD4 ((psa_algorithm_t)0x02000002)
+ 
+ static uint32_t         public_key_registered;
+-static psa_key_handle_t public_key_handle;
++static psa_key_id_t     public_key_handle;
+ 
+ static inline struct q_useful_buf_c useful_buf_head(struct q_useful_buf_c buf,
+                                                   size_t amount)
+diff --git a/secure-debug/crypto/psa-crypto/adac_crypto_psa_mac.c b/secure-debug/crypto/psa-crypto/adac_crypto_psa_mac.c
+index 32d45bf..ed6709a 100644
+--- a/secure-debug/crypto/psa-crypto/adac_crypto_psa_mac.c
++++ b/secure-debug/crypto/psa-crypto/adac_crypto_psa_mac.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2023-2026, Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -27,7 +27,7 @@ psa_status_t psa_adac_mac_verify(psa_algorithm_t alg, const uint8_t *inputs[], s
+     psa_status_t ret = PSA_ERROR_NOT_SUPPORTED;
+     psa_algorithm_t algo;
+     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+-    psa_key_handle_t handle;
++    psa_key_id_t handle;
+     size_t bits;
+ 
+     if (alg == PSA_ALG_CMAC) {
+@@ -70,7 +70,7 @@ psa_status_t psa_adac_mac_verify(psa_algorithm_t alg, const uint8_t *inputs[], s
+ psa_status_t psa_adac_derive_hmac(uint8_t *key, uint8_t *info, size_t size, uint8_t *output)
+ {
+     psa_algorithm_t algo = PSA_ALG_HKDF(PSA_ALG_SHA_256);
+-    psa_key_handle_t handle;
++    psa_key_id_t handle;
+ 
+     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+     psa_set_key_usage_flags(&attributes, 0);
+@@ -116,7 +116,7 @@ psa_status_t psa_adac_derive_cmac(uint8_t *key, uint8_t *context, size_t context
+                                   uint8_t *output)
+ {
+     psa_algorithm_t algo = PSA_ALG_CMAC;
+-    psa_key_handle_t handle;
++    psa_key_id_t handle;
+     size_t l = 0;
+     uint8_t info[16] = {
+             // Label = 'PSA ADAC 1.0'
+@@ -201,7 +201,7 @@ psa_status_t psa_adac_verify_mac(uint8_t key_type, uint8_t *key, size_t key_size
+                                  psa_algorithm_t mac_algo, uint8_t *mac, size_t mac_size)
+ {
+     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+-    psa_key_handle_t handle = -1;
++    psa_key_id_t handle = -1;
+     psa_status_t ret = PSA_ERROR_NOT_SUPPORTED;
+     psa_key_type_t type = 0;
+     size_t bits = 0;
+diff --git a/secure-debug/crypto/psa-crypto/adac_crypto_psa_pk.c b/secure-debug/crypto/psa-crypto/adac_crypto_psa_pk.c
+index c2610f3..5612619 100644
+--- a/secure-debug/crypto/psa-crypto/adac_crypto_psa_pk.c
++++ b/secure-debug/crypto/psa-crypto/adac_crypto_psa_pk.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2023-2026, Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -28,7 +28,7 @@ static const uint8_t f4[] = {0x02, 0x03, 0x01, 0x00, 0x01};
+ #ifdef PSA_ADAC_RSA3072
+ static const uint8_t rsa3072_header[] = {0x30, 0x82, 0x01, 0x89, 0x02, 0x82, 0x01, 0x80, 0x00};
+ 
+-psa_status_t load_rsa_3072_public_key(uint8_t *key, size_t key_size, psa_key_handle_t *handle)
++psa_status_t load_rsa_3072_public_key(uint8_t *key, size_t key_size, psa_key_id_t *handle)
+ {
+     psa_status_t ret;
+ 
+@@ -72,7 +72,7 @@ psa_status_t load_rsa_3072_public_key(uint8_t *key, size_t key_size, psa_key_han
+ #ifdef PSA_ADAC_RSA4096
+ static const uint8_t rsa4096_header[] = {0x30, 0x82, 0x02, 0x09, 0x02, 0x82, 0x02, 0x00, 0x00};
+ 
+-psa_status_t load_rsa_4096_public_key(uint8_t *key, size_t key_size, psa_key_handle_t *handle)
++psa_status_t load_rsa_4096_public_key(uint8_t *key, size_t key_size, psa_key_id_t *handle)
+ {
+     psa_status_t ret;
+ 
+@@ -115,7 +115,7 @@ psa_status_t load_rsa_4096_public_key(uint8_t *key, size_t key_size, psa_key_han
+ 
+ #ifdef PSA_ADAC_EC_P256
+ 
+-psa_status_t load_ecdsa_p256_public_key(uint8_t *key, size_t key_size, psa_key_handle_t *handle)
++psa_status_t load_ecdsa_p256_public_key(uint8_t *key, size_t key_size, psa_key_id_t *handle)
+ {
+     psa_status_t ret;
+ 
+@@ -145,7 +145,7 @@ psa_status_t load_ecdsa_p256_public_key(uint8_t *key, size_t key_size, psa_key_h
+ 
+ #ifdef PSA_ADAC_EC_P521
+ 
+-psa_status_t load_ecdsa_p521_public_key(uint8_t *key, size_t key_size, psa_key_handle_t *handle)
++psa_status_t load_ecdsa_p521_public_key(uint8_t *key, size_t key_size, psa_key_id_t *handle)
+ {
+     psa_status_t ret;
+ 
+@@ -172,7 +172,7 @@ psa_status_t load_ecdsa_p521_public_key(uint8_t *key, size_t key_size, psa_key_h
+ #endif
+ 
+ psa_status_t psa_adac_load_public_key(uint8_t key_type, uint8_t *key, size_t key_size,
+-                                      psa_key_handle_t *handle)
++                                      psa_key_id_t *handle)
+ {
+     psa_status_t ret = PSA_ERROR_NOT_SUPPORTED;
+ 
+@@ -211,7 +211,7 @@ psa_status_t psa_adac_verify_signature(uint8_t key_type, uint8_t *key, size_t ke
+     // cppcheck-suppress misra-c2012-18.8
+     uint8_t hash[PSA_HASH_MAX_SIZE];
+     size_t hash_size;
+-    psa_key_handle_t handle;
++    psa_key_id_t handle;
+     psa_status_t ret;
+ 
+     if ((PSA_ALG_IS_VENDOR_DEFINED(sig_algo) != 0) ||
+diff --git a/secure-debug/platform/common/include/adac_util.h b/secure-debug/platform/common/include/adac_util.h
+index d0d0f9a..ad392bc 100644
+--- a/secure-debug/platform/common/include/adac_util.h
++++ b/secure-debug/platform/common/include/adac_util.h
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2021-2023, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -46,7 +46,7 @@ psa_status_t psa_adac_read_extensions(uint32_t *chain, size_t chain_size, psa_tl
+                                       size_t *extns_count);
+ uint8_t detect_cryptosystem(psa_tlv_t **extns_list, size_t extns_count);
+ uint8_t get_certificate_role(psa_tlv_t **extns_list, size_t extns_count);
+-psa_status_t psa_adac_get_private_key(const char *key_file, uint8_t *type, psa_key_handle_t *handle,
++psa_status_t psa_adac_get_private_key(const char *key_file, uint8_t *type, psa_key_id_t *handle,
+                                       uint8_t **key_ptr, size_t *size);
+ psa_status_t psa_adac_issue_command(uint32_t command, request_packet_t *packet,
+                                     uint8_t *data, size_t data_size);
+@@ -57,7 +57,7 @@ psa_status_t psa_adac_send_certificate(psa_tlv_t **extns_list, size_t extns_coun
+ psa_status_t psa_adac_construct_token(uint8_t challenge[], size_t challenge_size,
+                                       uint8_t sign_type, uint8_t exts[], size_t exts_size,
+                                       uint8_t *fragment[], size_t *fragment_size, uint8_t *perm,
+-                                      psa_key_handle_t handle, uint8_t *key, size_t key_size);
++                                      psa_key_id_t handle, uint8_t *key, size_t key_size);
+ psa_status_t psa_adac_check_cryptosystem_support(response_packet_t *packet, uint8_t key_system);
+ 
+ request_packet_t *request_packet_lock(size_t *max_data_size);
+diff --git a/secure-debug/platform/common/src/adac_command_util.c b/secure-debug/platform/common/src/adac_command_util.c
+index b246abe..1b6d719 100644
+--- a/secure-debug/platform/common/src/adac_command_util.c
++++ b/secure-debug/platform/common/src/adac_command_util.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2021-2023, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -98,7 +98,7 @@ uint8_t get_certificate_role(psa_tlv_t *extns_list[], size_t extn_count)
+     return role_type;
+ }
+ 
+-psa_status_t psa_adac_get_private_key(const char *key_file, uint8_t *type, psa_key_handle_t *handle,
++psa_status_t psa_adac_get_private_key(const char *key_file, uint8_t *type, psa_key_id_t *handle,
+                                       uint8_t **key_ptr, size_t *size)
+ {
+     int ret_val;
+@@ -289,7 +289,7 @@ psa_status_t psa_adac_send_certificate(psa_tlv_t **extns_list, size_t extns_coun
+ psa_status_t psa_adac_construct_token(uint8_t challenge[], size_t challenge_size,
+                                       uint8_t sign_type, uint8_t exts[], size_t exts_size,
+                                       uint8_t *fragment[], size_t *fragment_size, uint8_t *perm,
+-                                      psa_key_handle_t handle, uint8_t *key, size_t key_size)
++                                      psa_key_id_t handle, uint8_t *key, size_t key_size)
+ {
+     psa_status_t r;
+ 
+diff --git a/secure-debug/tests/adac/test_a002/test_a002.c b/secure-debug/tests/adac/test_a002/test_a002.c
+index 6880cbf..9418277 100644
+--- a/secure-debug/tests/adac/test_a002/test_a002.c
++++ b/secure-debug/tests/adac/test_a002/test_a002.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2021-2022 Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2021-2026 Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -103,7 +103,7 @@ void test_entry(val_api_t *val_api)
+ 
+     response_packet_release(response);
+ 
+-    psa_key_handle_t handle;
++    psa_key_id_t handle;
+     uint8_t *key = NULL;
+     size_t key_size = 0;
+ 
+diff --git a/secure-debug/tests/adac/test_a005/test_a005.c b/secure-debug/tests/adac/test_a005/test_a005.c
+index ce97473..47aa5c4 100644
+--- a/secure-debug/tests/adac/test_a005/test_a005.c
++++ b/secure-debug/tests/adac/test_a005/test_a005.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2021-2022 Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2021-2026 Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -101,7 +101,7 @@ void test_entry(val_api_t *val_api)
+ 
+     response_packet_release(response);
+ 
+-    psa_key_handle_t handle;
++    psa_key_id_t handle;
+     uint8_t *key = NULL;
+     size_t key_size = 0;
+ 
+@@ -216,4 +216,3 @@ void test_entry(val_api_t *val_api)
+ test_end:
+     val->test_exit();
+ }
+-
+diff --git a/secure-debug/tests/adac/test_a010/test_a010.c b/secure-debug/tests/adac/test_a010/test_a010.c
+index 8fabca7..c76c64d 100644
+--- a/secure-debug/tests/adac/test_a010/test_a010.c
++++ b/secure-debug/tests/adac/test_a010/test_a010.c
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2021-2022 Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2021-2026 Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -81,7 +81,7 @@ void test_entry(val_api_t *val_api)
+ 
+     response_packet_release(response);
+ 
+-    psa_key_handle_t handle;
++    psa_key_id_t handle;
+     uint8_t *key = NULL;
+     size_t key_size = 0;
+ 
+-- 
+2.34.1
+
