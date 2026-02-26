@@ -7,7 +7,8 @@
 # References:
 #
 # EditorConfig rules https://editorconfig.org/
-# TF-M coding rules  https://tf-m-user-guide.trustedfirmware.org/contributing/coding_guide.html
+# TF-M coding rules  https://trustedfirmware-m.readthedocs.io/en/latest/contributing/coding_guide.html
+
 
 root = true
 

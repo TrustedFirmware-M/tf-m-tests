@@ -26,21 +26,23 @@ Folder Structure
 #######
 License
 #######
-The software is provided under a BSD-3-Clause :doc:`License </license>`.
-Contributions to this project are accepted under the same license with developer sign-off as
-described in the
-`TF-M Contributing Guidelines <https://tf-m-user-guide.trustedfirmware.org/contributing/contributing_process.html>`__
+This software is provided under the `BSD-3-Clause license <license.rst>`_.
+Contributions to this project are accepted under the same license,
+with developer sign-off as described in the `Contribution guidelines`_.
 
-This project contains code or pre-built binaries from other projects as listed below.
-The code from external projects is limited to ``CMSIS`` and ``lib`` folders.
-The original license texts are included in those folders.
+The ``lib/ext`` folder contains 3rd party projects and files with other
+licenses as listed below. The original license texts are included in those folders.
+Below is the list that are different from the BSD-3-Clause and may be a part of the
+runtime image. The source code for these projects except ``CMSIS`` is fetched
+from upstream at build time only.
 
-  - ``CMSIS`` - `Apache License <http://www.apache.org/licenses/>`__ Version 2.0 license
-  - The ``lib/ext`` folder may contain 3rd party projects and files with diverse licenses.
-    Here are some that are different from the BSD-3-Clause and may be a part of the runtime image.
-    The source code for these projects is fetched from upstream at build time only.
+``/lib/ext/CMSIS``
+  `Apache License v2.0
+  <https://github.com/ARM-software/CMSIS_5/blob/develop/LICENSE.txt>`_.
+``/lib/ext/qcbor``
+  `Modified BSD-3-Clause license
+  <https://github.com/laurencelundblade/QCBOR/blob/master/LICENSE>`_
 
-    - ``erpc`` - `Modified BSD-3-Clause license <https://github.com/EmbeddedRPC/erpc/blob/develop/LICENSE>`__
 
 ####################
 Feedback and support
@@ -50,7 +52,8 @@ Feedback can be submitted via email to
 
 .. _Trusted Firmware-M: https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/
 .. _psa-arch-tests: https://github.com/ARM-software/psa-arch-tests
+.. _Contribution guidelines: https://trustedfirmware-m.readthedocs.io/en/latest/contributing/contributing_process.html
 
 --------------
 
-*Copyright (c) 2020-2024, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2026, Arm Limited. All rights reserved.*
