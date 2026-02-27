@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2025, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,8 +12,6 @@
 
 set(ATTEST_KEY_BITS                        @ATTEST_KEY_BITS@                  CACHE STRING "The size of the initial attestation key in bits")
 set(SYMMETRIC_INITIAL_ATTESTATION          @SYMMETRIC_INITIAL_ATTESTATION@    CACHE BOOL   "Use symmetric crypto for initial attestation")
-
-set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@  CACHE BOOL   "This variable controls whether the legacy driver interface is used for CC-312")
 
 set(TFM_FWU_BOOTLOADER_LIB                 @TFM_FWU_BOOTLOADER_LIB@           CACHE STRING "Bootloader configure file for Firmware Update partition")
 
