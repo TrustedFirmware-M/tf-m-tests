@@ -231,11 +231,22 @@ static void tfm_ps_test_1003(struct test_result_t *ret)
     const psa_storage_uid_t uid = TEST_UID_3;
     const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = 0;
+    const uint32_t offset = 0;
+    const uint32_t read_len = 1;
+    uint8_t read_data[1];
+    size_t read_data_len = 0;
 
     /* Set with NULL data pointer */
     status = psa_ps_set(uid, data_len, NULL, flags);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should succeed with NULL data pointer and zero length");
+        return;
+    }
+
+    /* Get written (zero) data */
+    status = psa_ps_get(uid, offset, read_len, read_data, &read_data_len);
+    if ((status != PSA_SUCCESS) || (read_data_len > 0)) {
+        TEST_FAIL("Get should not fail");
         return;
     }
 
