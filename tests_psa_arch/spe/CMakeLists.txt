@@ -11,8 +11,6 @@ include(collect_args)
 
 # Force cross compilation and avoid compiler search and test
 set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_C_COMPILER_FORCED TRUE)
-set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
 collect_build_cmd_args(TFM_CMDLINE_CONFIGS)
 

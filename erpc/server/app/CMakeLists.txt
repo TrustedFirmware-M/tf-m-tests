@@ -51,7 +51,7 @@ add_executable(tfm_ns
     # has a linker issue that required system calls are missing,
     # such as _read and _write. Add stub functions of required
     # system calls to solve this issue.
-    $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:../../../app_broker/syscalls_stub.c>
+    $<$<C_COMPILER_ID:GNU>:../../../app_broker/syscalls_stub.c>
     ${ERPC_REPO_PATH}/erpc_c/setup/erpc_setup_uart_cmsis.cpp
     ${ERPC_REPO_PATH}/erpc_c/transports/erpc_uart_cmsis_transport.cpp
 )
