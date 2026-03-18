@@ -10,6 +10,7 @@ include(remote_library)
 # Default configuration of T_COSE repository
 set(T_COSE_PATH     "DOWNLOAD"      CACHE PATH      "Path to t_cose (or DOWNLOAD to fetch automatically")
 set(T_COSE_VERSION  "v2.0-alpha-2"  CACHE STRING    "The version of t_cose to use")
+set(T_COSE_GIT_REMOTE "https://github.com/laurencelundblade/t_cose.git" CACHE STRING "The URL to retrieve t_cose from.")
 
 fetch_remote_library(
     LIB_NAME                t_cose
@@ -17,7 +18,7 @@ fetch_remote_library(
     LIB_PATCH_DIR           ${CMAKE_CURRENT_LIST_DIR}
     LIB_BASE_DIR            "${CMAKE_BINARY_DIR}/lib/ext"
     FETCH_CONTENT_ARGS
-        GIT_REPOSITORY      https://github.com/laurencelundblade/t_cose.git
+        GIT_REPOSITORY      ${T_COSE_GIT_REMOTE}
         GIT_TAG             ${T_COSE_VERSION}
         GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE

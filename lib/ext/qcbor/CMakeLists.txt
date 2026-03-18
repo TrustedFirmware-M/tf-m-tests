@@ -12,6 +12,7 @@ include(remote_library)
 # Default configuration of QCBOR repository
 set(QCBOR_PATH      "DOWNLOAD"  CACHE PATH      "Path to qcbor (or DOWNLOAD to fetch automatically")
 set(QCBOR_VERSION   "v1.2"      CACHE STRING    "The version of qcbor to use")
+set(QCBOR_GIT_REMOTE "https://github.com/laurencelundblade/QCBOR.git" CACHE STRING "The URL to retrieve qcbor from.")
 
 # Entirely disable the floating-point support
 # in the qcbor library to reduce code size.
@@ -25,7 +26,7 @@ fetch_remote_library(
     LIB_PATCH_DIR           ${CMAKE_CURRENT_LIST_DIR}
     LIB_BASE_DIR            "${CMAKE_BINARY_DIR}/lib/ext"
     FETCH_CONTENT_ARGS
-        GIT_REPOSITORY      https://github.com/laurencelundblade/QCBOR.git
+        GIT_REPOSITORY      ${QCBOR_GIT_REMOTE}
         GIT_TAG             ${QCBOR_VERSION}
         GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
