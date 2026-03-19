@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -23,11 +23,15 @@
  * -----------------------------------------------------------------------------
  */
 
-#include "cmsis_compiler.h"
-#include "RTX_Config.h"
 #include "rtx_os.h"
 
-#ifdef    RTE_Compiler_EventRecorder
+#ifdef    CMSIS_device_header
+#include  CMSIS_device_header
+#else
+#include "cmsis_compiler.h"
+#endif
+
+#ifdef    RTE_CMSIS_View_EventRecorder
 #include "EventRecorder.h"
 #include "EventRecorderConf.h"
 #endif
@@ -87,7 +91,7 @@ __attribute__((section(".bss.os.thread.cb")));
 
 // Thread Default Stack
 #if (OS_THREAD_DEF_STACK_NUM != 0)
-static uint64_t os_thread_def_stack[OS_THREAD_DEF_STACK_NUM*(OS_STACK_SIZE/8)] \
+static uint64_t os_thread_def_stack[(OS_THREAD_DEF_STACK_NUM*OS_STACK_SIZE)/8] \
 __attribute__((section(".bss.os.thread.stack")));
 #endif
 
@@ -105,19 +109,11 @@ __attribute__((section(".data.os.thread.mpi"))) =
 
 // Memory Pool for Thread Stack
 #if (OS_THREAD_USER_STACK_SIZE != 0)
-static uint64_t os_thread_stack[2 + OS_THREAD_NUM + (OS_THREAD_USER_STACK_SIZE/8)] \
+static uint64_t os_thread_stack[(16 + (8*OS_THREAD_NUM) + OS_THREAD_USER_STACK_SIZE)/8] \
 __attribute__((section(".bss.os.thread.stack")));
 #endif
 
 #endif  // (OS_THREAD_OBJ_MEM != 0)
-
-
-// Stack overrun checking
-#if (OS_STACK_CHECK == 0)
-// Override library function
-extern void osRtxThreadStackCheck (void);
-       void osRtxThreadStackCheck (void) {}
-#endif
 
 
 // Idle Thread Control Block
@@ -126,14 +122,21 @@ __attribute__((section(".bss.os.thread.cb")));
 
 // Idle Thread Stack
 static uint64_t os_idle_thread_stack[OS_IDLE_THREAD_STACK_SIZE/8] \
-__attribute__((section(".bss.os.thread.stack")));
+__attribute__((section(".bss.os.thread.idle.stack")));
 
 // Idle Thread Attributes
 static const osThreadAttr_t os_idle_thread_attr = {
+  //lint -e{835} -e{845} "Zero argument to operator"
 #if defined(OS_IDLE_THREAD_NAME)
   OS_IDLE_THREAD_NAME,
 #else
-  NULL,
+  "osRtxIdle",
+#endif
+#ifdef RTX_SAFETY_CLASS
+  osSafetyClass((uint32_t)OS_IDLE_THREAD_CLASS) |
+#endif
+#ifdef RTX_EXECUTION_ZONE
+  osThreadZone((uint32_t)OS_IDLE_THREAD_ZONE)   |
 #endif
   osThreadDetached,
   &os_idle_thread_cb,
@@ -183,14 +186,21 @@ __attribute__((section(".bss.os.thread.cb")));
 
 // Timer Thread Stack
 static uint64_t os_timer_thread_stack[OS_TIMER_THREAD_STACK_SIZE/8] \
-__attribute__((section(".bss.os.thread.stack")));
+__attribute__((section(".bss.os.thread.timer.stack")));
 
 // Timer Thread Attributes
 static const osThreadAttr_t os_timer_thread_attr = {
+  //lint -e{835} -e{845} "Zero argument to operator"
 #if defined(OS_TIMER_THREAD_NAME)
   OS_TIMER_THREAD_NAME,
 #else
-  NULL,
+  "osRtxTimer",
+#endif
+#ifdef RTX_SAFETY_CLASS
+  osSafetyClass((uint32_t)OS_TIMER_THREAD_CLASS) |
+#endif
+#ifdef RTX_EXECUTION_ZONE
+  osThreadZone((uint32_t)OS_TIMER_THREAD_ZONE)   |
 #endif
   osThreadDetached,
   &os_timer_thread_cb,
@@ -217,7 +227,11 @@ __attribute__((section(".bss.os.msgqueue.mem")));
 
 // Timer Message Queue Attributes
 static const osMessageQueueAttr_t os_timer_mq_attr = {
+  //lint -e{835} -e{845} "Zero argument to operator"
   NULL,
+#ifdef RTX_SAFETY_CLASS
+  osSafetyClass((uint32_t)OS_TIMER_THREAD_CLASS) |
+#endif
   0U,
   &os_timer_mq_cb,
   (uint32_t)sizeof(os_timer_mq_cb),
@@ -225,10 +239,8 @@ static const osMessageQueueAttr_t os_timer_mq_attr = {
   (uint32_t)sizeof(os_timer_mq_data)
 };
 
-#else
-
-extern void osRtxTimerThread (void *argument);
-       void osRtxTimerThread (void *argument) { (void)argument; }
+extern int32_t osRtxTimerSetup  (void);
+extern void    osRtxTimerThread (void *argument);
 
 #endif  // ((OS_TIMER_THREAD_STACK_SIZE != 0) && (OS_TIMER_CB_QUEUE != 0))
 
@@ -319,7 +331,7 @@ __attribute__((section(".data.os.mempool.mpi"))) =
 #if ((OS_MEMPOOL_DATA_SIZE % 8) != 0)
 #error "Invalid Data Memory size for Memory Pools!"
 #endif
-static uint64_t os_mp_data[2 + OS_MEMPOOL_NUM + (OS_MEMPOOL_DATA_SIZE/8)] \
+static uint64_t os_mp_data[(16 + (8*OS_MEMPOOL_NUM) + OS_MEMPOOL_DATA_SIZE)/8] \
 __attribute__((section(".bss.os.mempool.mem")));
 #endif
 
@@ -349,7 +361,7 @@ __attribute__((section(".data.os.msgqueue.mpi"))) =
 #if ((OS_MSGQUEUE_DATA_SIZE % 8) != 0)
 #error "Invalid Data Memory size for Message Queues!"
 #endif
-static uint64_t os_mq_data[2 + OS_MSGQUEUE_NUM + (OS_MSGQUEUE_DATA_SIZE/8)] \
+static uint64_t os_mq_data[(16 + ((8+12)*OS_MSGQUEUE_NUM) + OS_MSGQUEUE_DATA_SIZE + 7)/8] \
 __attribute__((section(".bss.os.msgqueue.mem")));
 #endif
 
@@ -361,69 +373,57 @@ __attribute__((section(".bss.os.msgqueue.mem")));
 
 #if (defined(OS_EVR_INIT) && (OS_EVR_INIT != 0))
 
-// Initial Thread configuration covered also Thread Flags and Generic Wait
-#if  defined(OS_EVR_THREAD_FILTER)
-#if !defined(OS_EVR_THFLAGS_FILTER)
-#define OS_EVR_THFLAGS_FILTER   OS_EVR_THREAD_FILTER
-#endif
-#if !defined(OS_EVR_WAIT_FILTER)
-#define OS_EVR_WAIT_FILTER      OS_EVR_THREAD_FILTER
-#endif
-#endif
-
-// Migrate initial filter configuration
-#if  defined(OS_EVR_MEMORY_FILTER)
-#define OS_EVR_MEMORY_LEVEL     (((OS_EVR_MEMORY_FILTER    & 0x80U) != 0U) ? (OS_EVR_MEMORY_FILTER    & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_KERNEL_FILTER)
-#define OS_EVR_KERNEL_LEVEL     (((OS_EVR_KERNEL_FILTER    & 0x80U) != 0U) ? (OS_EVR_KERNEL_FILTER    & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_THREAD_FILTER)
-#define OS_EVR_THREAD_LEVEL     (((OS_EVR_THREAD_FILTER    & 0x80U) != 0U) ? (OS_EVR_THREAD_FILTER    & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_WAIT_FILTER)
-#define OS_EVR_WAIT_LEVEL       (((OS_EVR_WAIT_FILTER      & 0x80U) != 0U) ? (OS_EVR_WAIT_FILTER      & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_THFLAGS_FILTER)
-#define OS_EVR_THFLAGS_LEVEL    (((OS_EVR_THFLAGS_FILTER   & 0x80U) != 0U) ? (OS_EVR_THFLAGS_FILTER   & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_EVFLAGS_FILTER)
-#define OS_EVR_EVFLAGS_LEVEL    (((OS_EVR_EVFLAGS_FILTER   & 0x80U) != 0U) ? (OS_EVR_EVFLAGS_FILTER   & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_TIMER_FILTER)
-#define OS_EVR_TIMER_LEVEL      (((OS_EVR_TIMER_FILTER     & 0x80U) != 0U) ? (OS_EVR_TIMER_FILTER     & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_MUTEX_FILTER)
-#define OS_EVR_MUTEX_LEVEL      (((OS_EVR_MUTEX_FILTER     & 0x80U) != 0U) ? (OS_EVR_MUTEX_FILTER     & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_SEMAPHORE_FILTER)
-#define OS_EVR_SEMAPHORE_LEVEL  (((OS_EVR_SEMAPHORE_FILTER & 0x80U) != 0U) ? (OS_EVR_SEMAPHORE_FILTER & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_MEMPOOL_FILTER)
-#define OS_EVR_MEMPOOL_LEVEL    (((OS_EVR_MEMPOOL_FILTER   & 0x80U) != 0U) ? (OS_EVR_MEMPOOL_FILTER   & 0x0FU) : 0U)
-#endif
-#if  defined(OS_EVR_MSGQUEUE_FILTER)
-#define OS_EVR_MSGQUEUE_LEVEL   (((OS_EVR_MSGQUEUE_FILTER  & 0x80U) != 0U) ? (OS_EVR_MSGQUEUE_FILTER  & 0x0FU) : 0U)
-#endif
-
-#if  defined(RTE_Compiler_EventRecorder)
+#ifdef RTE_CMSIS_View_EventRecorder
 
 // Event Recorder Initialize
 __STATIC_INLINE void evr_initialize (void) {
 
   (void)EventRecorderInitialize(OS_EVR_LEVEL, (uint32_t)OS_EVR_START);
 
-  (void)EventRecorderEnable(OS_EVR_MEMORY_LEVEL,    EvtRtxMemoryNo,       EvtRtxMemoryNo);
-  (void)EventRecorderEnable(OS_EVR_KERNEL_LEVEL,    EvtRtxKernelNo,       EvtRtxKernelNo);
-  (void)EventRecorderEnable(OS_EVR_THREAD_LEVEL,    EvtRtxThreadNo,       EvtRtxThreadNo);
-  (void)EventRecorderEnable(OS_EVR_WAIT_LEVEL,      EvtRtxWaitNo,         EvtRtxWaitNo);
-  (void)EventRecorderEnable(OS_EVR_THFLAGS_LEVEL,   EvtRtxThreadFlagsNo,  EvtRtxThreadFlagsNo);
-  (void)EventRecorderEnable(OS_EVR_EVFLAGS_LEVEL,   EvtRtxEventFlagsNo,   EvtRtxEventFlagsNo);
-  (void)EventRecorderEnable(OS_EVR_TIMER_LEVEL,     EvtRtxTimerNo,        EvtRtxTimerNo);
-  (void)EventRecorderEnable(OS_EVR_MUTEX_LEVEL,     EvtRtxMutexNo,        EvtRtxMutexNo);
-  (void)EventRecorderEnable(OS_EVR_SEMAPHORE_LEVEL, EvtRtxSemaphoreNo,    EvtRtxSemaphoreNo);
-  (void)EventRecorderEnable(OS_EVR_MEMPOOL_LEVEL,   EvtRtxMemoryPoolNo,   EvtRtxMemoryPoolNo);
-  (void)EventRecorderEnable(OS_EVR_MSGQUEUE_LEVEL,  EvtRtxMessageQueueNo, EvtRtxMessageQueueNo);
+#if ((OS_EVR_MEMORY_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_MEMORY_LEVEL & 0x0FU,    EvtRtxMemoryNo,       EvtRtxMemoryNo);
+  (void)EventRecorderDisable(~OS_EVR_MEMORY_LEVEL & 0x0FU,    EvtRtxMemoryNo,       EvtRtxMemoryNo);
+#endif
+#if ((OS_EVR_KERNEL_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_KERNEL_LEVEL & 0x0FU,    EvtRtxKernelNo,       EvtRtxKernelNo);
+  (void)EventRecorderDisable(~OS_EVR_KERNEL_LEVEL & 0x0FU,    EvtRtxKernelNo,       EvtRtxKernelNo);
+#endif
+#if ((OS_EVR_THREAD_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_THREAD_LEVEL & 0x0FU,    EvtRtxThreadNo,       EvtRtxThreadNo);
+  (void)EventRecorderDisable(~OS_EVR_THREAD_LEVEL & 0x0FU,    EvtRtxThreadNo,       EvtRtxThreadNo);
+#endif
+#if ((OS_EVR_WAIT_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_WAIT_LEVEL & 0x0FU,      EvtRtxWaitNo,         EvtRtxWaitNo);
+  (void)EventRecorderDisable(~OS_EVR_WAIT_LEVEL & 0x0FU,      EvtRtxWaitNo,         EvtRtxWaitNo);
+#endif
+#if ((OS_EVR_THFLAGS_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_THFLAGS_LEVEL & 0x0FU,   EvtRtxThreadFlagsNo,  EvtRtxThreadFlagsNo);
+  (void)EventRecorderDisable(~OS_EVR_THFLAGS_LEVEL & 0x0FU,   EvtRtxThreadFlagsNo,  EvtRtxThreadFlagsNo);
+#endif
+#if ((OS_EVR_EVFLAGS_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_EVFLAGS_LEVEL & 0x0FU,   EvtRtxEventFlagsNo,   EvtRtxEventFlagsNo);
+  (void)EventRecorderDisable(~OS_EVR_EVFLAGS_LEVEL & 0x0FU,   EvtRtxEventFlagsNo,   EvtRtxEventFlagsNo);
+#endif
+#if ((OS_EVR_TIMER_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_TIMER_LEVEL & 0x0FU,     EvtRtxTimerNo,        EvtRtxTimerNo);
+  (void)EventRecorderDisable(~OS_EVR_TIMER_LEVEL & 0x0FU,     EvtRtxTimerNo,        EvtRtxTimerNo);
+#endif
+#if ((OS_EVR_MUTEX_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_MUTEX_LEVEL & 0x0FU,     EvtRtxMutexNo,        EvtRtxMutexNo);
+  (void)EventRecorderDisable(~OS_EVR_MUTEX_LEVEL & 0x0FU,     EvtRtxMutexNo,        EvtRtxMutexNo);
+#endif
+#if ((OS_EVR_SEMAPHORE_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_SEMAPHORE_LEVEL & 0x0FU, EvtRtxSemaphoreNo,    EvtRtxSemaphoreNo);
+  (void)EventRecorderDisable(~OS_EVR_SEMAPHORE_LEVEL & 0x0FU, EvtRtxSemaphoreNo,    EvtRtxSemaphoreNo);
+#endif
+#if ((OS_EVR_MEMPOOL_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_MEMPOOL_LEVEL & 0x0FU,   EvtRtxMemoryPoolNo,   EvtRtxMemoryPoolNo);
+  (void)EventRecorderDisable(~OS_EVR_MEMPOOL_LEVEL & 0x0FU,   EvtRtxMemoryPoolNo,   EvtRtxMemoryPoolNo);
+#endif
+#if ((OS_EVR_MSGQUEUE_LEVEL & 0x80U) != 0U)
+  (void)EventRecorderEnable(  OS_EVR_MSGQUEUE_LEVEL & 0x0FU,  EvtRtxMessageQueueNo, EvtRtxMessageQueueNo);
+  (void)EventRecorderDisable(~OS_EVR_MSGQUEUE_LEVEL & 0x0FU,  EvtRtxMessageQueueNo, EvtRtxMessageQueueNo);
+#endif
 }
 
 #else
@@ -452,6 +452,24 @@ __attribute__((section(".rodata"))) =
 #endif
 #if (OS_STACK_WATERMARK != 0)
   | osRtxConfigStackWatermark
+#endif
+#ifdef RTX_SAFETY_FEATURES
+  | osRtxConfigSafetyFeatures
+ #ifdef RTX_SAFETY_CLASS
+  | osRtxConfigSafetyClass
+ #endif
+ #ifdef RTX_EXECUTION_ZONE
+  | osRtxConfigExecutionZone
+ #endif
+ #ifdef RTX_THREAD_WATCHDOG
+  | osRtxConfigThreadWatchdog
+ #endif
+ #ifdef RTX_OBJ_PTR_CHECK
+  | osRtxConfigObjPtrCheck
+ #endif
+ #ifdef RTX_SVC_PTR_CHECK
+  | osRtxConfigSVCPtrCheck
+ #endif
 #endif
   ,
   (uint32_t)OS_TICK_FREQ,
@@ -532,9 +550,13 @@ __attribute__((section(".rodata"))) =
   &os_idle_thread_attr,
 #if ((OS_TIMER_THREAD_STACK_SIZE != 0) && (OS_TIMER_CB_QUEUE != 0))
   &os_timer_thread_attr,
+  osRtxTimerThread,
+  osRtxTimerSetup,
   &os_timer_mq_attr,
   (uint32_t)OS_TIMER_CB_QUEUE
 #else
+  NULL,
+  NULL,
   NULL,
   NULL,
   0U
@@ -546,9 +568,9 @@ __attribute__((section(".rodata"))) =
 //lint -esym(526,irqRtxLib)    "Defined by Exception handlers"
 //lint -esym(714,irqRtxLibRef) "Non weak reference"
 //lint -esym(765,irqRtxLibRef) "Global scope"
-extern       uint8_t  irqRtxLib;
-extern const uint8_t *irqRtxLibRef;
-       const uint8_t *irqRtxLibRef = &irqRtxLib;
+extern const uint8_t         irqRtxLib;
+extern const uint8_t * const irqRtxLibRef;
+       const uint8_t * const irqRtxLibRef = &irqRtxLib;
 
 // Default User SVC Table
 //lint -esym(714,osRtxUserSVC) "Referenced by Exception handlers"
@@ -557,123 +579,105 @@ extern const uint8_t *irqRtxLibRef;
 extern void * const osRtxUserSVC[];
 __WEAK void * const osRtxUserSVC[1] = { (void *)0 };
 
+#if (defined(RTX_SAFETY_CLASS) && defined(RTX_OBJ_PTR_CHECK) && \
+    !((OS_TIMER_THREAD_STACK_SIZE != 0) && (OS_TIMER_CB_QUEUE != 0)))
+extern void osRtxTimerDeleteClass(uint32_t safety_class, uint32_t mode);
+// Default Timer Delete Class Function.
+__WEAK void osRtxTimerDeleteClass(uint32_t safety_class, uint32_t mode) {
+  (void)safety_class;
+  (void)mode;
+}
+#endif
+
+#ifdef RTX_THREAD_WATCHDOG
+// Default Watchdog Alarm Handler.
+__WEAK uint32_t osWatchdogAlarm_Handler (osThreadId_t thread_id) {
+  (void)thread_id;
+  return 0U;
+}
+#endif
+
+#ifdef RTX_EXECUTION_ZONE
+// Default Zone Setup Function.
+__WEAK void osZoneSetup_Callback (uint32_t zone) {
+  (void)zone;
+}
+#endif
+
 
 // OS Sections
 // ===========
 
-#if defined(__CC_ARM)
-__asm void os_cb_sections_wrapper (void) {
-                EXTERN  ||.bss.os.thread.cb$$Base||     [WEAK]
-                EXTERN  ||.bss.os.thread.cb$$Limit||    [WEAK]
-                EXTERN  ||.bss.os.timer.cb$$Base||      [WEAK]
-                EXTERN  ||.bss.os.timer.cb$$Limit||     [WEAK]
-                EXTERN  ||.bss.os.evflags.cb$$Base||    [WEAK]
-                EXTERN  ||.bss.os.evflags.cb$$Limit||   [WEAK]
-                EXTERN  ||.bss.os.mutex.cb$$Base||      [WEAK]
-                EXTERN  ||.bss.os.mutex.cb$$Limit||     [WEAK]
-                EXTERN  ||.bss.os.semaphore.cb$$Base||  [WEAK]
-                EXTERN  ||.bss.os.semaphore.cb$$Limit|| [WEAK]
-                EXTERN  ||.bss.os.mempool.cb$$Base||    [WEAK]
-                EXTERN  ||.bss.os.mempool.cb$$Limit||   [WEAK]
-                EXTERN  ||.bss.os.msgqueue.cb$$Base||   [WEAK]
-                EXTERN  ||.bss.os.msgqueue.cb$$Limit||  [WEAK]
-  
-                AREA    ||.rodata||, DATA, READONLY
-                EXPORT  os_cb_sections
-os_cb_sections
-                DCD     ||.bss.os.thread.cb$$Base||
-                DCD     ||.bss.os.thread.cb$$Limit||
-                DCD     ||.bss.os.timer.cb$$Base||
-                DCD     ||.bss.os.timer.cb$$Limit||
-                DCD     ||.bss.os.evflags.cb$$Base||
-                DCD     ||.bss.os.evflags.cb$$Limit||
-                DCD     ||.bss.os.mutex.cb$$Base||
-                DCD     ||.bss.os.mutex.cb$$Limit||
-                DCD     ||.bss.os.semaphore.cb$$Base||
-                DCD     ||.bss.os.semaphore.cb$$Limit||
-                DCD     ||.bss.os.mempool.cb$$Base||
-                DCD     ||.bss.os.mempool.cb$$Limit||
-                DCD     ||.bss.os.msgqueue.cb$$Base||
-                DCD     ||.bss.os.msgqueue.cb$$Limit||
-
-                AREA    ||.emb_text||, CODE
-};
-#endif
-
 #if (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
-//lint -e{19} "Linker symbols"
-__asm (
-  ".weakref __os_thread_cb_start__,    .bss.os.thread.cb$$Base\n\t"
-  ".weakref __os_thread_cb_end__,      .bss.os.thread.cb$$Limit\n\t"
-  ".weakref __os_timer_cb_start__,     .bss.os.timer.cb$$Base\n\t"
-  ".weakref __os_timer_cb_end__,       .bss.os.timer.cb$$Limit\n\t"
-  ".weakref __os_evflags_cb_start__,   .bss.os.evflags.cb$$Base\n\t"
-  ".weakref __os_evflags_cb_end__,     .bss.os.evflags.cb$$Limit\n\t"
-  ".weakref __os_mutex_cb_start__,     .bss.os.mutex.cb$$Base\n\t"
-  ".weakref __os_mutex_cb_end__,       .bss.os.mutex.cb$$Limit\n\t"
-  ".weakref __os_semaphore_cb_start__, .bss.os.semaphore.cb$$Base\n\t"
-  ".weakref __os_semaphore_cb_end__,   .bss.os.semaphore.cb$$Limit\n\t"
-  ".weakref __os_mempool_cb_start__,   .bss.os.mempool.cb$$Base\n\t"
-  ".weakref __os_mempool_cb_end__,     .bss.os.mempool.cb$$Limit\n\t"
-  ".weakref __os_msgqueue_cb_start__,  .bss.os.msgqueue.cb$$Base\n\t"
-  ".weakref __os_msgqueue_cb_end__,    .bss.os.msgqueue.cb$$Limit\n\t"
-);
+// Initialized through linker
+//lint -esym(728,  __os_thread_cb_start__,    __os_thread_cb_end__)
+//lint -esym(728,  __os_timer_cb_start__,     __os_timer_cb_end__)
+//lint -esym(728,  __os_evflags_cb_start__,   __os_evflags_cb_end__)
+//lint -esym(728,  __os_mutex_cb_start__,     __os_mutex_cb_end__)
+//lint -esym(728,  __os_semaphore_cb_start__, __os_semaphore_cb_end__)
+//lint -esym(728,  __os_mempool_cb_start__,   __os_mempool_cb_end__)
+//lint -esym(728,  __os_msgqueue_cb_start__,  __os_msgqueue_cb_end__)
+static const uint32_t __os_thread_cb_start__    __attribute__((weakref(".bss.os.thread.cb$$Base")));
+static const uint32_t __os_thread_cb_end__      __attribute__((weakref(".bss.os.thread.cb$$Limit")));
+static const uint32_t __os_timer_cb_start__     __attribute__((weakref(".bss.os.timer.cb$$Base")));
+static const uint32_t __os_timer_cb_end__       __attribute__((weakref(".bss.os.timer.cb$$Limit")));
+static const uint32_t __os_evflags_cb_start__   __attribute__((weakref(".bss.os.evflags.cb$$Base")));
+static const uint32_t __os_evflags_cb_end__     __attribute__((weakref(".bss.os.evflags.cb$$Limit")));
+static const uint32_t __os_mutex_cb_start__     __attribute__((weakref(".bss.os.mutex.cb$$Base")));
+static const uint32_t __os_mutex_cb_end__       __attribute__((weakref(".bss.os.mutex.cb$$Limit")));
+static const uint32_t __os_semaphore_cb_start__ __attribute__((weakref(".bss.os.semaphore.cb$$Base")));
+static const uint32_t __os_semaphore_cb_end__   __attribute__((weakref(".bss.os.semaphore.cb$$Limit")));
+static const uint32_t __os_mempool_cb_start__   __attribute__((weakref(".bss.os.mempool.cb$$Base")));
+static const uint32_t __os_mempool_cb_end__     __attribute__((weakref(".bss.os.mempool.cb$$Limit")));
+static const uint32_t __os_msgqueue_cb_start__  __attribute__((weakref(".bss.os.msgqueue.cb$$Base")));
+static const uint32_t __os_msgqueue_cb_end__    __attribute__((weakref(".bss.os.msgqueue.cb$$Limit")));
+#else
+extern const uint32_t __os_thread_cb_start__    __attribute__((weak));
+extern const uint32_t __os_thread_cb_end__      __attribute__((weak));
+extern const uint32_t __os_timer_cb_start__     __attribute__((weak));
+extern const uint32_t __os_timer_cb_end__       __attribute__((weak));
+extern const uint32_t __os_evflags_cb_start__   __attribute__((weak));
+extern const uint32_t __os_evflags_cb_end__     __attribute__((weak));
+extern const uint32_t __os_mutex_cb_start__     __attribute__((weak));
+extern const uint32_t __os_mutex_cb_end__       __attribute__((weak));
+extern const uint32_t __os_semaphore_cb_start__ __attribute__((weak));
+extern const uint32_t __os_semaphore_cb_end__   __attribute__((weak));
+extern const uint32_t __os_mempool_cb_start__   __attribute__((weak));
+extern const uint32_t __os_mempool_cb_end__     __attribute__((weak));
+extern const uint32_t __os_msgqueue_cb_start__  __attribute__((weak));
+extern const uint32_t __os_msgqueue_cb_end__    __attribute__((weak));
 #endif
-
-#if (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)) || \
-    (defined(__GNUC__) && !defined(__CC_ARM))
-
-extern __attribute__((weak)) uint32_t __os_thread_cb_start__;    //lint -esym(526,__os_thread_cb_start__)
-extern __attribute__((weak)) uint32_t __os_thread_cb_end__;      //lint -esym(526,__os_thread_cb_end__)
-extern __attribute__((weak)) uint32_t __os_timer_cb_start__;     //lint -esym(526,__os_timer_cb_start__)
-extern __attribute__((weak)) uint32_t __os_timer_cb_end__;       //lint -esym(526,__os_timer_cb_end__)
-extern __attribute__((weak)) uint32_t __os_evflags_cb_start__;   //lint -esym(526,__os_evflags_cb_start__)
-extern __attribute__((weak)) uint32_t __os_evflags_cb_end__;     //lint -esym(526,__os_evflags_cb_end__)
-extern __attribute__((weak)) uint32_t __os_mutex_cb_start__;     //lint -esym(526,__os_mutex_cb_start__)
-extern __attribute__((weak)) uint32_t __os_mutex_cb_end__;       //lint -esym(526,__os_mutex_cb_end__)
-extern __attribute__((weak)) uint32_t __os_semaphore_cb_start__; //lint -esym(526,__os_semaphore_cb_start__)
-extern __attribute__((weak)) uint32_t __os_semaphore_cb_end__;   //lint -esym(526,__os_semaphore_cb_end__)
-extern __attribute__((weak)) uint32_t __os_mempool_cb_start__;   //lint -esym(526,__os_mempool_cb_start__)
-extern __attribute__((weak)) uint32_t __os_mempool_cb_end__;     //lint -esym(526,__os_mempool_cb_end__)
-extern __attribute__((weak)) uint32_t __os_msgqueue_cb_start__;  //lint -esym(526,__os_msgqueue_cb_start__)
-extern __attribute__((weak)) uint32_t __os_msgqueue_cb_end__;    //lint -esym(526,__os_msgqueue_cb_end__)
-
-//lint -e{19} "Global symbol"
-__asm (".global os_cb_sections");
 
 //lint -e{9067} "extern array declared without size"
-extern const uint32_t os_cb_sections[];
+extern const uint32_t * const os_cb_sections[];
 
 //lint -esym(714,os_cb_sections) "Referenced by debugger"
 //lint -esym(765,os_cb_sections) "Global scope"
-//lint -e{923} -e{9078} "cast from pointer to unsigned int"
-const uint32_t os_cb_sections[] \
+const uint32_t * const os_cb_sections[] \
+__USED \
 __attribute__((section(".rodata"))) =
 {
-  (uint32_t)&__os_thread_cb_start__,
-  (uint32_t)&__os_thread_cb_end__,
-  (uint32_t)&__os_timer_cb_start__,
-  (uint32_t)&__os_timer_cb_end__,
-  (uint32_t)&__os_evflags_cb_start__,
-  (uint32_t)&__os_evflags_cb_end__,
-  (uint32_t)&__os_mutex_cb_start__,
-  (uint32_t)&__os_mutex_cb_end__,
-  (uint32_t)&__os_semaphore_cb_start__,
-  (uint32_t)&__os_semaphore_cb_end__,
-  (uint32_t)&__os_mempool_cb_start__,
-  (uint32_t)&__os_mempool_cb_end__,
-  (uint32_t)&__os_msgqueue_cb_start__,
-  (uint32_t)&__os_msgqueue_cb_end__
+  &__os_thread_cb_start__,
+  &__os_thread_cb_end__,
+  &__os_timer_cb_start__,
+  &__os_timer_cb_end__,
+  &__os_evflags_cb_start__,
+  &__os_evflags_cb_end__,
+  &__os_mutex_cb_start__,
+  &__os_mutex_cb_end__,
+  &__os_semaphore_cb_start__,
+  &__os_semaphore_cb_end__,
+  &__os_mempool_cb_start__,
+  &__os_mempool_cb_end__,
+  &__os_msgqueue_cb_start__,
+  &__os_msgqueue_cb_end__
 };
-
-#endif
 
 
 // OS Initialization
 // =================
 
-#if  defined(__CC_ARM) || \
-    (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
+#if (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
 
 #ifndef __MICROLIB
 //lint -esym(714,_platform_post_stackheap_init) "Referenced by C library"
@@ -691,6 +695,14 @@ __WEAK void software_init_hook (void) {
   (void)osKernelInitialize();
 }
 
+#elif defined(__ICCARM__)
+
+extern void $Super$$__iar_data_init3 (void);
+void $Sub$$__iar_data_init3 (void) {
+  $Super$$__iar_data_init3();
+  (void)osKernelInitialize();
+}
+
 #endif
 
 
@@ -699,8 +711,8 @@ __WEAK void software_init_hook (void) {
 
 // RTOS Kernel Pre-Initialization Hook
 #if (defined(OS_EVR_INIT) && (OS_EVR_INIT != 0))
-void osRtxKernelPreInit (void);
-void osRtxKernelPreInit (void) {
+void osRtxKernelBeforeInit (void);
+void osRtxKernelBeforeInit (void) {
   if (osKernelGetState() == osKernelInactive) {
     evr_initialize();
   }
@@ -708,27 +720,39 @@ void osRtxKernelPreInit (void) {
 #endif
 
 
+// C/C++ Standard Library Floating-point Initialization
+// ====================================================
+
+#if (!defined(RTX_NO_FP_INIT_CLIB) && \
+     (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)) && \
+     !defined(__MICROLIB))
+
+#if (!defined(__ARM_ARCH_7A__) && \
+     (defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
+     (defined(__FPU_USED   ) && (__FPU_USED    == 1U)))
+
+extern void $Super$$_fp_init (void);
+
+void $Sub$$_fp_init (void);
+void $Sub$$_fp_init (void) {
+  $Super$$_fp_init();
+  FPU->FPDSCR = __get_FPSCR();
+}
+
+#endif
+
+#endif
+
+
 // C/C++ Standard Library Multithreading Interface
 // ===============================================
 
-#if ( !defined(RTX_NO_MULTITHREAD_CLIB) && \
-     ( defined(__CC_ARM) || \
-      (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))) && \
-      !defined(__MICROLIB))
+#if (!defined(RTX_NO_MULTITHREAD_CLIB) && \
+     (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)) && \
+     !defined(__MICROLIB))
 
-#define LIBSPACE_SIZE 96
-
-//lint -esym(714,__user_perthread_libspace,_mutex_*) "Referenced by C library"
-//lint -esym(765,__user_perthread_libspace,_mutex_*) "Global scope"
-//lint -esym(9003, os_libspace*) "variables 'os_libspace*' defined at module scope"
-
-// Memory for libspace
-static uint32_t os_libspace[OS_THREAD_LIBSPACE_NUM+1][LIBSPACE_SIZE/4] \
-__attribute__((section(".bss.os.libspace")));
-
-// Thread IDs for libspace
-static osThreadId_t os_libspace_id[OS_THREAD_LIBSPACE_NUM] \
-__attribute__((section(".bss.os.libspace")));
+#if (!defined(RTE_CMSIS_Compiler_OS_Interface_RTOS2_LIBSPACE) && \
+     !defined(RTE_CMSIS_Compiler_OS_Interface_RTOS2_LOCKS))
 
 // Check if Kernel has been started
 static uint32_t os_kernel_is_active (void) {
@@ -741,6 +765,24 @@ static uint32_t os_kernel_is_active (void) {
   }
   return (uint32_t)os_kernel_active;
 }
+
+#endif
+
+#ifndef RTE_CMSIS_Compiler_OS_Interface_RTOS2_LIBSPACE
+
+#define LIBSPACE_SIZE 96
+
+//lint -esym(714,__user_perthread_libspace) "Referenced by C library"
+//lint -esym(765,__user_perthread_libspace) "Global scope"
+//lint -esym(9003, os_libspace*) "variables 'os_libspace*' defined at module scope"
+
+// Memory for libspace
+static uint32_t os_libspace[OS_THREAD_LIBSPACE_NUM+1][LIBSPACE_SIZE/4] \
+__attribute__((section(".bss.os.libspace")));
+
+// Thread IDs for libspace
+static osThreadId_t os_libspace_id[OS_THREAD_LIBSPACE_NUM] \
+__attribute__((section(".bss.os.libspace")));
 
 // Provide libspace for current thread
 void *__user_perthread_libspace (void);
@@ -759,7 +801,7 @@ void *__user_perthread_libspace (void) {
       }
     }
     if (n == (uint32_t)OS_THREAD_LIBSPACE_NUM) {
-      (void)osRtxErrorNotify(osRtxErrorClibSpace, id);
+      (void)osRtxKernelErrorNotify(osRtxErrorClibSpace, id);
     }
   } else {
     n = OS_THREAD_LIBSPACE_NUM;
@@ -769,8 +811,33 @@ void *__user_perthread_libspace (void) {
   return (void *)&os_libspace[n][0];
 }
 
+// Free libspace for specified thread
+static void user_perthread_libspace_free (osThreadId_t id) {
+  uint32_t n;
+
+  for (n = 0U; n < (uint32_t)OS_THREAD_LIBSPACE_NUM; n++) {
+    if (os_libspace_id[n] == id) {
+      os_libspace_id[n] = NULL;
+      break;
+    }
+  }
+}
+
+/// RTOS Thread Before Free Hook
+void osRtxThreadBeforeFree (osThreadId_t id);
+void osRtxThreadBeforeFree (osThreadId_t id) {
+  user_perthread_libspace_free(id);
+}
+
+#endif
+
+#ifndef RTE_CMSIS_Compiler_OS_Interface_RTOS2_LOCKS
+
 // Mutex identifier
 typedef void *mutex;
+
+//lint -esym(714,_mutex_*) "Referenced by C library"
+//lint -esym(765,_mutex_*) "Global scope"
 
 //lint -save "Function prototypes defined in C library"
 //lint -e970 "Use of 'int' outside of a typedef"
@@ -787,7 +854,7 @@ int _mutex_initialize(mutex *m) {
     result = 1;
   } else {
     result = 0;
-    (void)osRtxErrorNotify(osRtxErrorClibMutex, m);
+    (void)osRtxKernelErrorNotify(osRtxErrorClibMutex, m);
   }
   return result;
 }
@@ -818,5 +885,7 @@ void _mutex_free(mutex *m) {
 }
 
 //lint -restore
+
+#endif
 
 #endif
