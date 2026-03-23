@@ -1,0 +1,36 @@
+From 92f8f71e92cd2c10677eb76f20d4b98978392de8 Mon Sep 17 00:00:00 2001
+From: Nicola Mazzucato <nicola.mazzucato@arm.com>
+Date: Mon, 23 Mar 2026 15:02:24 +0000
+Subject: [PATCH] ARMCLANG.cmake: Remove -fshort-enums and -fshort-wchar
+ options
+
+When RTX and NS are built without the -fshort options,
+a linking error appears:
+Error: L6242E: Cannot link object xyz.o as its attributes are
+incompatible with the image attributes.
+   ... wchart-16 clashes with wchart-32.
+   ... packed-enum clashes with enum_is_int.
+
+Remove those -fshort flags while other other components
+are also built without such flags.
+
+Signed-off-by: Nicola Mazzucato <nicola.mazzucato@arm.com>
+---
+ api-tests/tools/cmake/compiler/ARMCLANG.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/api-tests/tools/cmake/compiler/ARMCLANG.cmake b/api-tests/tools/cmake/compiler/ARMCLANG.cmake
+index 4b792b3..ae73f79 100644
+--- a/api-tests/tools/cmake/compiler/ARMCLANG.cmake
++++ b/api-tests/tools/cmake/compiler/ARMCLANG.cmake
+@@ -64,6 +64,6 @@ elseif(${CPU_ARCH} STREQUAL armv8a)
+     set(TARGET_SWITCH "-march=armv8-a")
+ endif()
+ 
+-set(CMAKE_C_FLAGS              "--target=arm-arm-none-eabi ${TARGET_SWITCH} -g -Wall -Werror -Wextra -fshort-enums -fshort-wchar -funsigned-char -fdata-sections -ffunction-sections -mno-unaligned-access -mfpu=none")
++set(CMAKE_C_FLAGS              "--target=arm-arm-none-eabi ${TARGET_SWITCH} -g -Wall -Werror -Wextra -funsigned-char -fdata-sections -ffunction-sections -mno-unaligned-access -mfpu=none")
+ set(CMAKE_ASM_FLAGS            "${TARGET_SWITCH} -mthumb")
+ set(CMAKE_EXE_LINKER_FLAGS     "--strict --map --symbols --xref  --info=summarysizes,sizes,totals,unused,veneers --diag_warning=L6204")
+-- 
+2.34.1
+
