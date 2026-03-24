@@ -37,7 +37,7 @@ extern "C" {
  * input parameters need to be put into a struct. Then put the pointer of the
  * struct into func_table.
  * The length of func_return should be same as func_num. The return value of
- * each funtion will be stored in func_return after the function is finished.
+ * each function will be stored in func_return after the function is finished.
  */
 void fp_func_jump_template(uintptr_t *func_table, uintptr_t *func_return,
                            uint32_t func_num);

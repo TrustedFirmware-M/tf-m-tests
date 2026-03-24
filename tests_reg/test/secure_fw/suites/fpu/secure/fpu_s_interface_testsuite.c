@@ -181,11 +181,11 @@ static void tfm_fpu_test_fp_protection_s_after_s_interrupt(
 
     if (memcmp(fp_caller_buffer, expecting_caller_content,
                FP_CALLER_BUF_SIZE)) {
-        TEST_FAIL("FP caller registers are not correctly retored in client!");
+        TEST_FAIL("FP caller registers are not correctly restored in client!");
     }
 
     if (memcmp(fp_callee_buffer, expecting_callee_content,
                FP_CALLEE_BUF_SIZE)) {
-        TEST_FAIL("FP callee registers are not correctly retored in client!");
+        TEST_FAIL("FP callee registers are not correctly restored in client!");
     }
 }
