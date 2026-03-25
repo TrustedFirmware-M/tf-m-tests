@@ -1,7 +1,7 @@
 From a461f8968e70d5fd8b72fa6ff0c14821b161af10 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Wed, 16 Jul 2025 21:48:00 +0100
-Subject: [PATCH 16/19] Build: Port to the NS side of rse/tc/tc4 platform
+Subject: [PATCH 16/20] Build: Port to the NS side of rse/tc/tc4 platform
 
 Port TC4 just as a copy of TC3 to allow running on different
 platforms FVPs

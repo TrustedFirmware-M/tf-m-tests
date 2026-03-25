@@ -1,39 +1,43 @@
-From ba96a60ecbafd2b1db11d3ad96bb5db41f791614 Mon Sep 17 00:00:00 2001
-From: Waqar Tahir <waqar.tahir@nxp.com>
-Date: Tue, 23 Dec 2025 16:20:33 +0100
-Subject: [PATCH 18/20] Add-frdmmcxn947-platform
+From f82408b37e54c91ab30c5838cc0a17f8de46ee69 Mon Sep 17 00:00:00 2001
+From: Marc JACOB <marc.jacob@st.com>
+Date: Wed, 25 Mar 2026 08:35:11 +0100
+Subject: [PATCH 20/20] Add stm32u3 platform
 
-Added support for mcxn947 platform in psa-arch-test
-
-Signed-off-by: Waqar Tahir <waqar.tahir@nxp.com>
+Signed-off-by: Marc JACOB <marc.jacob@st.com>
 ---
  .../nspe/pal_attestation_config.h             | 111 +++++
- .../nspe/pal_config.h                         |  99 +++++
+ .../nspe/pal_config.h                         | 100 +++++
  .../nspe/pal_crypto_config.h                  | 414 ++++++++++++++++++
- .../nspe/pal_driver_intf.c                    | 152 +++++++
+ .../nspe/pal_driver_intf.c                    | 147 +++++++
  .../nspe/pal_storage_config.h                 |  27 ++
- .../tgt_dev_apis_tfm_frdmmcxn947/target.cfg   |  47 ++
- .../tgt_dev_apis_tfm_frdmmcxn947/target.cmake | 142 ++++++
- 7 files changed, 992 insertions(+)
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_attestation_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_crypto_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_driver_intf.c
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_storage_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cfg
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cmake
+ .../nspe/pal_wd_platform.h                    | 123 ++++++
+ .../nspe/pal_wd_stm.c                         |  63 +++
+ .../nspe/pal_wd_stm.h                         |  74 ++++
+ .../tgt_dev_apis_tfm_stm32u3/target.cfg       |  45 ++
+ .../tgt_dev_apis_tfm_stm32u3/target.cmake     | 100 +++++
+ 10 files changed, 1204 insertions(+)
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake
 
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_attestation_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h
 new file mode 100644
-index 0000000..c9c3cf1
+index 0000000..0e23f14
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_attestation_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h
 @@ -0,0 +1,111 @@
 +/** @file
-+ * Copyright (c) 2020, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 + * SPDX-License-Identifier : Apache-2.0
 + *
-+ * Copyright 2025 NXP
++ * Copyright (c) 2026, STMicroelectronics.
 + * SPDX-License-Identifier : Apache-2.0
 + *
 + * Licensed under the Apache License, Version 2.0 (the "License");
@@ -140,17 +144,17 @@ index 0000000..c9c3cf1
 +};
 +
 +#endif /* _PAL_ATTESTATION_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h
 new file mode 100644
-index 0000000..c8165de
+index 0000000..8a1af1a
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_config.h
-@@ -0,0 +1,99 @@
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h
+@@ -0,0 +1,100 @@
 +/** @file
-+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 + * SPDX-License-Identifier : Apache-2.0
 + *
-+ * Copyright 2025 NXP
++ * Copyright (c) 2026, STMicroelectronics.
 + * SPDX-License-Identifier : Apache-2.0
 + *
 + * Licensed under the Apache License, Version 2.0 (the "License");
@@ -186,12 +190,13 @@ index 0000000..c8165de
 +#define NONSECURE_TEST_BUILD
 +
 +/* If not defined, skip watchdog programming */
-+// #define WATCHDOG_AVAILABLE
++#define WATCHDOG_AVAILABLE
 +
 +/* Are Dynamic memory APIs available to secure partition? */
-+// #define SP_HEAP_MEM_SUPP
++#define SP_HEAP_MEM_SUPP
++
 +/* PSA Isolation level supported by platform */
-+#define PLATFORM_PSA_ISOLATION_LEVEL 2
++#define PLATFORM_PSA_ISOLATION_LEVEL 3
 +#endif /* PSA_CMAKE_BUILD */
 +
 +/* Version of crypto spec used in attestation */
@@ -245,17 +250,17 @@ index 0000000..c8165de
 +#endif
 +
 +#endif /* _PAL_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_crypto_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h
 new file mode 100644
-index 0000000..2e047d4
+index 0000000..d6b9920
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_crypto_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h
 @@ -0,0 +1,414 @@
 +/** @file
-+ * Copyright (c) 2019-2024, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 + * SPDX-License-Identifier : Apache-2.0
 + *
-+ * Copyright 2025 NXP
++ * Copyright (c) 2026, STMicroelectronics.
 + * SPDX-License-Identifier : Apache-2.0
 + *
 + * Licensed under the Apache License, Version 2.0 (the "License");
@@ -321,7 +326,6 @@ index 0000000..2e047d4
 +#define ARCH_TEST_ECC_CURVE_SECP384R1
 +#endif
 +#endif
-+
 +/* curves of size <255 are obsolete algorithms, should be disabled. */
 +#undef ARCH_TEST_ECC_CURVE_SECP192R1
 +#undef ARCH_TEST_ECC_CURVE_SECP224R1
@@ -348,8 +352,6 @@ index 0000000..2e047d4
 + *
 + * Comment macros to disable the types
 + */
-+/* Following test(checks) have been disabled, as these are weak algos 
-+ * and will not be supported by NXP platforms by default. */
 +//#define ARCH_TEST_DES
 +//#define ARCH_TEST_DES_1KEY
 +//#define ARCH_TEST_DES_2KEY
@@ -376,8 +378,6 @@ index 0000000..2e047d4
 + *
 + * Enable the ARC4 key type.
 + */
-+/* Following test(checks) have been disabled, as its a weak algo and will not be 
-+ * supported by NXP platforms by default. */
 +//#define ARCH_TEST_ARC4
 +
 +/**
@@ -521,17 +521,11 @@ index 0000000..2e047d4
 + *
 + * Comment macros to disable the types
 + */
-+
-+
-+/* Following test(checks) have been disabled, as these are weak algo and will not 
-+ * be supported by NXP platforms by default. */
 +//#define ARCH_TEST_MD2
 +//#define ARCH_TEST_MD4
 +//#define ARCH_TEST_MD5
 +//#define ARCH_TEST_RIPEMD160
 +//#define ARCH_TEST_SHA1
-+
-+
 +#ifndef TF_M_PROFILE_SMALL
 +#define ARCH_TEST_SHA224
 +#endif
@@ -548,9 +542,6 @@ index 0000000..2e047d4
 +//#define ARCH_TEST_SHA3_256
 +//#define ARCH_TEST_SHA3_384
 +//#define ARCH_TEST_SHA3_512
-+
-+// SHA224 is not in our scope of testing
-+#undef ARCH_TEST_SHA224
 +
 +/**
 + * \def ARCH_TEST_HKDF
@@ -656,6 +647,20 @@ index 0000000..2e047d4
 +//#define ARCH_TEST_ECC_ASYMMETRIC_API_SUPPORT
 +
 +/**
++ * \def ARCH_TEST_HASH_SUSPEND
++ *
++ * Enable has suspend.
++*/
++//#define ARCH_TEST_HASH_SUSPEND
++
++/**
++ * \def ARCH_TEST_HASH_RESUME
++ *
++ * Enable has resume.
++*/
++//#define ARCH_TEST_HASH_RESUME
++
++/**
 + * \def ARCH_TEST_PBKDF2
 + *
 + * Enable the Password-based Key derivation functions - 2.
@@ -665,17 +670,17 @@ index 0000000..2e047d4
 +#include "pal_crypto_config_check.h"
 +
 +#endif /* _PAL_CRYPTO_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_driver_intf.c b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_driver_intf.c
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c
 new file mode 100644
-index 0000000..39f6bff
+index 0000000..77b7a1c
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_driver_intf.c
-@@ -0,0 +1,152 @@
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c
+@@ -0,0 +1,147 @@
 +/** @file
-+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 + * SPDX-License-Identifier : Apache-2.0
 + *
-+ * Copyright 2025 NXP
++ * Copyright (c) 2026, STMicroelectronics.
 + * SPDX-License-Identifier : Apache-2.0
 + *
 + * Licensed under the Apache License, Version 2.0 (the "License");
@@ -692,10 +697,9 @@ index 0000000..39f6bff
 +**/
 +
 +#include "pal_common.h"
++#include "pal_uart.h"
 +#include "pal_nvmem.h"
-+#include <stdio.h>
-+
-+int32_t tfm_platform_system_reset(void);
++#include "pal_wd_stm.h"
 +
 +/**
 +    @brief    - This function initializes the UART
@@ -704,7 +708,7 @@ index 0000000..39f6bff
 +**/
 +int pal_uart_init_ns(uint32_t uart_base_addr)
 +{
-+    (void) uart_base_addr;
++    pal_uart_stm_init(uart_base_addr);
 +    return PAL_STATUS_SUCCESS;
 +}
 +
@@ -717,7 +721,7 @@ index 0000000..39f6bff
 +
 +int pal_print_ns(const char *str, int32_t data)
 +{
-+    printf(str, data);
++    pal_uart_stm_print(str, data);
 +    return PAL_STATUS_SUCCESS;
 +}
 +
@@ -730,10 +734,7 @@ index 0000000..39f6bff
 +**/
 +int pal_wd_timer_init_ns(addr_t base_addr, uint32_t time_us, uint32_t timer_tick_us)
 +{
-+    (void) (base_addr);
-+    (void) (time_us);
-+    (void) (timer_tick_us);
-+    return PAL_STATUS_SUCCESS;
++    return pal_wd_stm_init(base_addr, time_us, timer_tick_us);
 +}
 +
 +/**
@@ -743,8 +744,7 @@ index 0000000..39f6bff
 +**/
 +int pal_wd_timer_enable_ns(addr_t base_addr)
 +{
-+    (void) (base_addr);
-+    return PAL_STATUS_SUCCESS;
++    return pal_wd_stm_enable(base_addr);
 +}
 +
 +/**
@@ -754,8 +754,7 @@ index 0000000..39f6bff
 +**/
 +int pal_wd_timer_disable_ns(addr_t base_addr)
 +{
-+    (void) (base_addr);
-+    return PAL_STATUS_SUCCESS;
++    return pal_wd_stm_disable(base_addr);
 +}
 +
 +/**
@@ -808,7 +807,7 @@ index 0000000..39f6bff
 +{
 +    /* Add logic to terminate the simluation */
 +
-+    while(1)
++    while (1)
 +    {
 +        __asm volatile("WFI");
 +    }
@@ -821,19 +820,20 @@ index 0000000..39f6bff
 +**/
 +int pal_system_reset(void)
 +{
-+    return tfm_platform_system_reset();
++    /* Reset functionality is not functional */
++    return PAL_STATUS_UNSUPPORTED_FUNC;
 +}
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_storage_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_storage_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h
 new file mode 100644
-index 0000000..cce094e
+index 0000000..8d5eaf7
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/nspe/pal_storage_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h
 @@ -0,0 +1,27 @@
 +/** @file
-+ * Copyright (c) 2020, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 + * SPDX-License-Identifier : Apache-2.0
 + *
-+ * Copyright 2025 NXP
++ * Copyright (c) 2026, STMicroelectronics.
 + * SPDX-License-Identifier : Apache-2.0
 + *
 + * Licensed under the Apache License, Version 2.0 (the "License");
@@ -856,17 +856,298 @@ index 0000000..cce094e
 +#define ARCH_TEST_STORAGE_UID_MAX_SIZE 512
 +
 +#endif /* _PAL_STORAGE_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cfg b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cfg
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h
 new file mode 100644
-index 0000000..b9c0c6a
+index 0000000..4931d91
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cfg
-@@ -0,0 +1,47 @@
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h
+@@ -0,0 +1,123 @@
++/** @file
++ * Copyright (c) 2026, STMicroelectronics.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++#ifndef _PAL_WD_PLATFORM_H_
++#define _PAL_WD_PLATFORM_H_
++
++#pragma once
++
++#include <stdint.h>
++#include "pal_common.h"
++
++#define PAL_WD_COUNTER_MIN           (0x40u)
++#define PAL_WD_COUNTER_MAX           (0x7Fu)
++#define PAL_WD_CAN_BE_DISABLED       0u
++
++#define __IO volatile
++typedef struct {
++    __IO uint32_t CR;   /* Control register */
++    __IO uint32_t CFR;  /* Configuration register */
++    __IO uint32_t SR;   /* Status register */
++} WWDG_TypeDef;
++
++/* Addresses & masks */
++#define WWDG_BASE_ADDR       ((addr_t)0x40002C00u) /* WWDG register Base address (from Reference Manual) */
++#define WWDG                 ((WWDG_TypeDef *)WWDG_BASE_ADDR)
++
++/* Bits, prescaler, etc... */
++#define WWDG_CR_T_Pos        (0U)
++#define WWDG_CR_T_Msk        (0x7FUL << WWDG_CR_T_Pos)
++#define WWDG_CR_T            WWDG_CR_T_Msk
++#define WWDG_CR_WDGA_Pos     (7U)
++#define WWDG_CR_WDGA_Msk     (0x1UL << WWDG_CR_WDGA_Pos)
++#define WWDG_CR_WDGA         WWDG_CR_WDGA_Msk
++
++#define WWDG_CFR_W_Pos       (0U)
++#define WWDG_CFR_W_Msk       (0x7FUL << WWDG_CFR_W_Pos)
++#define WWDG_CFR_W           WWDG_CFR_W_Msk
++
++#define WWDG_CFR_WDGTB_Pos   (11U)
++#define WWDG_CFR_WDGTB_Msk   (0x7UL << WWDG_CFR_WDGTB_Pos)
++#define WWDG_CFR_WDGTB       WWDG_CFR_WDGTB_Msk
++
++#define LL_WWDG_PRESCALER_128    ((0x4UL | 0x2UL | 0x1UL) << WWDG_CFR_WDGTB_Pos)
++
++#ifndef MODIFY_REG
++#define MODIFY_REG(REG, CLEARMASK, SETMASK)  \
++    do {                                     \
++        (REG) = (((REG) & ~(CLEARMASK)) | (SETMASK)); \
++    } while (0)
++#endif
++
++static inline void PAL_WD_ENABLE_CLOCK(void)
++{
++    /* clock WWDG */
++    #define RCC_APB1ENR1_WWDGEN_Pos  (11U) /* WWDG ENABLE = bit 11 */
++    #define RCC_APB1ENR1_WWDGEN_Msk  (0x1UL << RCC_APB1ENR1_WWDGEN_Pos)
++    #define RCC_APB1ENR1_WWDGEN      RCC_APB1ENR1_WWDGEN_Msk
++
++    volatile uint32_t *reg = (uint32_t *)0x40030C9C; /* = RCC register Base address (0x40030C00) + RCC_APB1ENR1 offest (0x9C) */
++    *reg |= RCC_APB1ENR1_WWDGEN;
++}
++
++static inline void PAL_WD_CONFIGURE_PRESCALER(addr_t base_addr)
++{
++    WWDG_TypeDef *wd = (WWDG_TypeDef *)base_addr;
++    MODIFY_REG(wd->CFR, WWDG_CFR_WDGTB, LL_WWDG_PRESCALER_128);
++}
++
++static inline void PAL_WD_SET_COUNTER(addr_t base_addr, uint32_t value)
++{
++    WWDG_TypeDef *wd = (WWDG_TypeDef *)base_addr;
++    MODIFY_REG(wd->CR, WWDG_CR_T, (value & 0x7Fu));
++}
++
++static inline void PAL_WD_CONFIGURE_WINDOW(addr_t base_addr, uint32_t value)
++{
++    WWDG_TypeDef *wd = (WWDG_TypeDef *)base_addr;
++    MODIFY_REG(wd->CFR, WWDG_CFR_W, (value & 0x7Fu));
++}
++
++static inline void PAL_WD_EXTRA_HW_CONFIG(addr_t base_addr)
++{
++    (void)base_addr;
++    /* nothing for now */
++}
++
++static inline void PAL_WD_START(addr_t base_addr)
++{
++#if 0
++   WWDG_TypeDef *wd = (WWDG_TypeDef *)base_addr;
++   wd->CR |= WWDG_CR_WDGA;
++#else
++    (void)base_addr;
++    /* nothing for now */
++#endif
++}
++
++static inline void PAL_WD_STOP(addr_t base_addr)
++{
++    (void)base_addr;
++    /* not supported */
++}
++
++static inline int PAL_WD_IS_ENABLED(addr_t base_addr)
++{
++    WWDG_TypeDef *wd = (WWDG_TypeDef *)base_addr;
++    return ((wd->CR & WWDG_CR_WDGA) != 0u);
++}
++
++#endif /* _PAL_WD_PLATFORM_H_ */
+\ No newline at end of file
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c
+new file mode 100644
+index 0000000..673e8d6
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c
+@@ -0,0 +1,63 @@
++/** @file
++ * Copyright (c) 2026, STMicroelectronics.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++#include "pal_wd_stm.h"
++#include "pal_wd_platform.h"
++#include "pal_common.h"
++
++int pal_wd_stm_init(addr_t base_addr, uint32_t time_us, uint32_t timer_tick_us)
++{
++    if ((time_us == 0u) || (timer_tick_us == 0u) ||
++        (time_us > WDOG_TIMER_MAX_VALUE)) {
++        return PAL_STATUS_ERROR;
++    }
++
++    uint32_t ticks = time_us / timer_tick_us;
++    if (ticks == 0u) {
++        ticks = 1u;
++    }
++
++    if (ticks < PAL_WD_COUNTER_MIN) {
++        ticks = PAL_WD_COUNTER_MIN;
++    } else if (ticks > PAL_WD_COUNTER_MAX) {
++        ticks = PAL_WD_COUNTER_MAX;
++    }
++
++    PAL_WD_ENABLE_CLOCK();
++    PAL_WD_CONFIGURE_PRESCALER(base_addr);
++    PAL_WD_SET_COUNTER(base_addr, ticks);
++    PAL_WD_CONFIGURE_WINDOW(base_addr, ticks);
++    PAL_WD_EXTRA_HW_CONFIG(base_addr);
++
++    return PAL_STATUS_SUCCESS;
++}
++
++int pal_wd_stm_enable(addr_t base_addr)
++{
++    PAL_WD_START(base_addr);
++    return PAL_STATUS_SUCCESS;
++}
++
++int pal_wd_stm_disable(addr_t base_addr)
++{
++    (void)base_addr;
++    return PAL_STATUS_SUCCESS;
++}
++
++int pal_wd_stm_is_enabled(addr_t base_addr)
++{
++    return PAL_WD_IS_ENABLED(base_addr) ? PAL_STATUS_SUCCESS : PAL_STATUS_ERROR;
++}
+\ No newline at end of file
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h
+new file mode 100644
+index 0000000..1553958
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h
+@@ -0,0 +1,74 @@
++/** @file
++ * Copyright (c) 2026, STMicroelectronics.
++ * SPDX-License-Identifier : Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++**/
++#ifndef _PAL_WD_STM_H_
++#define _PAL_WD_STM_H_
++
++#include "pal_common.h"
++
++#define WDOG_TIMER_MAX_VALUE           0xFFFFFFFFu
++
++/*
++ * Initializes the watchdog timer for a requested timeout.
++ *
++ * Parameters:
++ *  - base_addr:      watchdog base address (platform-specific).
++ *  - time_us:        requested timeout in microseconds.
++ *  - timer_tick_us:  watchdog clock tick period in microseconds.
++ *
++ * Returns:
++ *  - PAL_STATUS_SUCCESS on success
++ *  - PAL_STATUS_ERROR   on invalid parameters or configuration failure
++ */
++int pal_wd_stm_init(addr_t base_addr, uint32_t time_us, uint32_t timer_tick_us);
++
++/*
++ * Starts/enables the watchdog.
++ *
++ * Parameters:
++ *  - base_addr: watchdog base address (platform-specific).
++ *
++ * Returns:
++ *  - PAL_STATUS_SUCCESS on success
++ *  - PAL_STATUS_ERROR   on failure
++ */
++int pal_wd_stm_enable(addr_t base_addr);
++
++/*
++ * Disables the watchdog, if supported by the underlying IP.
++ *
++ * Parameters:
++ *  - base_addr: watchdog base address (platform-specific).
++ *
++ * Returns:
++ *  - PAL_STATUS_SUCCESS if the watchdog was disabled
++ *  - PAL_STATUS_ERROR   if disable is not supported or failed
++ */
++int pal_wd_stm_disable(addr_t base_addr);
++
++/*
++ * Checks whether the watchdog is currently enabled.
++ *
++ * Parameters:
++ *  - base_addr: watchdog base address (platform-specific).
++ *
++ * Returns:
++ *  - PAL_STATUS_SUCCESS if the watchdog is enabled
++ *  - PAL_STATUS_ERROR   otherwise
++ */
++int pal_wd_stm_is_enabled(addr_t base_addr);
++
++#endif /* _PAL_WD_STM_H_ */
+\ No newline at end of file
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg
+new file mode 100644
+index 0000000..ee7e174
+--- /dev/null
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg
+@@ -0,0 +1,45 @@
 +///** @file
-+// * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
++// * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 +// * SPDX-License-Identifier : Apache-2.0
 +// *
-+// * Copyright 2025 NXP
++// * Copyright (c) 2026, STMicroelectronics.
 +// * SPDX-License-Identifier : Apache-2.0
 +// *
 +// * Licensed under the Apache License, Version 2.0 (the "License");
@@ -884,42 +1165,40 @@ index 0000000..b9c0c6a
 +
 +// UART device info
 +uart.num=1;
-+uart.0.base = 0x40109000; // UART3_NS
-+uart.0.size = 0xFFF;
++uart.0.base = 0x40013800; // UART1_NS
++uart.0.size = 0x400;
 +uart.0.intr_id = 0xFF;
 +uart.0.permission = TYPE_READ_WRITE;
 +
 +// Watchdog device info
-+watchdog.num = 0;
++watchdog.num = 1;
++watchdog.0.base = 0x40002C00;
++watchdog.0.size = 0x400;
++watchdog.0.intr_id = 0xFF;
++watchdog.0.permission = TYPE_READ_WRITE;
++watchdog.0.num_of_tick_per_micro_sec = 0x3;         //(sys_feq/1000000)
++watchdog.0.timeout_in_micro_sec_low = 0xF4240;      //1.0  sec :  1 * 1000 * 1000
++watchdog.0.timeout_in_micro_sec_medium = 0x1E8480;  //2.0  sec :  2 * 1000 * 1000
++watchdog.0.timeout_in_micro_sec_high = 0x4C4B40;    //5.0  sec :  5 * 1000 * 1000
++watchdog.0.timeout_in_micro_sec_crypto = 0x1312D00; //18.0 sec : 18 * 1000 * 1000
 +
-+// Range of 1KB Non-volatile memory to preserve data over reset.
-+// This is an emulation in RAM. It uses the last 1Kib of RAM available to NS.
-+// Note, that RAM usage for NS is restricted, the value here must match up with
-+// The value that TF-M allows for NS (see also
-+trusted-firmware-m\platform\ext\target\nxp\rdrw61x\partition\region_defs.h).
-+// The size available to NS also needs to be known to the linker when building 
-+// NS projects. When building this application, it is recommended to not allow 
-+// usage of the memory used for nvmem emulation. How to achieve this depends on 
-+// the build system.
-+// For zephyr builds usually a _ns board configuration holds the available memory 
-+// for the NS partition. 
-+// Such settings split over multiple repositories tend to de-sync, so please take 
-+// care and the following numbers with extra-caution!
-+nvmem.num =1;
-+nvmem.0.start = 0x2005FC00;
-+nvmem.0.end = 0x20060000;
++// Range of 1Kb Non-volatile memory to preserve data over reset. Ex, NVRAM and FLASH
++nvmem.num = 1;
++nvmem.0.start = 0x2001F400;
++nvmem.0.end = 0x2001F7FF;
 +nvmem.0.permission = TYPE_READ_WRITE;
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cmake b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cmake
++
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake
 new file mode 100644
-index 0000000..c499d5c
+index 0000000..160c255
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_frdmmcxn947/target.cmake
-@@ -0,0 +1,142 @@
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake
+@@ -0,0 +1,100 @@
 +#/** @file
-+# * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
++# * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 +# * SPDX-License-Identifier : Apache-2.0
 +# *
-+# * Copyright 2025 NXP
++# * Copyright (c) 2026, STMicroelectronics.
 +# * SPDX-License-Identifier : Apache-2.0
 +# *
 +# * Licensed under the Apache License, Version 2.0 (the "License");
@@ -935,9 +1214,6 @@ index 0000000..c499d5c
 +# * limitations under the License.
 +#**/
 +
-+# No watchdog is configured for this platform.
-+set(WATCHDOG_AVAILABLE 0)
-+
 +# PAL C source files part of NSPE library
 +list(APPEND PAL_SRC_C_NSPE )
 +
@@ -950,43 +1226,19 @@ index 0000000..c499d5c
 +# PAL ASM source files part of SPE library - driver partition
 +list(APPEND PAL_SRC_ASM_DRIVER_SP )
 +
-+# Now this is a major hack, but there is no way to get a 
-+# platform specific header file (this platform overrides 
-+# tfm_builtin_key_ids.h) included here. Even if the header 
-+# file is part of TF-M's install interface, this is still 
-+# not an option as the test suite typically is part of the 
-+# TF-M build itself which means the install has not yet 
-+# happened and the interface files are only at their source 
-+# location but not at the install location.
-+# So we need that platform specific include path here which 
-+# depends on the file structure in TF-M (which probalby is 
-+# reasonably stable at this point)...
-+list(APPEND PSA_INCLUDE_PATHS ${CMAKE_SOURCE_DIR}/platform/ext/target/nxp/frdmmcxn947/Device/Include/)
-+
 +# Listing all the sources required for given target
 +if(${SUITE} STREQUAL "IPC")
-+	list(APPEND PAL_SRC_C_NSPE
-+		# driver functionalities are implemented as RoT-services
-+		# and secure and non-secure clients will call to these RoT-services to get appropriate driver services.
-+		${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe/common/pal_client_api_intf.c
-+		${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe/common/pal_driver_ipc_intf.c
-+	)
-+	list(APPEND PAL_SRC_C_DRIVER_SP
-+		# Driver files will be compiled as part of driver partition
-+		${PSA_ROOT_DIR}/platform/targets/${TARGET}/spe/pal_driver_intf.c
-+		${PSA_ROOT_DIR}/platform/drivers/nvmem/pal_nvmem.c
-+		${PSA_ROOT_DIR}/platform/drivers/uart/pl011/pal_uart.c
-+		${PSA_ROOT_DIR}/platform/drivers/watchdog/cmsdk/pal_wd_cmsdk.c
-+	)
++	message(FATAL_ERROR "For IPC - use -DTARGET=tgt_ff_tfm_stm32u3 instead")
 +else()
 +	list(APPEND PAL_SRC_C_NSPE
 +		# driver files will be compiled as part of NSPE
 +		${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe/pal_driver_intf.c
 +		${PSA_ROOT_DIR}/platform/drivers/nvmem/pal_nvmem.c
-+		${PSA_ROOT_DIR}/platform/drivers/uart/pl011/pal_uart.c
-+		${PSA_ROOT_DIR}/platform/drivers/watchdog/cmsdk/pal_wd_cmsdk.c
++		${PSA_ROOT_DIR}/platform/drivers/uart/stm/pal_uart.c
++		${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe/pal_wd_stm.c
 +	)
 +endif()
++
 +if(${SUITE} STREQUAL "CRYPTO")
 +	list(APPEND PAL_SRC_C_NSPE
 +		${PSA_ROOT_DIR}/platform/targets/common/nspe/crypto/pal_crypto_intf.c
@@ -1006,11 +1258,10 @@ index 0000000..c499d5c
 +	list(APPEND PAL_SRC_C_NSPE
 +		${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation/pal_attestation_intf.c
 +		${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
-+		#${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe/plat_iak_pk.c
-+        ${PSA_TARGET_QCBOR}/src/UsefulBuf.c
-+        ${PSA_TARGET_QCBOR}/src/ieee754.c
-+        ${PSA_TARGET_QCBOR}/src/qcbor_decode.c
-+        ${PSA_TARGET_QCBOR}/src/qcbor_encode.c
++                ${PSA_TARGET_QCBOR}/src/UsefulBuf.c
++                ${PSA_TARGET_QCBOR}/src/ieee754.c
++                ${PSA_TARGET_QCBOR}/src/qcbor_decode.c
++                ${PSA_TARGET_QCBOR}/src/qcbor_encode.c
 +	)
 +endif()
 +
@@ -1024,33 +1275,19 @@ index 0000000..c499d5c
 +
 +list(APPEND PAL_DRIVER_INCLUDE_PATHS
 +	${PSA_ROOT_DIR}/platform/drivers/nvmem
-+	${PSA_ROOT_DIR}/platform/drivers/uart/pl011
-+	${PSA_ROOT_DIR}/platform/drivers/watchdog/cmsdk
++	${PSA_ROOT_DIR}/platform/drivers/uart/stm
++	${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe
 +)
 +
-+if(${SUITE} STREQUAL "IPC")
-+    # driver files will be compiled as part of NSPE
-+    target_include_directories(${PSA_TARGET_DRIVER_PARTITION_LIB} PRIVATE
-+        ${PAL_DRIVER_INCLUDE_PATHS}
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/crypto
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/protected_storage
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/internal_trusted_storage
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation
-+    )
-+else()
-+    # driver files will be compiled as part of NSPE
-+    target_include_directories(${PSA_TARGET_PAL_NSPE_LIB} PRIVATE
-+        ${PAL_DRIVER_INCLUDE_PATHS}
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/crypto
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/protected_storage
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/internal_trusted_storage
-+        ${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation
-+        ${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe
-+    )
-+endif()
-+
++target_include_directories(${PSA_TARGET_PAL_NSPE_LIB} PRIVATE
++	${PAL_DRIVER_INCLUDE_PATHS}
++	${PSA_ROOT_DIR}/platform/targets/common/nspe
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/crypto
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/protected_storage
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/internal_trusted_storage
++	${PSA_ROOT_DIR}/platform/targets/common/nspe/initial_attestation
++	${PSA_ROOT_DIR}/platform/targets/${TARGET}/nspe
++)
 +
 +if(${SUITE} STREQUAL "INITIAL_ATTESTATION")
 +target_include_directories(${PSA_TARGET_PAL_NSPE_LIB} PRIVATE
@@ -1058,5 +1295,5 @@ index 0000000..c499d5c
 +)
 +endif()
 -- 
-2.34.1
+2.31.1.windows.1
 
