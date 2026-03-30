@@ -1,7 +1,7 @@
 From 8a83e281c1719377a19edf9f62b99f022c2131c1 Mon Sep 17 00:00:00 2001
 From: Waleed Elmelegy <waleed.elmelegy@arm.com>
 Date: Wed, 26 Mar 2025 15:53:13 +0000
-Subject: [PATCH 11/20] Add multiple expected return statuses in case of
+Subject: [PATCH 11/24] Add multiple expected return statuses in case of
  invalid algorithm
 
 Signed-off-by: Waleed Elmelegy <waleed.elmelegy@arm.com>

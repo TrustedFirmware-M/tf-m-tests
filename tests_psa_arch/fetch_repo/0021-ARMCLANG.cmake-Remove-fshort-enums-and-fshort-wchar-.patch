@@ -1,7 +1,7 @@
 From 92f8f71e92cd2c10677eb76f20d4b98978392de8 Mon Sep 17 00:00:00 2001
 From: Nicola Mazzucato <nicola.mazzucato@arm.com>
 Date: Mon, 23 Mar 2026 15:02:24 +0000
-Subject: [PATCH] ARMCLANG.cmake: Remove -fshort-enums and -fshort-wchar
+Subject: [PATCH 21/24] ARMCLANG.cmake: Remove -fshort-enums and -fshort-wchar
  options
 
 When RTX and NS are built without the -fshort options,

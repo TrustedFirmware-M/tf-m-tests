@@ -1,7 +1,7 @@
 From 01468c56543a664d5f6bcecc3b650b8d696aeca9 Mon Sep 17 00:00:00 2001
 From: David Vincze <david.vincze@arm.com>
 Date: Fri, 20 Feb 2026 09:45:50 +0000
-Subject: [PATCH 19/20] Replace deprecated psa_key_handle_t type
+Subject: [PATCH 19/24] Replace deprecated psa_key_handle_t type
 
 Fix the Initial Attestation API and ADAC test build by replacing the
 deprecated psa_key_handle_t with psa_key_id_t type. With TF-M's

@@ -1,7 +1,7 @@
 From 88555186b08f679e6cba3d723714c60adf0d7524 Mon Sep 17 00:00:00 2001
 From: Gabor Abonyi <gabor.abonyi@arm.com>
 Date: Thu, 8 Aug 2024 15:44:55 +0200
-Subject: [PATCH 05/20] Add rp2350 platform
+Subject: [PATCH 05/24] Add rp2350 platform
 
 Change-Id: I50777e655dfecdac7e4cacecbff8459efa4d7a77
 Signed-off-by: Gabor Abonyi <gabor.abonyi@arm.com>

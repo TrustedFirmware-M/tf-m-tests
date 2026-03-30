@@ -1,7 +1,7 @@
-From f82408b37e54c91ab30c5838cc0a17f8de46ee69 Mon Sep 17 00:00:00 2001
+From bf3f537deba69a2d51f260d3540133e5fc04da7a Mon Sep 17 00:00:00 2001
 From: Marc JACOB <marc.jacob@st.com>
-Date: Wed, 25 Mar 2026 08:35:11 +0100
-Subject: [PATCH 20/24] Add stm32u3 platform
+Date: Mon, 30 Mar 2026 14:19:05 +0200
+Subject: [PATCH 23/24] Add b_u585i_iot02a platform
 
 Signed-off-by: Marc JACOB <marc.jacob@st.com>
 ---
@@ -13,25 +13,25 @@ Signed-off-by: Marc JACOB <marc.jacob@st.com>
  .../nspe/pal_wd_platform.h                    | 123 ++++++
  .../nspe/pal_wd_stm.c                         |  63 +++
  .../nspe/pal_wd_stm.h                         |  74 ++++
- .../tgt_dev_apis_tfm_stm32u3/target.cfg       |  45 ++
- .../tgt_dev_apis_tfm_stm32u3/target.cmake     | 100 +++++
+ .../target.cfg                                |  45 ++
+ .../target.cmake                              | 100 +++++
  10 files changed, 1204 insertions(+)
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg
- create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_attestation_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_crypto_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_driver_intf.c
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_storage_config.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_platform.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.c
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.h
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cfg
+ create mode 100644 api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cmake
 
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_attestation_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_attestation_config.h
 new file mode 100644
 index 0000000..0e23f14
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_attestation_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_attestation_config.h
 @@ -0,0 +1,111 @@
 +/** @file
 + * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
@@ -144,11 +144,11 @@ index 0000000..0e23f14
 +};
 +
 +#endif /* _PAL_ATTESTATION_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_config.h
 new file mode 100644
 index 0000000..8a1af1a
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_config.h
 @@ -0,0 +1,100 @@
 +/** @file
 + * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
@@ -250,11 +250,11 @@ index 0000000..8a1af1a
 +#endif
 +
 +#endif /* _PAL_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_crypto_config.h
 new file mode 100644
 index 0000000..d6b9920
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_crypto_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_crypto_config.h
 @@ -0,0 +1,414 @@
 +/** @file
 + * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
@@ -670,11 +670,11 @@ index 0000000..d6b9920
 +#include "pal_crypto_config_check.h"
 +
 +#endif /* _PAL_CRYPTO_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_driver_intf.c b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_driver_intf.c
 new file mode 100644
 index 0000000..77b7a1c
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_driver_intf.c
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_driver_intf.c
 @@ -0,0 +1,147 @@
 +/** @file
 + * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
@@ -823,11 +823,11 @@ index 0000000..77b7a1c
 +    /* Reset functionality is not functional */
 +    return PAL_STATUS_UNSUPPORTED_FUNC;
 +}
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_storage_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_storage_config.h
 new file mode 100644
 index 0000000..8d5eaf7
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_storage_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_storage_config.h
 @@ -0,0 +1,27 @@
 +/** @file
 + * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
@@ -856,11 +856,11 @@ index 0000000..8d5eaf7
 +#define ARCH_TEST_STORAGE_UID_MAX_SIZE 512
 +
 +#endif /* _PAL_STORAGE_CONFIG_H_ */
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_platform.h b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_platform.h
 new file mode 100644
-index 0000000..4931d91
+index 0000000..71e9a73
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_platform.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_platform.h
 @@ -0,0 +1,123 @@
 +/** @file
 + * Copyright (c) 2026, STMicroelectronics.
@@ -933,7 +933,7 @@ index 0000000..4931d91
 +    #define RCC_APB1ENR1_WWDGEN_Msk  (0x1UL << RCC_APB1ENR1_WWDGEN_Pos)
 +    #define RCC_APB1ENR1_WWDGEN      RCC_APB1ENR1_WWDGEN_Msk
 +
-+    volatile uint32_t *reg = (uint32_t *)0x40030C9C; /* = RCC register Base address (0x40030C00) + RCC_APB1ENR1 offest (0x9C) */
++    volatile uint32_t *reg = (uint32_t *)0x46020C9C; /* = RCC register Base address (0x46020C9C) + RCC_APB1ENR1 offest (0x9C) */
 +    *reg |= RCC_APB1ENR1_WWDGEN;
 +}
 +
@@ -986,11 +986,11 @@ index 0000000..4931d91
 +
 +#endif /* _PAL_WD_PLATFORM_H_ */
 \ No newline at end of file
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.c b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.c
 new file mode 100644
 index 0000000..673e8d6
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.c
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.c
 @@ -0,0 +1,63 @@
 +/** @file
 + * Copyright (c) 2026, STMicroelectronics.
@@ -1056,11 +1056,11 @@ index 0000000..673e8d6
 +    return PAL_WD_IS_ENABLED(base_addr) ? PAL_STATUS_SUCCESS : PAL_STATUS_ERROR;
 +}
 \ No newline at end of file
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.h b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.h
 new file mode 100644
 index 0000000..1553958
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/nspe/pal_wd_stm.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/nspe/pal_wd_stm.h
 @@ -0,0 +1,74 @@
 +/** @file
 + * Copyright (c) 2026, STMicroelectronics.
@@ -1137,11 +1137,11 @@ index 0000000..1553958
 +
 +#endif /* _PAL_WD_STM_H_ */
 \ No newline at end of file
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cfg b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cfg
 new file mode 100644
 index 0000000..ee7e174
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cfg
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cfg
 @@ -0,0 +1,45 @@
 +///** @file
 +// * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
@@ -1188,11 +1188,11 @@ index 0000000..ee7e174
 +nvmem.0.end = 0x2001F7FF;
 +nvmem.0.permission = TYPE_READ_WRITE;
 +
-diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cmake b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cmake
 new file mode 100644
-index 0000000..160c255
+index 0000000..2d5b0aa
 --- /dev/null
-+++ b/api-tests/platform/targets/tgt_dev_apis_tfm_stm32u3/target.cmake
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_b_u585i_iot02a/target.cmake
 @@ -0,0 +1,100 @@
 +#/** @file
 +# * Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
@@ -1228,7 +1228,7 @@ index 0000000..160c255
 +
 +# Listing all the sources required for given target
 +if(${SUITE} STREQUAL "IPC")
-+	message(FATAL_ERROR "For IPC - use -DTARGET=tgt_ff_tfm_stm32u3 instead")
++	message(FATAL_ERROR "For IPC - use -DTARGET=tgt_ff_tfm_b_u585i_iot02a instead")
 +else()
 +	list(APPEND PAL_SRC_C_NSPE
 +		# driver files will be compiled as part of NSPE

@@ -1,7 +1,7 @@
 From 5d44ad34ee8bc83e9c4a9d85e51e53cd6ff8ef6b Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Tue, 29 Aug 2023 17:08:19 +0800
-Subject: [PATCH 01/20] Place crypto test 16 at the beginning of the test
+Subject: [PATCH 01/24] Place crypto test 16 at the beginning of the test
 
 HMAC_DRBG random generator is slower than CTR_DRBG, and this
 will influence the time spending for test 16 RSA 2048. Placing

@@ -1,7 +1,7 @@
 From 82021e5aebbec3181e77d6b995324c3f99255f75 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Tue, 15 Jul 2025 13:51:51 +0100
-Subject: [PATCH 15/20] Put ARCH_TEST_RSA variables guard
+Subject: [PATCH 15/24] Put ARCH_TEST_RSA variables guard
 
 ARCH_TEST_RSA should control whether some of the variables in
 test_crypto_common.c should be compiled in or not.

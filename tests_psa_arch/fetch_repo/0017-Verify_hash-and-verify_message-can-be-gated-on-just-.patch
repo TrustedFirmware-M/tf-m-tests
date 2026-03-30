@@ -1,7 +1,7 @@
 From 856f409b316504951458016d57a64caab3c5d4bd Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Fri, 18 Jul 2025 10:03:55 +0100
-Subject: [PATCH 17/20] Verify_hash and verify_message can be gated on just
+Subject: [PATCH 17/24] Verify_hash and verify_message can be gated on just
  ECDSA
 
 Even if the algorithm is strictly DETERMINISTIC_ECDSA, when doing

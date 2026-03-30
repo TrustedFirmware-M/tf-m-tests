@@ -1,7 +1,7 @@
 From ba96a60ecbafd2b1db11d3ad96bb5db41f791614 Mon Sep 17 00:00:00 2001
 From: Waqar Tahir <waqar.tahir@nxp.com>
 Date: Tue, 23 Dec 2025 16:20:33 +0100
-Subject: [PATCH 18/20] Add-frdmmcxn947-platform
+Subject: [PATCH 18/24] Add-frdmmcxn947-platform
 
 Added support for mcxn947 platform in psa-arch-test
 
