@@ -45,7 +45,8 @@ except:
 
 extensions = [
     'sphinx.ext.imgmath',
-    'm2r2', #Support markdown files. Needed for external code.
+    'myst_parser', #Support markdown files. Needed for external code.
+
     'sphinx.ext.autosectionlabel', #Make sphinx generate a label for each section
     'sphinxcontrib.plantuml', #Add support for PlantUML drawings
     'sphinxcontrib.rsvgconverter', #Add support for SVG to PDF
@@ -91,9 +92,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'readme.rst',
-                    'platform/cypress/psoc64/security/keys/readme.rst',
-                    'lib/ext/**']
+exclude_patterns = ['Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -105,7 +104,7 @@ html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     'collapse_navigation' : False,
     'prev_next_buttons_location' : None,   # Hide Prev and Next buttons
-    'display_version': True,    # Show version under logo
+    "version_selector": True,
     'sticky_navigation': True,
     'navigation_depth': 3,
 }
@@ -131,14 +130,10 @@ html_show_copyright = False
 # "Built with Sphinx using a theme provided by Read the Docs. "
 html_show_sphinx = False
 
-#Add custom css for HTML. Used to allow full page width rendering
-def setup(app):
-    app.add_css_file('css/tfm_custom.css')
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'TF-M doc'
+htmlhelp_basename = 'TF-M Tests doc'
 
 # Enable figures and tables auto numbering
 numfig = True
@@ -163,7 +158,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'TF-M.tex', title,
+    (master_doc, 'TF-M-Tests.tex', title,
      author, 'manual'),
 ]
 
