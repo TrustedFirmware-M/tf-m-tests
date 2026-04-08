@@ -44,8 +44,10 @@ set(APP_LIB_DIR                  ${CMAKE_CURRENT_LIST_DIR}/../lib)
 add_library(os_wrapper STATIC)
 
 target_sources(os_wrapper
-    PRIVATE
+    PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/os_wrapper_cmsis_rtos_v2.c
+        # Provide TZ context management stub to RTOS if protected by TrustZone
+        ${APP_LIB_DIR}/nsid_manager/tz_shim_layer.c
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:${CMAKE_CURRENT_LIST_DIR}/tfm_nsid_map_table.c>
 )
 
@@ -59,7 +61,7 @@ target_include_directories(os_wrapper
 )
 
 target_link_libraries(os_wrapper
-    PRIVATE
+    PUBLIC
         RTX_OS
         tfm_nsid_manager
 )
@@ -85,8 +87,6 @@ target_compile_definitions(tfm_nsid_manager
 
 target_sources(RTX_OS
     INTERFACE
-        # Provide TZ context management stub to RTOS if protected by TrustZone
-        $<$<NOT:$<BOOL:${TFM_NS_MAILBOX_API}>>:${APP_LIB_DIR}/nsid_manager/tz_shim_layer.c>
         # Provide CMSIS-RTX config implementation
         os_config_cmsis_rtx.c
 )
