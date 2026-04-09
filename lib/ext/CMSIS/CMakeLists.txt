@@ -30,18 +30,19 @@ endif()
 
 if(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8-m.main" OR
    TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
-    set(irq_source_file irq_armv8mml.S)
+    set(irq_source_file_name irq_armv8mml)
 elseif(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8-m.base")
-    set(irq_source_file irq_armv8mbl.S)
+    set(irq_source_file_name irq_armv8mbl)
 elseif(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv6-m")
-    set(irq_source_file irq_armv6m.S)
+    set(irq_source_file_name irq_armv6m)
 elseif(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv7-m" OR
        TFM_SYSTEM_ARCHITECTURE STREQUAL "armv7e-m")
-    set(irq_source_file irq_armv7m.S)
+    set(irq_source_file_name irq_armv7m)
 endif()
 
 add_library(RTX_OS STATIC
     RTX/Source/rtx_delay.c
+    RTX/Source/rtx_evflags.c
     RTX/Source/rtx_evr.c
     RTX/Source/rtx_kernel.c
     RTX/Source/rtx_lib.c
@@ -55,8 +56,8 @@ add_library(RTX_OS STATIC
     RTX/Source/rtx_timer.c
     RTX/os_systick.c
     Config/RTX_Config.c
-    $<$<C_COMPILER_ID:GNU,Clang,ARMClang>:RTX/Source/GCC/${irq_source_file}>
-    $<$<C_COMPILER_ID:IAR>:RTX/Source/IAR/${irq_source_file}>
+    $<$<C_COMPILER_ID:GNU,Clang,ARMClang>:RTX/Source/GCC/${irq_source_file_name}.S>
+    $<$<C_COMPILER_ID:IAR>:RTX/Source/IAR/${irq_source_file_name}.s>
 )
 
 target_include_directories(RTX_OS
