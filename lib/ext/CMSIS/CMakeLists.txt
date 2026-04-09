@@ -13,8 +13,11 @@ string(REPLACE "cortex-m" "ARMCM" rtx_device ${TFM_SYSTEM_PROCESSOR})
 if(CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE_FP)
     if (TFM_SYSTEM_PROCESSOR MATCHES "cortex-m4")
         set(cmsis_device_header ${rtx_device}_FP)
-    else()
+    elseif(TFM_SYSTEM_PROCESSOR MATCHES "cortex-m33" OR
+           TFM_SYSTEM_PROCESSOR MATCHES "cortex-35p")
         set(cmsis_device_header ${rtx_device}_DSP_FP)
+    else()
+        set(cmsis_device_header ${rtx_device})
     endif()
 else()
     set(cmsis_device_header ${rtx_device})
@@ -62,19 +65,20 @@ add_library(RTX_OS STATIC
 
 target_include_directories(RTX_OS
     PUBLIC
-        Core/Include
         RTX/Include
-        Device
         Config
+        Core/Include
+    PRIVATE
+        Device
 )
 
 target_compile_definitions(RTX_OS
     PUBLIC
         RTE_COMPONENTS_H
+    PRIVATE
         RTX_TZ_CONTEXT
         DOMAIN_NS=1
         CMSIS_device_header="${cmsis_device_header}"
-    PRIVATE
         NDEBUG
 )
 
@@ -84,3 +88,5 @@ target_compile_options(RTX_OS
         -Os
         -g0
 )
+
+#target_link_libraries(RTX_OS PRIVATE platform_ns)

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -40,22 +40,19 @@ set(SPE_INSTALL_INTERFACE_INC    ${CONFIG_SPE_PATH}/interface/include)
 # lib path
 set(APP_LIB_DIR                  ${CMAKE_CURRENT_LIST_DIR}/../lib)
 
-# OS wrapper library consists of the wrapper layer of RTOSes, such as RTX
-add_library(os_wrapper STATIC)
+add_subdirectory(${APP_LIB_DIR}/nsid_manager  ${CMAKE_BINARY_DIR}/lib/nsid_manager)
 
-target_sources(os_wrapper
-    PUBLIC
-        ${CMAKE_CURRENT_LIST_DIR}/os_wrapper_cmsis_rtos_v2.c
-        # Provide TZ context management stub to RTOS if protected by TrustZone
-        ${APP_LIB_DIR}/nsid_manager/tz_shim_layer.c
-        $<$<BOOL:${TFM_NS_MANAGE_NSID}>:${CMAKE_CURRENT_LIST_DIR}/tfm_nsid_map_table.c>
+# OS wrapper library consists of the wrapper layer of RTOSes, such as RTX
+add_library(os_wrapper STATIC
+    # Provide TZ context management stub to RTOS if protected by TrustZone
+    tz_shim_layer.c
 )
 
 target_include_directories(os_wrapper
     PUBLIC
-        ${CMAKE_CURRENT_LIST_DIR}/../lib/os_wrapper
+        ${APP_LIB_DIR}/os_wrapper
         # Some NS files include "os_wrapper/xxx.h" instead
-        ${CMAKE_CURRENT_LIST_DIR}/../lib
+        ${APP_LIB_DIR}
         # Some OS wrapper header files are exported from TF-M secure build
         ${SPE_INSTALL_INTERFACE_INC}
 )
@@ -66,37 +63,13 @@ target_link_libraries(os_wrapper
         tfm_nsid_manager
 )
 
-# NSID manager
-add_library(tfm_nsid_manager INTERFACE)
-
-target_include_directories(tfm_nsid_manager
-    INTERFACE
-        ${APP_LIB_DIR}/nsid_manager
-)
-
-target_sources(tfm_nsid_manager
-    INTERFACE
-        $<$<BOOL:${TFM_NS_MANAGE_NSID}>:${APP_LIB_DIR}/nsid_manager/tfm_nsid_manager.c>
-)
-
-target_compile_definitions(tfm_nsid_manager
-    INTERFACE
-        $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
-        $<$<BOOL:${TEST_NS_MANAGE_NSID}>:TEST_NS_MANAGE_NSID>
-)
-
-target_sources(RTX_OS
-    INTERFACE
-        # Provide CMSIS-RTX config implementation
-        os_config_cmsis_rtx.c
-)
-
 target_link_libraries(RTX_OS
-    INTERFACE
-        tfm_nsid_manager
+    PRIVATE
+        os_wrapper
 )
 
 # Multi-core library
+
 if(TFM_NS_MAILBOX_API)
     add_library(ns_multi_core STATIC)
 
@@ -180,13 +153,21 @@ target_link_libraries(tfm_api_ns
         $<$<NOT:$<BOOL:${TFM_NS_MAILBOX_API}>>:os_wrapper>
 )
 
+target_sources(platform_ns
+    PRIVATE
+        platform_init_def.c
+)
+
+target_link_libraries(platform_ns
+    PRIVATE
+        tfm_ns_log
+)
+
 ######################## NS application broker ########################
 
-add_library(tfm_test_broker STATIC)
-
-target_sources(tfm_test_broker
-    PRIVATE
-        main_ns.c
+add_library(tfm_test_broker STATIC
+    main_ns.c
+    os_wrapper_cmsis_rtos_v2.c
 )
 
 target_include_directories(tfm_test_broker
@@ -196,10 +177,9 @@ target_include_directories(tfm_test_broker
 
 target_link_libraries(tfm_test_broker
     PRIVATE
-        os_wrapper
         tfm_nsid_manager
     PUBLIC
-        RTX_OS
+        os_wrapper
         tfm_api_ns
         tfm_ns_log
         $<$<BOOL:${TFM_NS_MAILBOX_API}>:ns_multi_core>
