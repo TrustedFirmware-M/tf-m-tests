@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -59,6 +59,7 @@ ExternalProject_Add(TF-M
     CMAKE_CACHE_DEFAULT_ARGS ${TFM_CMDLINE_CONFIGS}
     PREFIX             "temp"
     BUILD_ALWAYS       ON
+    STEP_TARGETS       configure
 )
 
 add_dependencies(tfm_test_spe TF-M)
