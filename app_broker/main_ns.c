@@ -21,10 +21,6 @@
 #include "test_log.h"
 #include "uart_stdout.h"
 
-#if (CONFIG_TFM_FLOAT_ABI >= 1)
-#include "cmsis.h"
-#endif
-
 /**
  * \brief Modified table template for user defined SVC functions
  *

@@ -9,6 +9,10 @@
 #include "Driver_USART.h"
 #include "uart_stdout.h"
 
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
+#include "cmsis.h"
+#endif
+
  /**
  * \brief Platform peripherals and devices initialization.
  *        Can be overridden for platform specific initialization.
