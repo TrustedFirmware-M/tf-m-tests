@@ -90,5 +90,3 @@ target_compile_options(RTX_OS
         $<$<NOT:$<C_COMPILER_ID:IAR>>:-Os>
         $<$<NOT:$<C_COMPILER_ID:IAR>>:-g0>
 )
-
-#target_link_libraries(RTX_OS PRIVATE platform_ns)
