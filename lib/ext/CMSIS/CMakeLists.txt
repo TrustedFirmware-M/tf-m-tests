@@ -86,9 +86,9 @@ target_compile_definitions(RTX_OS
 
 target_compile_options(RTX_OS
     PRIVATE
-        -fomit-frame-pointer
-        -Os
-        -g0
+        $<$<NOT:$<C_COMPILER_ID:IAR>>:-fomit-frame-pointer>
+        $<$<NOT:$<C_COMPILER_ID:IAR>>:-Os>
+        $<$<NOT:$<C_COMPILER_ID:IAR>>:-g0>
 )
 
 #target_link_libraries(RTX_OS PRIVATE platform_ns)
