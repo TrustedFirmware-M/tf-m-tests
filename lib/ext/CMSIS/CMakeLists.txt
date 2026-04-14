@@ -79,7 +79,9 @@ target_compile_definitions(RTX_OS
         RTX_TZ_CONTEXT
         DOMAIN_NS=1
         CMSIS_device_header="${cmsis_device_header}"
-        NDEBUG
+        # Add NDEBUG for Debug build to decrease the code size. For non-Debug
+        # builds, NDEBUG is added by CMake automatically.
+        $<$<CONFIG:Debug>:NDEBUG>
 )
 
 target_compile_options(RTX_OS
