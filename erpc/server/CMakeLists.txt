@@ -53,5 +53,7 @@ target_include_directories(erpc_server
 target_link_libraries(erpc_server
     PUBLIC
         tfm_api_ns
+        os_wrapper
+        tfm_test_broker
         platform_ns # UART driver header and target config
 )
