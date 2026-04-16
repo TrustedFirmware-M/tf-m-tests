@@ -2663,6 +2663,8 @@ destroy_key:
     return;
 }
 
+#define CMAC_TEST_EXPECTED_OUTPUT_SIZE_MAX  64
+
 /**
  * @Note Test vectors are taken from:
  * https://github.com/ARM-software/psa-api/blob/main/examples/crypto/SP800-108_counter_KDF/README.md
@@ -2677,7 +2679,9 @@ static psa_status_t psa_key_derivation_sp800_108_counter_cmac_test_vector(
     psa_key_attributes_t input_key_attr = PSA_KEY_ATTRIBUTES_INIT;
     psa_key_derivation_operation_t deriv_ops = psa_key_derivation_operation_init();
     psa_status_t status;
-    uint8_t derived_output[expected_len];
+    uint8_t derived_output[CMAC_TEST_EXPECTED_OUTPUT_SIZE_MAX];
+
+    assert(sizeof(derived_output) >= expected_len);
 
     /* Import secret key */
     psa_set_key_usage_flags(&input_key_attr, PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_SIGN_MESSAGE);
