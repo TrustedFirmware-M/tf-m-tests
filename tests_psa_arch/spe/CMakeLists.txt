@@ -14,10 +14,10 @@ set(CMAKE_SYSTEM_NAME Generic)
 
 collect_build_cmd_args(TFM_CMDLINE_CONFIGS)
 
-project("TF-M SPE for PSA tests" LANGUAGES C)
+list(APPEND TFM_CMDLINE_CONFIGS -DTOOLCHAIN:UNINITIALIZED=INHERIT)
 
+project("TF-M SPE for PSA tests" NONE)
 # use tf-m-tests/cmake folder
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../cmake)
 list(APPEND CMAKE_MODULE_PATH ${CONFIG_TFM_SOURCE_PATH}/cmake)
 
 # User must specify which TEST_PSA_API suit name

@@ -36,18 +36,6 @@ project("TF-M PSA Arch tests" LANGUAGES C ASM)
 # Setup required configs: SUITE, CPU_ARCH and TARGET
 set(SUITE    ${TEST_PSA_API})
 
-if (NOT DEFINED CPU_ARCH)
-    if (${TFM_SYSTEM_ARCHITECTURE} STREQUAL armv8-m.main)
-        set(CPU_ARCH armv8m_ml)
-    elseif (${TFM_SYSTEM_ARCHITECTURE} STREQUAL armv8-m.base)
-        set(CPU_ARCH armv8m_bl)
-    elseif (${TFM_SYSTEM_ARCHITECTURE} STREQUAL armv8.1-m.main)
-        set(CPU_ARCH armv81m_ml)
-    elseif (${TFM_SYSTEM_ARCHITECTURE} STREQUAL armv7-m)
-        set(CPU_ARCH armv7m)
-    endif()
-endif()
-
 if (NOT DEFINED PSA_API_TEST_TARGET)
     string(REGEX REPLACE ".*/" "" PSA_API_TEST_TARGET ${TFM_PLATFORM})
 endif()
@@ -62,14 +50,7 @@ else()
     set(TARGET tgt_dev_apis_tfm_${PSA_API_TEST_TARGET})
 endif()
 
-# Toolchain
-if (NOT TOOLCHAIN)
-    if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-        set(TOOLCHAIN GNUARM)
-    elseif (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
-        set(TOOLCHAIN ARMCLANG)
-    endif()
-endif()
+set (TOOLCHAIN INHERIT)
 
 # Check config in case additional configs are passed via command line
 include(${CMAKE_SOURCE_DIR}/spe/config/check_config.cmake)
