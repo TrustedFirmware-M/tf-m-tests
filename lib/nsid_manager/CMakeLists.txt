@@ -20,16 +20,12 @@ else()
     target_include_directories(tfm_nsid_manager
         PUBLIC
             .
+            ${SPE_INSTALL_INTERFACE_INC}
     )
 
     target_compile_definitions(tfm_nsid_manager
         PUBLIC
             TFM_NS_MANAGE_NSID
             $<$<BOOL:${TEST_NS_MANAGE_NSID}>:TEST_NS_MANAGE_NSID>
-    )
-
-    target_link_libraries(tfm_nsid_manager
-        PRIVATE
-            tfm_api_ns
     )
 endif()

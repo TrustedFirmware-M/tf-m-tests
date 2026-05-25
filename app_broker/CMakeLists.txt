@@ -42,14 +42,11 @@ set(APP_LIB_DIR                  ${CMAKE_CURRENT_LIST_DIR}/../lib)
 
 add_subdirectory(${APP_LIB_DIR}/nsid_manager  ${CMAKE_BINARY_DIR}/lib/nsid_manager)
 
-# OS wrapper library consists of the wrapper layer of RTOSes, such as RTX
-add_library(os_wrapper STATIC
-    # Provide TZ context management stub to RTOS if protected by TrustZone
-    tz_shim_layer.c
-)
+# OS wrapper is a header-only library providing OS wrapper API headers
+add_library(os_wrapper INTERFACE)
 
 target_include_directories(os_wrapper
-    PUBLIC
+    INTERFACE
         ${APP_LIB_DIR}/os_wrapper
         # Some NS files include "os_wrapper/xxx.h" instead
         ${APP_LIB_DIR}
@@ -57,15 +54,14 @@ target_include_directories(os_wrapper
         ${SPE_INSTALL_INTERFACE_INC}
 )
 
-target_link_libraries(os_wrapper
-    PUBLIC
-        RTX_OS
-        tfm_nsid_manager
+target_sources(tfm_ns
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/tz_shim_layer.c
 )
 
-target_link_libraries(RTX_OS
+target_link_libraries(tfm_ns
     PRIVATE
-        os_wrapper
+        tfm_nsid_manager
 )
 
 # Multi-core library
@@ -179,6 +175,7 @@ target_link_libraries(tfm_test_broker
     PRIVATE
         tfm_nsid_manager
     PUBLIC
+        RTX_OS
         os_wrapper
         tfm_api_ns
         tfm_ns_log
