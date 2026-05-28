@@ -17,11 +17,11 @@ static void test_failed(const struct test_result_t *ret, const char *name)
     if (ret->info_msg != 0) {
         TEST_LOG("  %s", ret->info_msg);
         if (ret->filename != 0) {
-            TEST_LOG(" (Failed at %s:%d)\r\n", ret->filename, ret->line);
+            TEST_LOG(" (Failed at %s:%u)\r\n", ret->filename, (unsigned)ret->line);
         }
     } else {
         if (ret->filename != 0) {
-            TEST_LOG("  Failed at %s:%d\r\n", ret->filename, ret->line);
+            TEST_LOG("  Failed at %s:%u\r\n", ret->filename, (unsigned)ret->line);
         }
     }
 
@@ -192,13 +192,13 @@ enum test_suite_err_t run_testsuite(struct test_suite_t *test_suite)
 
     if (failed_tests != 0) {
         printf_set_color(DEFAULT);
-        TEST_LOG("Number of failed tests: %d of %d\r\n",
-                 failed_tests, test_suite->list_size);
+        TEST_LOG("Number of failed tests: %u of %u\r\n",
+                 (unsigned)failed_tests, (unsigned)test_suite->list_size);
     }
     if (skipped_tests != 0) {
         printf_set_color(DEFAULT);
-        TEST_LOG("Number of skipped tests: %d of %d\r\n",
-                 skipped_tests, test_suite->list_size);
+        TEST_LOG("Number of skipped tests: %u of %u\r\n",
+                 (unsigned)skipped_tests, (unsigned)test_suite->list_size);
     }
 
     if (failed_tests == 0) {

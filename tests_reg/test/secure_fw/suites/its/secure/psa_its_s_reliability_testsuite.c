@@ -66,7 +66,7 @@ static void tfm_its_test_2001(struct test_result_t *ret)
     size_t read_data_length = 0;
 
     for (itr = 0; itr < LOOP_ITERATIONS_001; itr++) {
-        TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_001);
+        TEST_LOG("  > Iteration %u of %d\r", (unsigned)itr + 1, LOOP_ITERATIONS_001);
 
         /* Set a data in the asset */
         status = psa_its_set(uid, data_len, write_data, flags);
@@ -124,7 +124,7 @@ static void tfm_its_test_2002(struct test_result_t *ret)
     size_t read_data_length = 0;
 
     for (itr = 0; itr < LOOP_ITERATIONS_002; itr++) {
-        TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
+        TEST_LOG("  > Iteration %u of %d\r", (unsigned)itr + 1, LOOP_ITERATIONS_002);
 
         /* Set a data in the asset */
         status = psa_its_set(uid, data_len, write_data, flags);

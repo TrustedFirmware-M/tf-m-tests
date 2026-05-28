@@ -61,7 +61,7 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
 
     err = decode_test_normal_sig();
     if (err != 0) {
-        TEST_LOG("decode_test_normal_sig() returned: %d\r\n", err);
+        TEST_LOG("decode_test_normal_sig() returned: %d\r\n", (signed)err);
         TEST_FAIL("Attest token decode_test_normal_sig() has failed");
         return;
     }
