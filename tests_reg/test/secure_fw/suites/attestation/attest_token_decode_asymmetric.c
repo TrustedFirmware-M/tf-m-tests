@@ -38,7 +38,11 @@ attest_token_decode_validate_token(struct attest_token_decode_context *me,
 
     t_cose_sign1_verify_init(&verify_ctx, 0);
 
+#ifdef TFM_BUILTIN_KEY_ID_IAK_PUB
+    attest_key.key.handle = TFM_BUILTIN_KEY_ID_IAK_PUB;
+#else /* TFM_BUILTIN_KEY_ID_IAK_PUB */
     attest_key.key.handle = TFM_BUILTIN_KEY_ID_IAK;
+#endif /* TFM_BUILTIN_KEY_ID_IAK_PUB */
 
     t_cose_sign1_set_verification_key(&verify_ctx, attest_key);
 
