@@ -2685,7 +2685,7 @@ static psa_status_t psa_key_derivation_sp800_108_counter_cmac_test_vector(
 
     /* Import secret key */
     psa_set_key_usage_flags(&input_key_attr, PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_SIGN_MESSAGE);
-    psa_set_key_algorithm(&input_key_attr, PSA_ALG_CMAC);
+    psa_set_key_algorithm(&input_key_attr, PSA_ALG_SP800_108_COUNTER_CMAC);
     psa_set_key_type(&input_key_attr, PSA_KEY_TYPE_AES);
     status = psa_import_key(&input_key_attr, secret, secret_len, &input_key_id_local);
     if (status != PSA_SUCCESS) {
