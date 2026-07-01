@@ -662,7 +662,9 @@ static void tfm_crypto_test_1049(struct test_result_t *ret)
 {
     psa_aead_test(PSA_KEY_TYPE_CHACHA20, PSA_ALG_CHACHA20_POLY1305,
                   test_key_256, BIT_SIZE_TEST_LONG_KEY,
-                  BYTE_SIZE_CHUNK, ret);
+                  BYTE_SIZE_CHUNK,
+                  PSA_TEST_IOVEC_NOT_INLINED,
+                  ret);
 }
 
 static void tfm_crypto_test_1052(struct test_result_t *ret)
