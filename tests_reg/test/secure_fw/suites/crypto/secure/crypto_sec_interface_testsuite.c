@@ -30,7 +30,7 @@ static void tfm_crypto_test_1009(struct test_result_t *ret);
 #ifdef TFM_CRYPTO_TEST_UNSUPPORTED_ALG
 static void tfm_crypto_test_1010(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_UNSUPPORTED_ALG */
-#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224)
 static void tfm_crypto_test_1011(struct test_result_t *ret);
 #endif
 static void tfm_crypto_test_1012(struct test_result_t *ret);
@@ -50,7 +50,7 @@ static void tfm_crypto_test_1021(struct test_result_t *ret);
 #ifdef TFM_CRYPTO_TEST_ALG_SHA_512
 static void tfm_crypto_test_1022(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_SHA_512 */
-#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224)
 static void tfm_crypto_test_1024(struct test_result_t *ret);
 #endif
 #ifdef TFM_CRYPTO_TEST_ALG_CCM
@@ -76,9 +76,9 @@ static void tfm_crypto_test_1039(struct test_result_t *ret);
 #ifdef TFM_CRYPTO_TEST_ECDH
 static void tfm_crypto_test_1040(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ECDH */
-#if defined(TFM_CRYPTO_TEST_ALG_OFB) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_OFB)
 static void tfm_crypto_test_1041(struct test_result_t *ret);
-#endif /* TFM_CRYPTO_TEST_ALG_OFB && !CC3XX_RUNTIME_ENABLED */
+#endif /* TFM_CRYPTO_TEST_ALG_OFB */
 #ifdef TFM_CRYPTO_TEST_ALG_ECB
 static void tfm_crypto_test_1042(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_ECB */
@@ -108,7 +108,7 @@ static void tfm_crypto_test_1051(struct test_result_t *ret);
 static void tfm_crypto_test_1050(struct test_result_t *ret);
 static void tfm_crypto_test_1052(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305 */
-#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION)
 static void tfm_crypto_test_1053(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION */
 #if defined(TFM_CRYPTO_TEST_SINGLE_PART_FUNCS)
@@ -149,7 +149,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1010, "TFM_S_CRYPTO_TEST_1010",
      "Secure Unsupported Hash (SHA-1) interface"},
 #endif /* TFM_CRYPTO_TEST_UNSUPPORTED_ALG */
-#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224)
     {&tfm_crypto_test_1011, "TFM_S_CRYPTO_TEST_1011",
      "Secure Hash (SHA-224) interface"},
 #endif
@@ -177,7 +177,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1022, "TFM_S_CRYPTO_TEST_1022",
      "Secure HMAC (SHA-512) interface"},
 #endif /* TFM_CRYPTO_TEST_ALG_SHA_512 */
-#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224)
     {&tfm_crypto_test_1024, "TFM_S_CRYPTO_TEST_1024",
      "Secure HMAC with long key (SHA-224) interface"},
 #endif
@@ -215,10 +215,10 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1040, "TFM_S_CRYPTO_TEST_1040",
      "Secure ECDH key agreement"},
 #endif /* TFM_CRYPTO_TEST_ECDH */
-#if defined(TFM_CRYPTO_TEST_ALG_OFB) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_OFB)
     {&tfm_crypto_test_1041, "TFM_S_CRYPTO_TEST_1041",
      "Secure Symmetric encryption (AES-128-OFB) interface"},
-#endif /* TFM_CRYPTO_TEST_ALG_OFB && !CC3XX_RUNTIME_ENABLED */
+#endif /* TFM_CRYPTO_TEST_ALG_OFB */
 #ifdef TFM_CRYPTO_TEST_ALG_ECB
     {&tfm_crypto_test_1042, "TFM_S_CRYPTO_TEST_1042",
      "Secure Symmetric encryption (AES-128-ECB) interface"},
@@ -265,7 +265,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1052, "TFM_S_CRYPTO_TEST_1052",
      "Secure RFC7539 verification on Chacha20-Poly1305"},
 #endif /* TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305 */
-#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION)
     {&tfm_crypto_test_1053, "TFM_S_CRYPTO_TEST_1053",
      "Secure RSASSA-PSS signature verification (RSASSA-PSS-SHA256)"},
 #endif /* TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION */
@@ -359,7 +359,7 @@ static void tfm_crypto_test_1010(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_UNSUPPORTED_ALG */
 
-#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224)
 static void tfm_crypto_test_1011(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_SHA_224, ret);
@@ -415,7 +415,7 @@ static void tfm_crypto_test_1022(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_ALG_SHA_512 */
 
-#if defined(TFM_CRYPTO_TEST_ALG_SHA_224) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_SHA_224)
 static void tfm_crypto_test_1024(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_224),
@@ -600,13 +600,13 @@ static void tfm_crypto_test_1040(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_ECDH */
 
-#if defined(TFM_CRYPTO_TEST_ALG_OFB) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_OFB)
 static void tfm_crypto_test_1041(struct test_result_t *ret)
 {
     psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_OFB,
                     test_key_128, BIT_SIZE_TEST_KEY, ret);
 }
-#endif /* TFM_CRYPTO_TEST_ALG_OFB && !CC3XX_RUNTIME_ENABLED */
+#endif /* TFM_CRYPTO_TEST_ALG_OFB */
 
 #ifdef TFM_CRYPTO_TEST_ALG_ECB
 static void tfm_crypto_test_1042(struct test_result_t *ret)
@@ -702,7 +702,7 @@ static void tfm_crypto_test_1052(struct test_result_t *ret)
 }
 #endif /* TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305 */
 
-#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION) && !defined(CC3XX_RUNTIME_ENABLED)
+#if defined(TFM_CRYPTO_TEST_ALG_RSASSA_PSS_VERIFICATION)
 static void tfm_crypto_test_1053(struct test_result_t *ret)
 {
     psa_verify_rsassa_pss_test(ret);
