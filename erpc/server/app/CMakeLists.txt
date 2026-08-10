@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2026, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -43,9 +43,13 @@ set(ERPC_DIR     ${CMAKE_CURRENT_LIST_DIR}/../..)
 set(TFM_NS_LOG_DISABLE  ON     CACHE BOOL  "Whether to disable log messages from NSPE")
 
 add_subdirectory(${ERPC_DIR}/server ${CMAKE_CURRENT_BINARY_DIR}/server)
+
+add_executable(tfm_ns)
+
 add_subdirectory(../../../app_broker ${CMAKE_BINARY_DIR}/app_broker)
 
-add_executable(tfm_ns
+target_sources(tfm_ns
+    PRIVATE
     erpc_app.c
     # GNU Arm compiler version greater equal than *11.3.Rel1*
     # has a linker issue that required system calls are missing,
