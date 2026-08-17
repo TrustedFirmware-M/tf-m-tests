@@ -1,7 +1,7 @@
-From bf3f537deba69a2d51f260d3540133e5fc04da7a Mon Sep 17 00:00:00 2001
+From e63a8065a374e2345d8f93b42cae42d1136d46ce Mon Sep 17 00:00:00 2001
 From: Marc JACOB <marc.jacob@st.com>
 Date: Mon, 30 Mar 2026 14:19:05 +0200
-Subject: [PATCH 23/24] Add b_u585i_iot02a platform
+Subject: [PATCH 23/26] Add b_u585i_iot02a platform
 
 Signed-off-by: Marc JACOB <marc.jacob@st.com>
 ---
@@ -1295,5 +1295,5 @@ index 0000000..2d5b0aa
 +)
 +endif()
 -- 
-2.31.1.windows.1
+2.34.1
 

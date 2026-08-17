@@ -1,0 +1,44 @@
+From fa251ccfc8793f4a467545b251d866ba224bfe8b Mon Sep 17 00:00:00 2001
+From: David Vincze <david.vincze@arm.com>
+Date: Fri, 14 Aug 2026 17:42:39 +0200
+Subject: [PATCH 26/26] dev_apis: Fix AES CBC (short in) output buffer data
+
+Provide a valid output buffer for the Decrypt - AES CBC_NO_PADDING
+(Short in) test case - similarly to the related Encrypt test case.
+
+The test case was failing when the underlying crypto implementation
+interrupted the psa_cipher_finish() operation with PSA_SUCCESS as
+the output buffer was NULL and assumed that there was no output data
+to be written.
+
+Change-Id: Id4dfb48530f7893df283f807483ba08591862f4d
+Signed-off-by: David Vincze <david.vincze@arm.com>
+---
+ api-tests/dev_apis/crypto/test_c037/test_data.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/api-tests/dev_apis/crypto/test_c037/test_data.h b/api-tests/dev_apis/crypto/test_c037/test_data.h
+index f7a935c..6870da9 100644
+--- a/api-tests/dev_apis/crypto/test_c037/test_data.h
++++ b/api-tests/dev_apis/crypto/test_c037/test_data.h
+@@ -1,5 +1,5 @@
+ /** @file
+- * Copyright (c) 2019-2023, Arm Limited or its affiliates. All rights reserved.
++ * Copyright (c) 2019-2026, Arm Limited or its affiliates. All rights reserved.
+  * SPDX-License-Identifier : Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -269,8 +269,8 @@ static const test_data check1[] = {
+     .iv_length              = 16,
+     .input                  = ciphertext_1,
+     .input_length           = 5,
+-    .output                 = NULL,
+-    .output_size            = 0,
++    .output                 = expected_output,
++    .output_size            = BUFFER_SIZE,
+     .expected_output        = NULL,
+     .expected_output_length = 0,
+     .expected_status        = PSA_ERROR_INVALID_ARGUMENT
+-- 
+2.34.1
+

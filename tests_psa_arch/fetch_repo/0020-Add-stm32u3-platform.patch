@@ -1,7 +1,7 @@
-From f82408b37e54c91ab30c5838cc0a17f8de46ee69 Mon Sep 17 00:00:00 2001
+From 3e1d069162e9344a5d84efe0e832ac1a9a2894ab Mon Sep 17 00:00:00 2001
 From: Marc JACOB <marc.jacob@st.com>
 Date: Wed, 25 Mar 2026 08:35:11 +0100
-Subject: [PATCH 20/24] Add stm32u3 platform
+Subject: [PATCH 20/26] Add stm32u3 platform
 
 Signed-off-by: Marc JACOB <marc.jacob@st.com>
 ---
@@ -1295,5 +1295,5 @@ index 0000000..160c255
 +)
 +endif()
 -- 
-2.31.1.windows.1
+2.34.1
 

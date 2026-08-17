@@ -1,7 +1,7 @@
-From 7bc42bc73378361deb363c9a687bf16f64146ca6 Mon Sep 17 00:00:00 2001
+From 3ec63ca13b581811fe45214ddef5919a0e61cc73 Mon Sep 17 00:00:00 2001
 From: Marc JACOB <marc.jacob@st.com>
 Date: Mon, 30 Mar 2026 14:20:41 +0200
-Subject: [PATCH 24/24] Add stm32h5 platform
+Subject: [PATCH 24/26] Add stm32h5 platform
 
 Signed-off-by: Marc JACOB <marc.jacob@st.com>
 ---
@@ -1295,5 +1295,5 @@ index 0000000..261cd3f
 +)
 +endif()
 -- 
-2.31.1.windows.1
+2.34.1
 
