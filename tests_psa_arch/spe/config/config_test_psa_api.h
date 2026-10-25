@@ -246,14 +246,4 @@
 #endif
 #endif
 
-/* Set the doorbell APIs */
-#ifndef CONFIG_TFM_DOORBELL_API
-#ifdef PSA_API_TEST_IPC
-/* IPC test suite uses IPC backend */
-#define CONFIG_TFM_DOORBELL_API                1
-#else
-#define CONFIG_TFM_DOORBELL_API                0
-#endif
-#endif
-
 #endif /* __CONFIG_TEST_PSA_API_H__ */

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2026, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -21,6 +21,12 @@ if (NOT "${TEST_PSA_API}" STREQUAL IPC)
     # The extra 3 TF-M partitions are necesary only for IPC tests
     return()
 endif()
+
+# IPC tests require doorbells even when a profile supplies the config header.
+target_compile_definitions(tfm_config
+    INTERFACE
+        CONFIG_TFM_DOORBELL_API=1
+)
 
 if (NOT DEFINED CPU_ARCH)
     if (${TFM_SYSTEM_ARCHITECTURE} STREQUAL armv8-m.main)
